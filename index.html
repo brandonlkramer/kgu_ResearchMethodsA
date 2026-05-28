@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Statistics with JASP | Applied Linguistics & Language Research</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;0,700;1,400&family=Source+Sans+3:wght@300;400;500;600&family=Source+Code+Pro:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:          #faf8f5;
+    --surface:     #ffffff;
+    --sidebar-bg:  #1c2a38;
+    --sidebar-hover: #2d3f52;
+    --sidebar-active: #3b8ea5;
+    --ink:         #1a1f2e;
+    --muted:       #6b7280;
+    --accent:      #2a7f9e;
+    --accent2:     #c0622a;
+    --border:      #e2ddd6;
+    --highlight:   #eef7fa;
+    --sidebar-w:   280px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Source Sans 3', sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    font-size: 17px;
+    line-height: 1.75;
+    display: flex;
+    min-height: 100vh;
+  }
+
+  /* ── SIDEBAR ── */
+  #sidebar {
+    width: var(--sidebar-w);
+    background: var(--sidebar-bg);
+    color: #c8d4e0;
+    position: fixed;
+    top: 0; left: 0; bottom: 0;
+    overflow-y: auto;
+    z-index: 100;
+    font-size: 14px;
+  }
+  #sh { padding: 24px 20px 16px; border-bottom: 1px solid rgba(255,255,255,.08); }
+  #sh .bt { font-family: 'Lora', serif; font-size: 15px; font-weight: 700; color: #fff; line-height: 1.3; margin-bottom: 4px; }
+  #sh .bs { font-size: 12px; color: rgba(200,212,224,.55); letter-spacing: .05em; text-transform: uppercase; }
+  #sidebar nav { padding: 12px 0 32px; }
+  .nl { padding: 12px 20px 4px; font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: rgba(200,212,224,.4); font-weight: 600; }
+  .nc { display: block; padding: 7px 20px; color: #c8d4e0; text-decoration: none; transition: background .15s, color .15s; line-height: 1.4; }
+  .nc:hover { background: var(--sidebar-hover); color: #fff; }
+  .nc.active { background: rgba(59,142,165,.25); color: var(--sidebar-active); border-left: 3px solid var(--sidebar-active); padding-left: 17px; font-weight: 600; }
+  .ns { display: block; padding: 5px 20px 5px 36px; color: rgba(200,212,224,.6); text-decoration: none; font-size: 13px; transition: color .15s; }
+  .ns:hover { color: #fff; }
+
+  /* ── MAIN ── */
+  #main { margin-left: var(--sidebar-w); flex: 1; min-width: 0; }
+
+  /* ── HERO ── */
+  #hero {
+    background: var(--sidebar-bg);
+    padding: 72px 64px 64px;
+    position: relative;
+    overflow: hidden;
+  }
+  #hero::before {
+    content: '';
+    position: absolute;
+    top: -80px; right: -80px;
+    width: 400px; height: 400px;
+    background: radial-gradient(circle, rgba(59,142,165,.15) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  #hero::after {
+    content: '';
+    position: absolute;
+    bottom: -60px; left: 200px;
+    width: 300px; height: 300px;
+    background: radial-gradient(circle, rgba(192,98,42,.08) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .hero-eyebrow {
+    font-size: 12px;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    color: var(--sidebar-active);
+    font-weight: 600;
+    margin-bottom: 16px;
+  }
+  .hero-title {
+    font-family: 'Lora', serif;
+    font-size: 3rem;
+    font-weight: 700;
+    color: #ffffff;
+    line-height: 1.1;
+    margin-bottom: 12px;
+    max-width: 640px;
+  }
+  .hero-title em { font-style: italic; color: #7dd3fc; }
+  .hero-subtitle {
+    font-family: 'Lora', serif;
+    font-size: 1.1rem;
+    font-style: italic;
+    color: rgba(200,212,224,.75);
+    margin-bottom: 32px;
+    max-width: 520px;
+    line-height: 1.6;
+  }
+  .hero-badges { display: flex; gap: 10px; flex-wrap: wrap; }
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 600;
+    border: 1px solid;
+  }
+  .badge-blue  { background: rgba(59,142,165,.15); color: #7dd3fc; border-color: rgba(59,142,165,.3); }
+  .badge-amber { background: rgba(192,98,42,.15);  color: #fdba74; border-color: rgba(192,98,42,.3); }
+  .badge-gray  { background: rgba(255,255,255,.07); color: rgba(200,212,224,.8); border-color: rgba(255,255,255,.12); }
+
+  /* ── CONTENT ── */
+  #content { max-width: 900px; margin: 0 auto; padding: 56px 64px 80px; }
+
+  /* ── SECTION HEADINGS ── */
+  .section-head {
+    display: flex;
+    align-items: baseline;
+    gap: 14px;
+    margin: 52px 0 20px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid var(--border);
+  }
+  .section-head h2 {
+    font-family: 'Lora', serif;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--ink);
+  }
+  .section-head .sh-tag {
+    font-size: 11px;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--accent);
+    font-weight: 600;
+    border: 1px solid rgba(42,127,158,.3);
+    background: var(--highlight);
+    padding: 2px 10px;
+    border-radius: 10px;
+  }
+
+  /* ── CHAPTER CARDS ── */
+  .chapter-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 8px;
+  }
+  .chapter-grid.full { grid-template-columns: 1fr; }
+
+  .ch-card {
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    padding: 22px 24px 18px;
+    text-decoration: none;
+    color: var(--ink);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    transition: border-color .2s, box-shadow .2s, transform .15s;
+    position: relative;
+    overflow: hidden;
+  }
+  .ch-card::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 4px;
+    border-radius: 10px 0 0 10px;
+    background: var(--accent);
+    opacity: 0;
+    transition: opacity .2s;
+  }
+  .ch-card:hover {
+    border-color: var(--accent);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 20px rgba(42,127,158,.1);
+    text-decoration: none;
+  }
+  .ch-card:hover::before { opacity: 1; }
+
+  .ch-card.foundation::before { background: var(--accent2); }
+  .ch-card.foundation:hover { border-color: var(--accent2); box-shadow: 0 4px 20px rgba(192,98,42,.1); }
+
+  .ch-num {
+    font-size: 11px;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--accent);
+    font-weight: 700;
+  }
+  .ch-card.foundation .ch-num { color: var(--accent2); }
+
+  .ch-title {
+    font-family: 'Lora', serif;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--ink);
+    line-height: 1.3;
+  }
+  .ch-desc {
+    font-size: 14px;
+    color: var(--muted);
+    line-height: 1.5;
+    flex: 1;
+  }
+  .ch-links {
+    display: flex;
+    gap: 8px;
+    margin-top: 4px;
+    flex-wrap: wrap;
+  }
+  .ch-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 5px;
+    text-decoration: none;
+    transition: background .15s, color .15s;
+    letter-spacing: .03em;
+  }
+  .ch-link-concept {
+    background: var(--highlight);
+    color: var(--accent);
+    border: 1px solid rgba(42,127,158,.2);
+  }
+  .ch-link-concept:hover { background: var(--accent); color: #fff; text-decoration: none; }
+  .ch-link-jasp {
+    background: #f4f2ee;
+    color: #555;
+    border: 1px solid var(--border);
+  }
+  .ch-link-jasp:hover { background: var(--ink); color: #fff; text-decoration: none; }
+
+  /* ── INTRO TEXT ── */
+  .intro { max-width: 680px; }
+  .intro p { margin-bottom: 16px; color: var(--ink); }
+  .intro p:last-child { margin-bottom: 0; }
+
+  /* ── HOW TO USE ── */
+  .how-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+    margin: 24px 0;
+  }
+  .how-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 18px 16px;
+  }
+  .how-num {
+    width: 28px; height: 28px;
+    background: var(--accent);
+    color: #fff;
+    border-radius: 50%;
+    font-size: 13px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 10px;
+  }
+  .how-card strong { display: block; font-size: 15px; margin-bottom: 4px; }
+  .how-card p { font-size: 14px; color: var(--muted); margin: 0; line-height: 1.5; }
+
+  /* ── DATASETS STRIP ── */
+  .datasets {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 24px 28px;
+    margin-top: 8px;
+  }
+  .datasets h3 {
+    font-family: 'Lora', serif;
+    font-size: 1rem;
+    font-weight: 700;
+    margin-bottom: 16px;
+    color: var(--ink);
+  }
+  .dataset-list { list-style: none; padding: 0; }
+  .dataset-list li {
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+    padding: 9px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 15px;
+  }
+  .dataset-list li:last-child { border-bottom: none; }
+  .ds-study { font-weight: 600; min-width: 200px; color: var(--ink); }
+  .ds-used  { color: var(--muted); font-size: 14px; }
+  .ds-tag   {
+    flex-shrink: 0;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    padding: 2px 8px;
+    border-radius: 4px;
+    margin-top: 2px;
+  }
+  .ds-tag-t   { background: #dbeafe; color: #1d4ed8; }
+  .ds-tag-a   { background: #dcfce7; color: #15803d; }
+  .ds-tag-r   { background: var(--highlight); color: var(--accent); }
+  .ds-tag-anova { background: #ede9fe; color: #6d28d9; }
+
+  /* ── FOOTER ── */
+  #footer {
+    border-top: 2px solid var(--border);
+    padding: 32px 64px;
+    max-width: 900px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  #footer p { font-size: 14px; color: var(--muted); }
+  #footer a { color: var(--accent); text-decoration: none; }
+  #footer a:hover { text-decoration: underline; }
+
+  @media (max-width: 900px) {
+    #sidebar { transform: translateX(-100%); }
+    #main { margin-left: 0; }
+    #hero { padding: 48px 28px 40px; }
+    .hero-title { font-size: 2.2rem; }
+    #content { padding: 40px 24px 60px; }
+    .chapter-grid { grid-template-columns: 1fr; }
+    .how-grid { grid-template-columns: 1fr; }
+    #footer { padding: 28px 24px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ══════════ SIDEBAR ══════════ -->
+<aside id="sidebar">
+  <div id="sh">
+    <div class="bt">Statistics with JASP</div>
+    <div class="bs">Applied Linguistics &amp; Language Research</div>
+  </div>
+  <nav>
+    <div class="nl">You are here</div>
+    <a class="nc active" href="index.html">Home &amp; Contents</a>
+
+    <div class="nl">Foundations</div>
+    <a class="nc" href="A_old-statistics.html">A · The "Old" Statistics: NHST</a>
+    <a class="nc" href="B_new-statistics.html">B · The "New" Statistics: CIs &amp; Effect Sizes</a>
+
+    <div class="nl">Chapters</div>
+    <a class="nc" href="06_correlation.html">6 · Correlation</a>
+    <a class="ns" href="06_correlation_jasp.html">→ Running in JASP</a>
+    <a class="nc" href="09_t-tests.html">9 · T-Tests</a>
+    <a class="ns" href="09_t-tests_jasp.html">→ Running in JASP</a>
+    <a class="nc" href="10_one-way-anova.html">10 · One-Way ANOVA (Between)</a>
+    <a class="ns" href="10_one-way-anova_jasp.html">→ Running in JASP</a>
+    <a class="nc" href="11_rm-anova.html">11 · One-Way ANOVA (Within)</a>
+    <a class="ns" href="11_rm-anova_jasp.html">→ Running in JASP</a>
+    <a class="nc" href="12_two-way-anova.html">12 · Two-Way Factorial ANOVA</a>
+    <a class="ns" href="12_two-way-anova_jasp.html">→ Running in JASP</a>
+  </nav>
+</aside>
+
+<!-- ══════════ MAIN ══════════ -->
+<main id="main">
+
+  <!-- Hero -->
+  <div id="hero">
+    <div class="hero-eyebrow">Open Course Material</div>
+    <h1 class="hero-title">Statistics with <em>JASP</em></h1>
+    <p class="hero-subtitle">An introduction to quantitative methods for applied linguistics and language learning research</p>
+    <div class="hero-badges">
+      <span class="badge badge-blue">JASP Software</span>
+      <span class="badge badge-amber">SLA Research</span>
+      <span class="badge badge-gray">Estimation Approach</span>
+      <span class="badge badge-gray">Effect Sizes &amp; CIs</span>
+    </div>
+  </div>
+
+  <div id="content">
+
+    <!-- Intro -->
+    <div class="intro">
+      <p>These pages accompany a statistics textbook written for researchers in applied linguistics and second language acquisition. Each chapter covers one statistical test: the conceptual logic behind it, the assumptions it requires, how to run it in JASP, how to read the output, and how to write up the results.</p>
+      <p>The book takes an <strong>estimation approach</strong> — emphasising confidence intervals and effect sizes over dichotomous significance decisions. The two foundation chapters explain why, and what to do instead.</p>
+    </div>
+
+    <!-- How to use -->
+    <div class="section-head" style="margin-top:40px;">
+      <h2>How to use these pages</h2>
+    </div>
+    <div class="how-grid">
+      <div class="how-card">
+        <div class="how-num">1</div>
+        <strong>Read the concept page</strong>
+        <p>Each chapter has a theory page explaining when and why to use the test, illustrated with worked examples from published SLA studies.</p>
+      </div>
+      <div class="how-card">
+        <div class="how-num">2</div>
+        <strong>Follow the JASP walkthrough</strong>
+        <p>The paired JASP page gives step-by-step instructions with annotated screenshots showing every click and every output value to record.</p>
+      </div>
+      <div class="how-card">
+        <div class="how-num">3</div>
+        <strong>Use the write-up templates</strong>
+        <p>Every JASP page ends with a model reporting paragraph you can adapt for your own results — following APA and field-specific conventions.</p>
+      </div>
+    </div>
+
+    <!-- Foundation chapters -->
+    <div class="section-head">
+      <h2>Foundations</h2>
+      <span class="sh-tag">Start here</span>
+    </div>
+    <div class="chapter-grid">
+      <a class="ch-card foundation" href="A_old-statistics.html">
+        <div class="ch-num">Foundation A</div>
+        <div class="ch-title">The "Old" Statistics: NHST</div>
+        <div class="ch-desc">How null hypothesis significance testing works, what a p-value actually means, Type I and II errors, statistical power, and why NHST alone is not enough.</div>
+        <div class="ch-links">
+          <span class="ch-link ch-link-concept">Read →</span>
+        </div>
+      </a>
+      <a class="ch-card foundation" href="B_new-statistics.html">
+        <div class="ch-num">Foundation B</div>
+        <div class="ch-title">The "New" Statistics: CIs &amp; Effect Sizes</div>
+        <div class="ch-desc">Confidence intervals, the margin of error, why p-values are more variable than they look, and a complete guide to d-family and r-family effect sizes.</div>
+        <div class="ch-links">
+          <span class="ch-link ch-link-concept">Read →</span>
+        </div>
+      </a>
+    </div>
+
+    <!-- Chapter 6 -->
+    <div class="section-head">
+      <h2>Chapter 6 · Correlation</h2>
+    </div>
+    <div class="chapter-grid">
+      <a class="ch-card" href="06_correlation.html">
+        <div class="ch-num">Concept &amp; Theory</div>
+        <div class="ch-title">Pearson's r, Scatterplots &amp; the Variance Explained</div>
+        <div class="ch-desc">When to use correlation, linearity checks, positive vs. negative relationships, r², causation vs. correlation, assumptions, and correlation matrices. Uses Flege et al. (1999) and DeKeyser (2000).</div>
+        <div class="ch-links">
+          <span class="ch-link ch-link-concept">Concept page →</span>
+        </div>
+      </a>
+      <a class="ch-card" href="06_correlation_jasp.html">
+        <div class="ch-num">JASP Walkthrough</div>
+        <div class="ch-title">Running Correlation in JASP</div>
+        <div class="ch-desc">Scatterplot setup, grouped scatterplots, finding Correlation under the Regression module, selecting CIs and sample size, reading the output table, and the scatterplot matrix.</div>
+        <div class="ch-links">
+          <span class="ch-link ch-link-jasp">JASP walkthrough →</span>
+        </div>
+      </a>
+    </div>
+
+    <!-- Chapter 9 -->
+    <div class="section-head">
+      <h2>Chapter 9 · T-Tests</h2>
+    </div>
+    <div class="chapter-grid">
+      <a class="ch-card" href="09_t-tests.html">
+        <div class="ch-num">Concept &amp; Theory</div>
+        <div class="ch-title">Independent &amp; Paired Samples T-Tests</div>
+        <div class="ch-desc">Choosing between independent and paired designs, assumptions, Welch's correction for unequal variances, reading CIs, and effect sizes. Uses Leow &amp; Morgan-Short (2004) and Kim (2013).</div>
+        <div class="ch-links">
+          <span class="ch-link ch-link-concept">Concept page →</span>
+        </div>
+      </a>
+      <a class="ch-card" href="09_t-tests_jasp.html">
+        <div class="ch-num">JASP Walkthrough</div>
+        <div class="ch-title">Running T-Tests in JASP</div>
+        <div class="ch-desc">Step-by-step setup for both test types, selecting Welch vs. Student, effect size options, assumption check output, and interpreting CI tables for significance and effect magnitude.</div>
+        <div class="ch-links">
+          <span class="ch-link ch-link-jasp">JASP walkthrough →</span>
+        </div>
+      </a>
+    </div>
+
+    <!-- Chapter 10 -->
+    <div class="section-head">
+      <h2>Chapter 10 · One-Way ANOVA (Between-Subjects)</h2>
+    </div>
+    <div class="chapter-grid">
+      <a class="ch-card" href="10_one-way-anova.html">
+        <div class="ch-num">Concept &amp; Theory</div>
+        <div class="ch-title">The F-Ratio &amp; Post-Hoc Comparisons</div>
+        <div class="ch-desc">Why ANOVA instead of multiple t-tests, between vs. within variance, assumptions, choosing a post-hoc test (Tukey, Games–Howell, Scheffé, BCa bootstrap), and effect sizes. Uses Ellis &amp; Yuan (2004).</div>
+        <div class="ch-links">
+          <span class="ch-link ch-link-concept">Concept page →</span>
+        </div>
+      </a>
+      <a class="ch-card" href="10_one-way-anova_jasp.html">
+        <div class="ch-num">JASP Walkthrough</div>
+        <div class="ch-title">Running One-Way ANOVA in JASP</div>
+        <div class="ch-desc">Assigning variables, Levene's test, Q-Q plot, reading the Between Subjects Effects table, setting up post-hoc tests with BCa bootstrapping, and interpreting Hedges' gₛ with CIs.</div>
+        <div class="ch-links">
+          <span class="ch-link ch-link-jasp">JASP walkthrough →</span>
+        </div>
+      </a>
+    </div>
+
+    <!-- Chapter 11 -->
+    <div class="section-head">
+      <h2>Chapter 11 · One-Way ANOVA (Within-Subjects / Repeated Measures)</h2>
+    </div>
+    <div class="chapter-grid">
+      <a class="ch-card" href="11_rm-anova.html">
+        <div class="ch-num">Concept &amp; Theory</div>
+        <div class="ch-title">Sphericity, the F-Ratio &amp; Correction Factors</div>
+        <div class="ch-desc">How RM-ANOVA factors out individual differences for greater power, wide data format, the sphericity assumption, Mauchly's test, and Greenhouse–Geisser vs. Huynh–Feldt corrections. Uses Kim (2013).</div>
+        <div class="ch-links">
+          <span class="ch-link ch-link-concept">Concept page →</span>
+        </div>
+      </a>
+      <a class="ch-card" href="11_rm-anova_jasp.html">
+        <div class="ch-num">JASP Walkthrough</div>
+        <div class="ch-title">Running RM-ANOVA in JASP</div>
+        <div class="ch-desc">Defining the repeated-measures factor and level labels, assigning variables to cells, reading the Within Subjects Effects table, choosing a sphericity correction, and setting up post-hoc pairwise tests.</div>
+        <div class="ch-links">
+          <span class="ch-link ch-link-jasp">JASP walkthrough →</span>
+        </div>
+      </a>
+    </div>
+
+    <!-- Chapter 12 -->
+    <div class="section-head">
+      <h2>Chapter 12 · Two-Way Factorial ANOVA</h2>
+    </div>
+    <div class="chapter-grid">
+      <a class="ch-card" href="12_two-way-anova.html">
+        <div class="ch-num">Concept &amp; Theory</div>
+        <div class="ch-title">Main Effects, Interactions &amp; Interaction Plots</div>
+        <div class="ch-desc">Design notation, the critical difference between main effects and interactions, reading interaction plots, variance partitioning, Type II sum of squares, and reporting order. Uses Obarow (2004).</div>
+        <div class="ch-links">
+          <span class="ch-link ch-link-concept">Concept page →</span>
+        </div>
+      </a>
+      <a class="ch-card" href="12_two-way-anova_jasp.html">
+        <div class="ch-num">JASP Walkthrough</div>
+        <div class="ch-title">Running Two-Way ANOVA in JASP</div>
+        <div class="ch-desc">Assigning multiple fixed factors, changing to Type II SS in the Model menu, setting up interaction plots, reading the full Between Subjects Effects table, and conditional post-hoc comparisons for interactions.</div>
+        <div class="ch-links">
+          <span class="ch-link ch-link-jasp">JASP walkthrough →</span>
+        </div>
+      </a>
+    </div>
+
+    <!-- Datasets -->
+    <div class="section-head" style="margin-top:52px;">
+      <h2>Example datasets</h2>
+      <span class="sh-tag">Used throughout</span>
+    </div>
+    <div class="datasets">
+      <ul class="dataset-list">
+        <li>
+          <span class="ds-tag ds-tag-r">Correlation</span>
+          <span class="ds-study">Flege et al. (1999)</span>
+          <span class="ds-used">240 Korean immigrants. Age of arrival × English pronunciation rating. Used to illustrate Pearson's r = −.86.</span>
+        </li>
+        <li>
+          <span class="ds-tag ds-tag-r">Correlation</span>
+          <span class="ds-study">DeKeyser (2000)</span>
+          <span class="ds-used">57 Hungarian immigrants. Age of arrival × GJT score. Used for grouped scatterplots.</span>
+        </li>
+        <li>
+          <span class="ds-tag ds-tag-t">T-Test</span>
+          <span class="ds-study">Leow &amp; Morgan-Short (2004)</span>
+          <span class="ds-used">77 learners. Think-aloud vs. non-think-aloud groups. Used for the independent samples t-test.</span>
+        </li>
+        <li>
+          <span class="ds-tag ds-tag-t">T-Test</span>
+          <span class="ds-study">Kim (2013)</span>
+          <span class="ds-used">9 Korean L2 learners. Sarcasm test at pretest, posttest, and delayed posttest. Used for the paired t-test and the one-way RM-ANOVA.</span>
+        </li>
+        <li>
+          <span class="ds-tag ds-tag-a">ANOVA</span>
+          <span class="ds-study">Ellis &amp; Yuan (2004)</span>
+          <span class="ds-used">42 Chinese learners. Planning time (NP / PTP / OLP) × syntactic variety in writing. Used for the one-way between-subjects ANOVA.</span>
+        </li>
+        <li>
+          <span class="ds-tag ds-tag-anova">Factorial</span>
+          <span class="ds-study">Obarow (2004)</span>
+          <span class="ds-used">64 young L2 learners. Music × Illustrations × Gender on vocabulary gain scores. Used for the two-way factorial ANOVA.</span>
+        </li>
+      </ul>
+    </div>
+
+  </div><!-- /content -->
+
+  <footer id="footer">
+    <p>Based on <em>A Practical Introduction to Statistics for Language Research</em> &middot; Material on this site is provided for educational use</p>
+    <p>Built with <a href="https://www.jasp-stats.org" target="_blank">JASP</a> &middot; Hosted on <a href="https://pages.github.com" target="_blank">GitHub Pages</a></p>
+  </footer>
+
+</main>
+
+</body>
+</html>
