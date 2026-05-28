@@ -1,0 +1,1037 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chapter 9: Differences between Two Means with T-Tests | Statistics with JASP</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;0,700;1,400&family=Source+Sans+3:wght@300;400;500;600&family=Source+Code+Pro:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:        #faf8f5;
+    --surface:   #ffffff;
+    --sidebar-bg:#1c2a38;
+    --sidebar-hover: #2d3f52;
+    --sidebar-active: #3b8ea5;
+    --ink:       #1a1f2e;
+    --muted:     #6b7280;
+    --accent:    #2a7f9e;
+    --accent2:   #c0622a;
+    --border:    #e2ddd6;
+    --highlight: #eef7fa;
+    --tip-bg:    #f0f9eb;
+    --tip-border:#5a9e4a;
+    --warn-bg:   #fdf6ec;
+    --warn-border:#d97c2a;
+    --code-bg:   #f3f0eb;
+    --sidebar-w: 280px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Source Sans 3', sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    font-size: 17px;
+    line-height: 1.75;
+    display: flex;
+    min-height: 100vh;
+  }
+
+  /* ─── SIDEBAR ─── */
+  #sidebar {
+    width: var(--sidebar-w);
+    background: var(--sidebar-bg);
+    color: #c8d4e0;
+    position: fixed;
+    top: 0; left: 0; bottom: 0;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    z-index: 100;
+    font-size: 14px;
+  }
+
+  #sidebar-header {
+    padding: 24px 20px 16px;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+  }
+  #sidebar-header .book-title {
+    font-family: 'Lora', serif;
+    font-size: 15px;
+    font-weight: 700;
+    color: #ffffff;
+    line-height: 1.3;
+    margin-bottom: 4px;
+  }
+  #sidebar-header .book-sub {
+    font-size: 12px;
+    color: rgba(200,212,224,0.6);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  #sidebar nav { padding: 12px 0; flex: 1; }
+
+  .nav-section-label {
+    padding: 12px 20px 4px;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: rgba(200,212,224,0.4);
+    font-weight: 600;
+  }
+
+  .nav-chapter {
+    display: block;
+    padding: 7px 20px;
+    color: #c8d4e0;
+    text-decoration: none;
+    transition: background 0.15s, color 0.15s;
+    line-height: 1.4;
+  }
+  .nav-chapter:hover { background: var(--sidebar-hover); color: #fff; }
+  .nav-chapter.active {
+    background: rgba(59,142,165,0.25);
+    color: var(--sidebar-active);
+    border-left: 3px solid var(--sidebar-active);
+    padding-left: 17px;
+    font-weight: 600;
+  }
+
+  .nav-sub {
+    display: block;
+    padding: 5px 20px 5px 36px;
+    color: rgba(200,212,224,0.65);
+    text-decoration: none;
+    font-size: 13px;
+    transition: color 0.15s;
+  }
+  .nav-sub:hover { color: #fff; }
+  .nav-sub.active { color: var(--sidebar-active); }
+
+  /* ─── MAIN CONTENT ─── */
+  #main {
+    flex: 1;
+    min-width: 0;
+  }
+
+  #content {
+    max-width: 820px;
+    margin: 0 auto;
+    padding: 56px 48px 80px;
+  }
+
+  /* ─── CHAPTER HEADER ─── */
+  .chapter-eyebrow {
+    font-size: 12px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent);
+    font-weight: 600;
+    margin-bottom: 10px;
+  }
+
+  h1.chapter-title {
+    font-family: 'Lora', serif;
+    font-size: 2.6rem;
+    font-weight: 700;
+    line-height: 1.15;
+    color: var(--ink);
+    margin-bottom: 10px;
+  }
+  h1.chapter-title em { font-style: italic; color: var(--accent2); }
+
+  .chapter-subtitle {
+    font-family: 'Lora', serif;
+    font-size: 1.1rem;
+    font-style: italic;
+    color: var(--muted);
+    margin-bottom: 32px;
+  }
+
+  .chapter-divider {
+    border: none;
+    border-top: 2px solid var(--border);
+    margin-bottom: 40px;
+  }
+
+  /* ─── PULL QUOTE ─── */
+  blockquote.pull-quote {
+    border-left: 4px solid var(--accent);
+    background: var(--highlight);
+    padding: 20px 28px;
+    margin: 32px 0;
+    border-radius: 0 6px 6px 0;
+  }
+  blockquote.pull-quote p {
+    font-family: 'Lora', serif;
+    font-style: italic;
+    font-size: 1.1rem;
+    color: #2a3a4a;
+    margin-bottom: 8px;
+    line-height: 1.6;
+  }
+  blockquote.pull-quote cite {
+    font-size: 0.85rem;
+    color: var(--muted);
+    font-style: normal;
+  }
+
+  /* ─── HEADINGS ─── */
+  h2 {
+    font-family: 'Lora', serif;
+    font-size: 1.65rem;
+    font-weight: 700;
+    color: var(--ink);
+    margin: 52px 0 16px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid var(--border);
+  }
+  h2 .section-num {
+    color: var(--accent);
+    margin-right: 8px;
+    font-weight: 400;
+    font-size: 1.1rem;
+  }
+
+  h3 {
+    font-family: 'Lora', serif;
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--ink);
+    margin: 36px 0 12px;
+  }
+  h3 .section-num {
+    color: var(--accent2);
+    margin-right: 6px;
+    font-weight: 400;
+  }
+
+  h4 {
+    font-size: 0.95rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: 28px 0 8px;
+  }
+
+  p { margin-bottom: 16px; }
+
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  strong { font-weight: 600; color: #111; }
+  em { font-style: italic; }
+
+  /* ─── BOXES ─── */
+  .box {
+    border-radius: 6px;
+    padding: 20px 24px;
+    margin: 28px 0;
+  }
+  .box-tip {
+    background: var(--tip-bg);
+    border-left: 4px solid var(--tip-border);
+  }
+  .box-tip .box-label { color: var(--tip-border); }
+
+  .box-warn {
+    background: var(--warn-bg);
+    border-left: 4px solid var(--warn-border);
+  }
+  .box-warn .box-label { color: var(--warn-border); }
+
+  .box-example {
+    background: var(--highlight);
+    border-left: 4px solid var(--accent);
+  }
+  .box-example .box-label { color: var(--accent); }
+
+  .box-label {
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    font-weight: 700;
+    margin-bottom: 8px;
+    display: block;
+  }
+  .box p:last-child { margin-bottom: 0; }
+
+  /* ─── STEPS ─── */
+  .steps {
+    counter-reset: step;
+    margin: 20px 0;
+    padding: 0;
+    list-style: none;
+  }
+  .steps li {
+    counter-increment: step;
+    display: flex;
+    gap: 16px;
+    margin-bottom: 14px;
+    align-items: flex-start;
+  }
+  .steps li::before {
+    content: counter(step);
+    flex-shrink: 0;
+    width: 28px;
+    height: 28px;
+    background: var(--accent);
+    color: #fff;
+    border-radius: 50%;
+    font-size: 13px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 2px;
+  }
+  .steps li p { margin: 0; }
+
+  /* ─── TABLES ─── */
+  .table-wrap {
+    overflow-x: auto;
+    margin: 24px 0;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 15px;
+  }
+  thead tr { background: var(--ink); color: #fff; }
+  thead th {
+    padding: 12px 16px;
+    text-align: left;
+    font-weight: 600;
+    font-size: 13px;
+    letter-spacing: 0.04em;
+  }
+  tbody tr:nth-child(even) { background: var(--highlight); }
+  tbody td {
+    padding: 11px 16px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+  tbody tr:last-child td { border-bottom: none; }
+  .td-center { text-align: center; }
+
+  /* ─── STAT OUTPUT ─── */
+  .stat-output {
+    background: #1c2a38;
+    color: #e2f0f7;
+    border-radius: 8px;
+    padding: 24px 28px;
+    margin: 24px 0;
+    font-family: 'Source Code Pro', monospace;
+    font-size: 14px;
+    line-height: 1.9;
+    overflow-x: auto;
+  }
+  .stat-output .stat-heading {
+    color: #7dd3fc;
+    font-weight: 600;
+    border-bottom: 1px solid rgba(255,255,255,0.12);
+    padding-bottom: 8px;
+    margin-bottom: 12px;
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: 13px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .stat-output .stat-row {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 4px 20px;
+    padding: 4px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    font-size: 13px;
+  }
+  .stat-output .stat-row.header { color: #94a3b8; font-size: 12px; }
+  .stat-output .stat-highlight { color: #fbbf24; font-weight: 600; }
+
+  /* ─── REPORTING TEMPLATE ─── */
+  .report-template {
+    background: #fffbf5;
+    border: 1px solid #e8d5b7;
+    border-radius: 6px;
+    padding: 22px 28px;
+    margin: 24px 0;
+    font-family: 'Lora', serif;
+    font-size: 0.95rem;
+    line-height: 1.8;
+    color: #2a2a2a;
+    position: relative;
+  }
+  .report-template::before {
+    content: '"';
+    position: absolute;
+    top: -10px;
+    left: 20px;
+    font-size: 4rem;
+    color: #e8d5b7;
+    font-family: 'Lora', serif;
+    line-height: 1;
+  }
+  .report-template .report-label {
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent2);
+    font-weight: 700;
+    margin-bottom: 12px;
+    display: block;
+    font-style: normal;
+  }
+  .report-template p { margin-bottom: 10px; }
+  .report-template p:last-child { margin-bottom: 0; }
+
+  /* ─── DECISION CHART ─── */
+  .decision-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin: 24px 0;
+  }
+  .decision-card {
+    border: 2px solid var(--border);
+    border-radius: 8px;
+    padding: 20px;
+    transition: border-color 0.2s;
+  }
+  .decision-card:hover { border-color: var(--accent); }
+  .decision-card .dc-type {
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+  .decision-card .dc-name {
+    font-family: 'Lora', serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--ink);
+    margin-bottom: 10px;
+  }
+  .decision-card p { font-size: 15px; color: var(--muted); margin: 0; }
+
+  /* ─── ASSUMPTION LIST ─── */
+  .assumption-list {
+    list-style: none;
+    margin: 16px 0;
+    padding: 0;
+  }
+  .assumption-list li {
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .assumption-list li:last-child { border-bottom: none; }
+  .assumption-icon {
+    width: 26px;
+    height: 26px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    background: var(--highlight);
+    border: 2px solid var(--accent);
+    color: var(--accent);
+    font-size: 13px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 2px;
+  }
+  .assumption-list strong { display: block; font-size: 15px; margin-bottom: 2px; }
+  .assumption-list span { font-size: 15px; color: var(--muted); }
+
+  /* ─── JASP STEP PANELS ─── */
+  .jasp-steps {
+    background: #f8f7f5;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 24px 28px;
+    margin: 24px 0;
+  }
+  .jasp-steps h4 {
+    margin-top: 0;
+    color: var(--accent);
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 10px;
+    margin-bottom: 16px;
+  }
+  .jasp-steps .software-badge {
+    display: inline-block;
+    background: var(--accent);
+    color: #fff;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 2px 8px;
+    border-radius: 3px;
+    margin-right: 6px;
+    vertical-align: middle;
+  }
+
+  kbd {
+    background: var(--code-bg);
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    padding: 1px 6px;
+    font-family: 'Source Code Pro', monospace;
+    font-size: 13px;
+    color: #333;
+  }
+
+  /* ─── NAV FOOTER ─── */
+  .chapter-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 64px;
+    padding-top: 24px;
+    border-top: 2px solid var(--border);
+    gap: 16px;
+  }
+  .chapter-nav a {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 20px;
+    border: 1.5px solid var(--border);
+    border-radius: 6px;
+    color: var(--ink);
+    font-weight: 500;
+    transition: border-color 0.2s, background 0.2s;
+    font-size: 15px;
+    text-decoration: none;
+  }
+  .chapter-nav a:hover {
+    border-color: var(--accent);
+    background: var(--highlight);
+    text-decoration: none;
+  }
+  .chapter-nav .nav-prev { flex-direction: row; }
+  .chapter-nav .nav-next { flex-direction: row-reverse; }
+  .chapter-nav .nav-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    display: block;
+  }
+  .chapter-nav .nav-title { display: block; }
+  .chapter-nav .arrow { color: var(--accent); font-size: 1.2rem; }
+
+  /* ─── RESPONSIVE ─── */
+  @media (max-width: 900px) {
+    #sidebar { transform: translateX(-100%); }
+    #main { margin-left: 0; }
+    #content { padding: 32px 24px 60px; }
+    .decision-grid { grid-template-columns: 1fr; }
+    .stat-output .stat-row { grid-template-columns: repeat(3, 1fr); }
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════ MAIN -->
+<main id="main">
+<div id="content">
+
+  <!-- Chapter Header -->
+  <div class="chapter-eyebrow">Chapter 9</div>
+  <h1 class="chapter-title">Differences between Two Means<br>with <em>T</em>-Tests</h1>
+  <div class="chapter-subtitle">Think-Aloud Methodology &amp; Teaching Sarcasm</div>
+  <hr class="chapter-divider">
+
+  <blockquote class="pull-quote">
+    <p>Far better an approximate answer to the <em>right</em> question, which is often vague, than an <em>exact</em> answer to the wrong question, which can always be made precise.</p>
+    <cite>— Attributed to Tukey (1962)</cite>
+  </blockquote>
+
+  <p>A <em>t</em>-test answers a deceptively simple question: <strong>are two scores the same or different?</strong> Despite its apparent simplicity, this test is useful across a wide range of research settings. All of the statistical tests in this chapter involve comparing two mean scores measured on the same instrument.</p>
+
+  <p>Owing to random chance, scores from two groups on the same test are unlikely to be exactly the same — even if both sets of scores come from the same people. A <em>t</em>-test tells us whether the <em>difference</em> between two means is large enough to conclude that the groups are genuinely different, or whether scores at Time 1 differ meaningfully from scores at Time 2.</p>
+
+  <p>This chapter focuses on the two <em>t</em>-tests most commonly encountered in applied linguistics and language research:</p>
+
+  <div class="decision-grid">
+    <div class="decision-card">
+      <div class="dc-type">Section 9.2–9.5</div>
+      <div class="dc-name">Independent Samples<br><em>t</em>-Test</div>
+      <p>Two separate groups are compared on the same measure. Groups are independent — different people in each.</p>
+    </div>
+    <div class="decision-card">
+      <div class="dc-type">Section 9.6–9.8</div>
+      <div class="dc-name">Paired Samples<br><em>t</em>-Test</div>
+      <p>The same group is measured at two time points, or on two related measures. Groups share participants.</p>
+    </div>
+  </div>
+
+  <!-- ─── 9.1 ─── -->
+  <h2 id="types"><span class="section-num">9.1</span>Types of <em>t</em>-Tests</h2>
+
+  <p>Before running any analysis, you need to identify which type of <em>t</em>-test fits your data. The key question is: <strong>are your two groups independent of each other, or do they share participants?</strong></p>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Test</th>
+          <th>When to Use</th>
+          <th>Example</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Independent Samples</strong> <em>t</em>-test</td>
+          <td>Two separate groups; different participants in each</td>
+          <td>Think-aloud vs. non-think-aloud group scores on a comprehension task</td>
+        </tr>
+        <tr>
+          <td><strong>Paired Samples</strong> <em>t</em>-test</td>
+          <td>Same participants measured twice, or on two related measures</td>
+          <td>Pretest vs. posttest scores from the same learners</td>
+        </tr>
+        <tr>
+          <td><strong>One-Sample</strong> <em>t</em>-test</td>
+          <td>One group compared against a known or hypothetical value</td>
+          <td>Comparing program GRE scores against a university-wide average of 600</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="box box-warn">
+    <span class="box-label">⚠ Important</span>
+    <p>A <em>t</em>-test can only compare <strong>exactly two</strong> means at the same time. If you have three or more groups, you cannot use a <em>t</em>-test to test all groups simultaneously — use a one-way ANOVA instead (see Chapter 10).</p>
+  </div>
+
+  <!-- ─── 9.2 ─── -->
+  <h2 id="independent"><span class="section-num">9.2</span>Independent Samples <em>t</em>-Test</h2>
+
+  <h4>Example Study</h4>
+
+  <div class="box box-example">
+    <span class="box-label">📖 Example: Leow &amp; Morgan-Short (2004)</span>
+    <p>This chapter uses data from Leow and Morgan-Short (2004), who investigated whether performing a think-aloud task <em>while</em> completing a language activity affected learners' comprehension and production scores. Participants were assigned to one of two conditions:</p>
+    <p><strong>Think-Aloud group</strong> — verbalized their thoughts while doing the task<br>
+    <strong>Non-Think-Aloud group</strong> — completed the task silently</p>
+    <p>Because two separate groups of different people were compared, this is an ideal situation for an <strong>independent samples <em>t</em>-test</strong>.</p>
+  </div>
+
+  <h3>Data Variables</h3>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Variable</th>
+          <th>Description</th>
+          <th>Scale Type</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><kbd>Group</kbd></td>
+          <td>1 = Think Aloud, 2 = Non-Think-Aloud</td>
+          <td>Nominal (Grouping Variable)</td>
+        </tr>
+        <tr>
+          <td><kbd>RecPostScore</kbd></td>
+          <td>Score on the receptive (comprehension) posttest</td>
+          <td>Scale (continuous)</td>
+        </tr>
+        <tr>
+          <td><kbd>ProPostScore</kbd></td>
+          <td>Score on the productive posttest</td>
+          <td>Scale (continuous)</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ─── 9.3 ─── -->
+  <h2 id="assumptions-ind"><span class="section-num">9.3</span>Assumptions of the Independent Samples <em>t</em>-Test</h2>
+
+  <p>Before interpreting output, verify that your data meet the assumptions of the parametric <em>t</em>-test. When they are violated, consider bootstrapping or robust alternatives.</p>
+
+  <ul class="assumption-list">
+    <li>
+      <div class="assumption-icon">1</div>
+      <div>
+        <strong>Independence of observations</strong>
+        <span>Each participant contributes only one score, and scores in one group are unrelated to scores in the other. This is guaranteed by good experimental design.</span>
+      </div>
+    </li>
+    <li>
+      <div class="assumption-icon">2</div>
+      <div>
+        <strong>Normality</strong>
+        <span>Scores within each group should be approximately normally distributed. Check this visually with boxplots and Q-Q plots, or formally with a Shapiro-Wilk test. With large samples (<em>n</em> &gt; 30), mild deviations are generally tolerable.</span>
+      </div>
+    </li>
+    <li>
+      <div class="assumption-icon">3</div>
+      <div>
+        <strong>Homogeneity of variances</strong>
+        <span>The variance of both groups should be roughly equal. Test with Levene's test or the Brown-Forsythe test in JASP. If variances are unequal, use <strong>Welch's <em>t</em>-test</strong> (JASP's default).</span>
+      </div>
+    </li>
+  </ul>
+
+  <div class="box box-tip">
+    <span class="box-label">💡 Practical Tip</span>
+    <p>Because it may seem counterintuitive: for Levene's test, you <em>want</em> a non-significant result (<em>p</em> &gt; .05). The null hypothesis here is that the variances <em>are</em> equal — rejecting it means they are not. When in doubt, always use Welch's <em>t</em>-test (unequal variances assumed), which handles both equal and unequal variance situations safely.</p>
+  </div>
+
+  <!-- ─── 9.4 ─── -->
+  <h2 id="jasp-independent"><span class="section-num">9.4</span>Running an Independent Samples <em>t</em>-Test in JASP</h2>
+
+  <div class="jasp-steps">
+    <h4><span class="software-badge">JASP</span> Step-by-Step Instructions</h4>
+    <ol class="steps">
+      <li><p>Load the Leow &amp; Morgan-Short data file. Confirm that <kbd>RecPostScore</kbd> is set to <strong>Scale</strong> and <kbd>Group</kbd> is set to <strong>Nominal</strong>. Data should be in <em>long format</em>: one row per participant.</p></li>
+      <li><p>Click the <strong>T-Tests</strong> module in the top menu bar, then select <kbd>Independent Samples T-Test</kbd>.</p></li>
+      <li><p>Move your dependent variable (<kbd>RecPostScore</kbd>) into the <strong>Dependent Variables</strong> box on the right.</p></li>
+      <li><p>Move your grouping variable (<kbd>Group</kbd>) into the <strong>Grouping Variable</strong> box below.</p></li>
+      <li><p>Under <strong>Tests</strong>, check ☑ <kbd>Welch</kbd> (recommended as the default — it handles unequal variances automatically).</p></li>
+      <li><p>Under <strong>Additional Statistics</strong>, check ☑ <kbd>Location parameter</kbd> and ☑ <kbd>Confidence interval</kbd> (set to 95%).</p></li>
+      <li><p>Under <strong>Additional Statistics</strong>, also check ☑ <kbd>Effect size</kbd> and select the appropriate standardizer. Check ☑ <kbd>Confidence interval</kbd> for the effect size too.</p></li>
+      <li><p>Under <strong>Assumption Checks</strong>, check ☑ <kbd>Normality</kbd>, ☑ <kbd>Equality of variances</kbd>, and ☑ <kbd>Q-Q plot residuals</kbd>.</p></li>
+      <li><p>Under <strong>Plots</strong>, check ☑ <kbd>Raincloud plots</kbd> to visualize data distribution in both groups.</p></li>
+    </ol>
+  </div>
+
+  <div class="box box-tip">
+    <span class="box-label">💡 Data Format: Long vs. Wide</span>
+    <p>For an independent samples <em>t</em>-test, data must be in <strong>long format</strong>: one interval-level column containing scores for <em>both</em> groups, plus a separate categorical column indicating which group each row belongs to. Do not put Group 1 scores in one column and Group 2 scores in another (that would be wide format).</p>
+  </div>
+
+  <!-- ─── 9.5 ─── -->
+  <h2 id="output-ind"><span class="section-num">9.5</span>Reading the JASP Output</h2>
+
+  <h3>Descriptive Statistics</h3>
+  <p>First, examine the means and standard deviations for each group. Large differences in standard deviations signal potential heterogeneity of variances.</p>
+
+  <div class="stat-output">
+    <div class="stat-heading">Descriptive Statistics — Receptive Posttest</div>
+    <div class="stat-row header">
+      <span>Group</span><span>N</span><span>Mean</span><span>SD</span><span>SE</span><span>95% CI</span>
+    </div>
+    <div class="stat-row">
+      <span>Think Aloud</span><span>38</span><span>5.89</span><span class="stat-highlight">6.04</span><span>0.98</span><span>[3.91, 7.87]</span>
+    </div>
+    <div class="stat-row">
+      <span>Non-Think-Aloud</span><span>39</span><span>3.92</span><span class="stat-highlight">4.31</span><span>0.69</span><span>[2.53, 5.31]</span>
+    </div>
+  </div>
+
+  <p>Notice that the SD of the Think-Aloud group (6.04) is substantially larger than that of the Non-Think-Aloud group (4.31). The variances (SD²) are approximately 36 vs. 18 — the groups do <em>not</em> have homogeneous variances, which is why Welch's test is appropriate here.</p>
+
+  <h3>Assumption Checks</h3>
+
+  <div class="stat-output">
+    <div class="stat-heading">Test of Normality (Shapiro-Wilk)</div>
+    <div class="stat-row header">
+      <span>Variable</span><span>Group</span><span>W</span><span><em>p</em></span><span></span><span></span>
+    </div>
+    <div class="stat-row">
+      <span>RecPostScore</span><span>Non-Think-Aloud</span><span>0.790</span><span class="stat-highlight">&lt; .001</span><span></span><span></span>
+    </div>
+    <div class="stat-row">
+      <span>RecPostScore</span><span>Think Aloud</span><span>0.849</span><span class="stat-highlight">&lt; .001</span><span></span><span></span>
+    </div>
+  </div>
+
+  <p>Both groups show significant departures from normality. In practice, most real datasets fail normality tests. Bootstrapping or robust trimmed-means methods can address this.</p>
+
+  <div class="stat-output">
+    <div class="stat-heading">Test of Equality of Variances (Brown-Forsythe)</div>
+    <div class="stat-row header">
+      <span>Variable</span><span><em>F</em></span><span>df₁</span><span>df₂</span><span><em>p</em></span><span></span>
+    </div>
+    <div class="stat-row">
+      <span>RecPostScore</span><span>8.393</span><span>1</span><span>75</span><span class="stat-highlight">.005</span><span></span>
+    </div>
+  </div>
+
+  <p>The test confirms unequal variances (<em>p</em> = .005). We should use <strong>Welch's <em>t</em>-test</strong> (equal variances <em>not</em> assumed).</p>
+
+  <h3>T-Test Results</h3>
+
+  <div class="stat-output">
+    <div class="stat-heading">Independent Samples T-Test (Welch's)</div>
+    <div class="stat-row header">
+      <span>Variable</span><span><em>t</em></span><span>df</span><span><em>p</em></span><span>Mean Diff.</span><span>95% CI</span>
+    </div>
+    <div class="stat-row">
+      <span>RecPostScore</span>
+      <span>−1.644</span>
+      <span>66.81</span>
+      <span>.105</span>
+      <span>−1.972</span>
+      <span class="stat-highlight">[−4.37, 0.42]</span>
+    </div>
+  </div>
+
+  <h3>Interpreting the Confidence Interval</h3>
+
+  <p>The 95% CI for the difference in means is <strong>[−4.37, 0.42]</strong>. Because this interval <strong>contains zero</strong>, we cannot conclude that there is a statistically significant difference between the groups. Zero is a plausible value for the true mean difference.</p>
+
+  <p>However, the width of the interval — nearly 5 points on a 17-point scale — tells us that our estimate is quite <em>uncertain</em>. We cannot rule out differences as large as about 4 points in either direction.</p>
+
+  <div class="box box-example">
+    <span class="box-label">📊 Effect Size</span>
+    <p>The effect size using Glass' Δ (chosen because of unequal variances; uses the SD of the non-think-aloud group as standardizer) was <strong>Glass' Δ = −0.33 [−0.78, 0.13]</strong>. By Plonsky and Oswald's (2014) guidelines for SLA research, this would be considered a <em>small</em> effect. Note that the 95% CI for the effect size also spans zero.</p>
+  </div>
+
+  <!-- ─── 9.6 ─── -->
+  <h2 id="paired"><span class="section-num">9.6</span>Paired Samples <em>t</em>-Test</h2>
+
+  <p>The <strong>paired samples <em>t</em>-test</strong> (also called the matched samples <em>t</em>-test) is used when the two sets of scores you want to compare come from the <em>same</em> participants. Because the same people contribute data to both conditions, the groups are not independent, and the paired <em>t</em>-test accounts for this dependency.</p>
+
+  <div class="box box-example">
+    <span class="box-label">📖 Example: Kim (2013)</span>
+    <p>In Kim (2013), nine learners of English as an L2 were tested on their ability to understand sarcasm. They took a <strong>pretest</strong> before instruction, an <strong>immediate posttest</strong> after nine weekly instructional sessions, and a <strong>delayed posttest</strong> five weeks later. Because the same nine participants appear at every time point, a paired samples <em>t</em>-test is appropriate.</p>
+    <p>Participants scored up to 30 points total (one point per correct sarcasm identification + up to 2 bonus points per item for identifying the cue).</p>
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Variable</th>
+          <th>Description</th>
+          <th>Scale Type</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><kbd>Pretest</kbd></td>
+          <td>Sarcasm comprehension score before instruction</td>
+          <td>Scale (max = 30)</td>
+        </tr>
+        <tr>
+          <td><kbd>Posttest</kbd></td>
+          <td>Sarcasm comprehension score immediately after instruction</td>
+          <td>Scale (max = 30)</td>
+        </tr>
+        <tr>
+          <td><kbd>DelayedPost</kbd></td>
+          <td>Sarcasm comprehension score five weeks after instruction</td>
+          <td>Scale (max = 30)</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Testing Time</th>
+          <th>N</th>
+          <th>Mean</th>
+          <th>SD</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>Pretest</td><td class="td-center">9</td><td class="td-center">7.44</td><td class="td-center">6.24</td></tr>
+        <tr><td>Posttest</td><td class="td-center">9</td><td class="td-center">16.56</td><td class="td-center">2.96</td></tr>
+        <tr><td>Delayed Posttest</td><td class="td-center">9</td><td class="td-center">13.44</td><td class="td-center">2.65</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ─── 9.7 ─── -->
+  <h2 id="jasp-paired"><span class="section-num">9.7</span>Running a Paired Samples <em>t</em>-Test in JASP</h2>
+
+  <div class="jasp-steps">
+    <h4><span class="software-badge">JASP</span> Step-by-Step Instructions</h4>
+    <ol class="steps">
+      <li><p>Load the Kim (2013) data. Confirm that <kbd>Pretest</kbd>, <kbd>Posttest</kbd>, and <kbd>DelayedPost</kbd> are all set to <strong>Scale</strong>.</p></li>
+      <li><p>Click the <strong>T-Tests</strong> module, then select <kbd>Paired Samples T-Test</kbd>.</p></li>
+      <li><p>Pair your variables: click <kbd>Pretest</kbd> from the variable list, then <kbd>Posttest</kbd>. Both move together into the right panel as Pair 1. Repeat for Posttest &amp; DelayedPost as Pair 2.</p></li>
+      <li><p>Under <strong>Tests</strong>, keep the default <kbd>Student</kbd> test checked (the classic parametric version).</p></li>
+      <li><p>Under <strong>Additional Statistics</strong>, check ☑ <kbd>Location parameter</kbd> and ☑ <kbd>Confidence interval</kbd> (95%).</p></li>
+      <li><p>Under <strong>Additional Statistics</strong>, check ☑ <kbd>Effect size</kbd>. Select <kbd>Cohen's dᵣₘ</kbd> — this is recommended because it does not overestimate effects unlike other within-group <em>d</em> family members.</p></li>
+      <li><p>Under <strong>Assumption Checks</strong>, check ☑ <kbd>Normality</kbd> to run a Shapiro-Wilk test on the difference scores.</p></li>
+      <li><p>Under <strong>Plots</strong>, check ☑ <kbd>Raincloud plots</kbd> to examine the full distribution.</p></li>
+    </ol>
+  </div>
+
+  <!-- ─── 9.8 ─── -->
+  <h2 id="output-paired"><span class="section-num">9.8</span>Reading the Paired Samples Output</h2>
+
+  <h3>Paired Samples Correlations</h3>
+  <p>JASP first shows the correlation between each pair of scores. The paired <em>t</em>-test assumes the two measures will be positively correlated (since the same people contribute scores at both times).</p>
+
+  <div class="stat-output">
+    <div class="stat-heading">Paired Samples Correlations</div>
+    <div class="stat-row header">
+      <span>Pair</span><span>N</span><span><em>r</em></span><span>One-sided <em>p</em></span><span>Two-sided <em>p</em></span><span></span>
+    </div>
+    <div class="stat-row">
+      <span>Pretest – Posttest</span><span>9</span><span>−.340</span><span>.186</span><span>.371</span><span></span>
+    </div>
+    <div class="stat-row">
+      <span>Posttest – Delayed</span><span>9</span><span>.586</span><span>.049</span><span>.097</span><span></span>
+    </div>
+  </div>
+
+  <h3>Test Results</h3>
+
+  <div class="stat-output">
+    <div class="stat-heading">Paired Samples T-Test</div>
+    <div class="stat-row header">
+      <span>Pair</span><span>Mean Diff.</span><span>SD Diff.</span><span><em>t</em></span><span>df</span><span>95% CI</span>
+    </div>
+    <div class="stat-row">
+      <span>Pretest – Posttest</span>
+      <span>−9.11</span>
+      <span>6.85</span>
+      <span>−3.99</span>
+      <span>8</span>
+      <span class="stat-highlight">[−14.37, −3.85]</span>
+    </div>
+    <div class="stat-row">
+      <span>Posttest – Delayed</span>
+      <span>−3.11</span>
+      <span>2.71</span>
+      <span>−3.44</span>
+      <span>8</span>
+      <span class="stat-highlight">[−5.20, −1.03]</span>
+    </div>
+  </div>
+
+  <h3>Interpreting the Results</h3>
+
+  <p>For the pretest–posttest comparison, the 95% CI is <strong>[−14.37, −3.85]</strong>. Because this interval does <em>not</em> contain zero — and is entirely negative — we conclude there is a <strong>statistically significant improvement</strong> from pretest to posttest. Scores improved by at least about 4 points, and possibly as much as 14 points.</p>
+
+  <p>For the posttest–delayed posttest comparison, the 95% CI is <strong>[−5.20, −1.03]</strong>, also entirely below zero, indicating continued improvement (or retention) was maintained through the delayed test.</p>
+
+  <div class="box box-example">
+    <span class="box-label">📊 Effect Size</span>
+    <p>For the pretest–posttest comparison, <strong>Cohen's d<sub>rm</sub> = 2.18 [0.21, 4.14]</strong>. This indicates that the difference between the pretest and posttest was approximately <em>twice</em> the standard deviation of the difference scores — a very large effect by any conventional standard. However, the wide confidence interval (spanning from 0.21 to 4.14) reflects the small sample size (<em>N</em> = 9) and urges caution in over-interpreting the point estimate.</p>
+  </div>
+
+  <div class="box box-warn">
+    <span class="box-label">⚠ Small Sample Caution</span>
+    <p>With only nine participants, confidence intervals will be wide and effect size estimates unstable. The Kim (2013) results are promising, but replication with a larger sample is essential before drawing strong conclusions.</p>
+  </div>
+
+  <!-- ─── 9.9 ─── -->
+  <h2 id="reporting"><span class="section-num">9.9</span>Writing Up Your Results</h2>
+
+  <p>A complete write-up should address: (1) whether assumptions were met; (2) descriptive statistics for each group; (3) the CI for the mean difference; (4) effect size with its CI; and (5) a plain-language interpretation. A <em>t</em>-value, <em>df</em>, and <em>p</em>-value are optional if the CI is present.</p>
+
+  <h3>Independent Samples <em>t</em>-Test — Example Write-Up</h3>
+
+  <div class="report-template">
+    <span class="report-label">Model Reporting Paragraph</span>
+    <p>Data from Leow and Morgan-Short (2004) showed departures from normality in that there were outliers, distributions were not symmetric, and variances were not equal. An independent samples <em>t</em>-test, 95% CI [−4.37, 0.42], found no evidence of a difference between scores on the receptive posttest task for the think-aloud group (<em>M</em> = 5.89, <em>SD</em> = 6.04, <em>n</em> = 38) and the non-think-aloud group (<em>M</em> = 3.92, <em>SD</em> = 4.31, <em>n</em> = 39).</p>
+    <p>Since the 95% CI contains zero, we conclude that there is no statistical difference between groups. The wide CI, nearly 5 points on a test where the maximum score was 17, shows that the estimate of how different the groups are is uncertain, but not likely to be far from zero. The effect size using Glass' Δ (1976), calculated with the SD of the non-think-aloud group to account for unequal variances, was Glass' Δ = −0.33 [−0.78, 0.13] — a small effect by Plonsky and Oswald's (2014) guidelines for SLA research.</p>
+  </div>
+
+  <h3>Paired Samples <em>t</em>-Test — Example Write-Up</h3>
+
+  <div class="report-template">
+    <span class="report-label">Model Reporting Paragraph</span>
+    <p>Data for the pretest and posttest showed some departures from normality in having a skewed distribution. Standard deviations showed that scores at the two testing times did not have homogeneous variance, with less variance on the immediate and delayed posttests (pretest: <em>M</em> = 7.44, <em>SD</em> = 6.24, <em>N</em> = 9; posttest: <em>M</em> = 16.56, <em>SD</em> = 2.96, <em>N</em> = 9).</p>
+    <p>A parametric paired samples <em>t</em>-test found that a 95% CI for the difference between the pretest and posttest showed a statistically significant and practically important difference [−14.37, −3.85]. Because this CI does not cross zero, the difference between groups is statistically significant. The Cohen's d<sub>rm</sub> effect size was d<sub>rm</sub> = 2.18 [0.21, 4.14], meaning that the pretest-to-posttest difference was approximately twice the SD of the difference scores — a very large effect, indicating that the sarcasm instruction was highly effective. However, the wide CI reflects the small sample size and suggests that the experiment should be repeated with more participants to obtain a more precise estimate.</p>
+  </div>
+
+  <!-- ─── 9.10 ─── -->
+  <h2 id="summary"><span class="section-num">9.10</span>Summary</h2>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th></th>
+          <th>Independent Samples</th>
+          <th>Paired Samples</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Design</strong></td>
+          <td>Two separate groups (different people)</td>
+          <td>Same people at two times or on two measures</td>
+        </tr>
+        <tr>
+          <td><strong>Key assumption</strong></td>
+          <td>Observations are independent across groups</td>
+          <td>Observations are <em>dependent</em> (paired) within groups</td>
+        </tr>
+        <tr>
+          <td><strong>Variance check</strong></td>
+          <td>Levene's / Brown-Forsythe; use Welch if unequal</td>
+          <td>Check variance of <em>difference scores</em></td>
+        </tr>
+        <tr>
+          <td><strong>Effect size</strong></td>
+          <td>Cohen's <em>d</em><sub>s</sub>, Hedges' <em>g</em>, or Glass' Δ</td>
+          <td>Cohen's d<sub>rm</sub> (recommended)</td>
+        </tr>
+        <tr>
+          <td><strong>Example</strong></td>
+          <td>Leow &amp; Morgan-Short (2004): think-aloud vs. not</td>
+          <td>Kim (2013): sarcasm pretest vs. posttest</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p><em>t</em>-tests are among the most frequently used tools in applied linguistics research, but interpreting them well requires going beyond the <em>p</em>-value. Always report confidence intervals for the mean difference and effect sizes with their own CIs to give readers a full picture of what your data show.</p>
+
+  <!-- Chapter Nav -->
+  <div class="chapter-nav">
+    <a class="nav-prev" href="#">
+      <span class="arrow">←</span>
+      <span>
+        <span class="nav-label">Previous</span>
+        <span class="nav-title">Ch. 8 · One-Way ANOVA (Between-Subjects)</span>
+      </span>
+    </a>
+    <a class="nav-next" href="#">
+      <span>
+        <span class="nav-label">Next</span>
+        <span class="nav-title">Ch. 10 · One-Way ANOVA (Within-Subjects)</span>
+      </span>
+      <span class="arrow">→</span>
+    </a>
+  </div>
+
+</div><!-- /content -->
+</main>
+
+<script>
+  // Highlight active nav link on scroll
+  const sections = document.querySelectorAll('h2[id]');
+  const navSubs = document.querySelectorAll('.nav-sub');
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        navSubs.forEach(a => a.classList.remove('active'));
+        const match = document.querySelector(`.nav-sub[href="#${entry.target.id}"]`);
+        if (match) match.classList.add('active');
+      }
+    });
+  }, { rootMargin: '-20% 0px -70% 0px' });
+  sections.forEach(s => observer.observe(s));
+</script>
+</body>
+</html>

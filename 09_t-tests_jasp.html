@@ -1,0 +1,1043 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chapter 9: T-Tests in JASP | Statistics with JASP</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;0,700;1,400&family=Source+Sans+3:wght@300;400;500;600&family=Source+Code+Pro:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:           #faf8f5;
+    --surface:      #ffffff;
+    --sidebar-bg:   #1c2a38;
+    --sidebar-hover:#2d3f52;
+    --sidebar-active:#3b8ea5;
+    --ink:          #1a1f2e;
+    --muted:        #6b7280;
+    --accent:       #2a7f9e;
+    --accent2:      #c0622a;
+    --red:          #dc2626;
+    --red-bg:       #fef2f2;
+    --border:       #e2ddd6;
+    --highlight:    #eef7fa;
+    --tip-bg:       #f0f9eb;
+    --tip-border:   #5a9e4a;
+    --sidebar-w:    280px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Source Sans 3', sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    font-size: 17px;
+    line-height: 1.75;
+    display: flex;
+    min-height: 100vh;
+  }
+
+  /* ── SIDEBAR ── */
+  #sidebar {
+    width: var(--sidebar-w);
+    background: var(--sidebar-bg);
+    color: #c8d4e0;
+    position: fixed;
+    top: 0; left: 0; bottom: 0;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    z-index: 100;
+    font-size: 14px;
+  }
+  #sidebar-header {
+    padding: 24px 20px 16px;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+  }
+  #sidebar-header .book-title {
+    font-family: 'Lora', serif;
+    font-size: 15px;
+    font-weight: 700;
+    color: #fff;
+    line-height: 1.3;
+    margin-bottom: 4px;
+  }
+  #sidebar-header .book-sub {
+    font-size: 12px;
+    color: rgba(200,212,224,0.55);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+  #sidebar nav { padding: 12px 0; }
+  .nav-section-label {
+    padding: 12px 20px 4px;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: rgba(200,212,224,0.4);
+    font-weight: 600;
+  }
+  .nav-chapter {
+    display: block;
+    padding: 7px 20px;
+    color: #c8d4e0;
+    text-decoration: none;
+    transition: background 0.15s, color 0.15s;
+    line-height: 1.4;
+  }
+  .nav-chapter:hover { background: var(--sidebar-hover); color: #fff; }
+  .nav-chapter.active {
+    background: rgba(59,142,165,0.25);
+    color: var(--sidebar-active);
+    border-left: 3px solid var(--sidebar-active);
+    padding-left: 17px;
+    font-weight: 600;
+  }
+  .nav-sub {
+    display: block;
+    padding: 5px 20px 5px 36px;
+    color: rgba(200,212,224,0.65);
+    text-decoration: none;
+    font-size: 13px;
+    transition: color 0.15s;
+  }
+  .nav-sub:hover { color: #fff; }
+  .nav-sub.active { color: var(--sidebar-active); }
+
+  /* ── MAIN ── */
+  #main { flex: 1; min-width: 0; }
+  #content { max-width: 860px; margin: 0 auto; padding: 56px 48px 80px; }
+
+  /* ── HEADER ── */
+  .chapter-eyebrow {
+    font-size: 12px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent);
+    font-weight: 600;
+    margin-bottom: 10px;
+  }
+  h1.chapter-title {
+    font-family: 'Lora', serif;
+    font-size: 2.4rem;
+    font-weight: 700;
+    line-height: 1.15;
+    color: var(--ink);
+    margin-bottom: 10px;
+  }
+  h1.chapter-title em { font-style: italic; color: var(--accent2); }
+  .chapter-subtitle {
+    font-family: 'Lora', serif;
+    font-size: 1rem;
+    font-style: italic;
+    color: var(--muted);
+    margin-bottom: 12px;
+  }
+  .page-links {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 32px;
+    flex-wrap: wrap;
+  }
+  .page-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 14px;
+    border-radius: 5px;
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.15s;
+  }
+  .page-link-concept {
+    background: var(--highlight);
+    color: var(--accent);
+    border: 1.5px solid var(--accent);
+  }
+  .page-link-concept:hover { background: var(--accent); color: #fff; }
+  .page-link-jasp {
+    background: var(--accent);
+    color: #fff;
+    border: 1.5px solid var(--accent);
+    cursor: default;
+    opacity: 0.85;
+  }
+  hr.divider { border: none; border-top: 2px solid var(--border); margin-bottom: 40px; }
+
+  /* ── HEADINGS ── */
+  h2 {
+    font-family: 'Lora', serif;
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: var(--ink);
+    margin: 56px 0 16px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid var(--border);
+    scroll-margin-top: 24px;
+  }
+  h2 .sec-num { color: var(--accent); margin-right: 8px; font-weight: 400; font-size: 1.1rem; }
+  h3 {
+    font-family: 'Lora', serif;
+    font-size: 1.15rem;
+    font-weight: 600;
+    color: var(--ink);
+    margin: 36px 0 12px;
+    scroll-margin-top: 24px;
+  }
+  h3 .sec-num { color: var(--accent2); margin-right: 6px; font-weight: 400; }
+  p { margin-bottom: 16px; }
+  strong { font-weight: 600; }
+  em { font-style: italic; }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  /* ── NUMBERED STEP LIST ── */
+  .step-list { list-style: none; padding: 0; margin: 24px 0; }
+  .step-list > li {
+    display: flex;
+    gap: 18px;
+    align-items: flex-start;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .step-list > li:last-child { border-bottom: none; }
+  .step-num {
+    flex-shrink: 0;
+    width: 32px;
+    height: 32px;
+    background: var(--accent);
+    color: #fff;
+    border-radius: 50%;
+    font-size: 14px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 2px;
+    font-family: 'Source Sans 3', sans-serif;
+  }
+  .step-body { flex: 1; min-width: 0; }
+  .step-body p { margin: 0; }
+  kbd {
+    background: #f0ede8;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    padding: 1px 7px;
+    font-family: 'Source Code Pro', monospace;
+    font-size: 13px;
+    color: #333;
+    white-space: nowrap;
+  }
+
+  /* ── SCREENSHOT BLOCK ── */
+  /* Each screenshot block = step label + image slot + callout */
+  .screenshot-block {
+    margin: 28px 0 36px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    background: var(--surface);
+  }
+  .screenshot-label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 18px;
+    background: #f4f2ee;
+    border-bottom: 1px solid var(--border);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--muted);
+    letter-spacing: 0.04em;
+  }
+  .screenshot-label .fig-badge {
+    background: var(--ink);
+    color: #fff;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    padding: 2px 8px;
+    border-radius: 3px;
+    text-transform: uppercase;
+  }
+
+  /* The image area — placeholder or real image */
+  .screenshot-img-wrap {
+    position: relative;
+    background: #f9f8f6;
+    min-height: 160px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+  }
+  .screenshot-img-wrap img {
+    display: block;
+    width: 100%;
+    height: auto;
+    cursor: zoom-in;
+  }
+
+  /* Placeholder shown when no image is loaded */
+  .screenshot-placeholder {
+    width: 100%;
+    padding: 40px 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    color: #aaa;
+    border: 2px dashed #d5cfc6;
+    background: #faf9f7;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+    min-height: 160px;
+    position: relative;
+  }
+  .screenshot-placeholder:hover {
+    border-color: var(--accent);
+    background: var(--highlight);
+    color: var(--accent);
+  }
+  .screenshot-placeholder input[type="file"] {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    cursor: pointer;
+    width: 100%;
+    height: 100%;
+  }
+  .placeholder-icon { line-height:1; display:flex; align-items:center; justify-content:center; }
+  .placeholder-text { font-size: 14px; font-weight: 600; text-align: center; line-height: 1.4; }
+  .placeholder-hint { font-size: 12px; opacity: 0.7; text-align: center; }
+
+  /* Callout box inside screenshot block */
+  .callout {
+    border-top: 1px solid var(--border);
+    padding: 14px 20px;
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+    background: #fff;
+  }
+  .callout-marker {
+    flex-shrink: 0;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    font-size: 12px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 3px;
+  }
+  .callout-red   { background: #fecaca; color: var(--red); border: 2px solid var(--red); }
+  .callout-blue  { background: #dbeafe; color: #1d4ed8; border: 2px solid #3b82f6; }
+  .callout-green { background: #dcfce7; color: #15803d; border: 2px solid #22c55e; }
+  .callout-body  { font-size: 15px; line-height: 1.6; flex: 1; }
+  .callout-body p { margin: 0 0 6px; }
+  .callout-body p:last-child { margin: 0; }
+  .callout-body strong { color: var(--ink); }
+
+  /* ── BOXES ── */
+  .box {
+    border-radius: 6px;
+    padding: 18px 24px;
+    margin: 24px 0;
+  }
+  .box p:last-child { margin: 0; }
+  .box-tip   { background: var(--tip-bg); border-left: 4px solid var(--tip-border); }
+  .box-warn  { background: #fdf6ec; border-left: 4px solid #d97c2a; }
+  .box-info  { background: var(--highlight); border-left: 4px solid var(--accent); }
+  .box-label {
+    font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase;
+    font-weight: 700; margin-bottom: 8px; display: block;
+  }
+  .box-tip  .box-label { color: #5a9e4a; }
+  .box-warn .box-label { color: #d97c2a; }
+  .box-info .box-label { color: var(--accent); }
+
+  /* ── OUTPUT TABLE ── */
+  .output-section {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    margin: 28px 0;
+  }
+  .output-section-header {
+    padding: 12px 20px;
+    background: #f4f2ee;
+    border-bottom: 1px solid var(--border);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--muted);
+    letter-spacing: 0.04em;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .output-section-header .fig-badge {
+    background: var(--ink);
+    color: #fff;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    padding: 2px 8px;
+    border-radius: 3px;
+    text-transform: uppercase;
+  }
+
+  /* ── REPORT TEMPLATE ── */
+  .report-template {
+    background: #fffbf5;
+    border: 1px solid #e8d5b7;
+    border-radius: 6px;
+    padding: 24px 28px 20px;
+    margin: 24px 0;
+    font-family: 'Lora', serif;
+    font-size: 0.95rem;
+    line-height: 1.85;
+    color: #2a2a2a;
+    position: relative;
+  }
+  .report-template::before {
+    content: '"';
+    position: absolute;
+    top: -6px; left: 18px;
+    font-size: 4rem;
+    color: #e8d5b7;
+    font-family: 'Lora', serif;
+    line-height: 1;
+  }
+  .report-label {
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: 11px; letter-spacing: 0.12em;
+    text-transform: uppercase; color: var(--accent2);
+    font-weight: 700; margin-bottom: 14px;
+    display: block; font-style: normal;
+  }
+  .report-template p { margin-bottom: 10px; }
+  .report-template p:last-child { margin: 0; }
+
+  /* ── CHAPTER NAV ── */
+  .chapter-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 64px;
+    padding-top: 24px;
+    border-top: 2px solid var(--border);
+    gap: 16px;
+  }
+  .chapter-nav a {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 20px;
+    border: 1.5px solid var(--border);
+    border-radius: 6px;
+    color: var(--ink);
+    font-weight: 500;
+    font-size: 15px;
+    text-decoration: none;
+    transition: border-color 0.2s, background 0.2s;
+  }
+  .chapter-nav a:hover { border-color: var(--accent); background: var(--highlight); text-decoration: none; }
+  .chapter-nav .nav-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); display: block; }
+  .chapter-nav .arrow { color: var(--accent); font-size: 1.2rem; }
+
+  /* ── LIGHTBOX ── */
+  #lightbox {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.82);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    cursor: zoom-out;
+  }
+  #lightbox.open { display: flex; }
+  #lightbox img {
+    max-width: 100%;
+    max-height: 90vh;
+    border-radius: 6px;
+    box-shadow: 0 24px 60px rgba(0,0,0,0.5);
+    object-fit: contain;
+  }
+  #lightbox-close {
+    position: absolute;
+    top: 16px; right: 20px;
+    color: #fff;
+    font-size: 2rem;
+    cursor: pointer;
+    line-height: 1;
+    background: none;
+    border: none;
+    opacity: 0.8;
+    transition: opacity 0.15s;
+  }
+  #lightbox-close:hover { opacity: 1; }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 900px) {
+    #sidebar { transform: translateX(-100%); }
+    #main { margin-left: 0; }
+    #content { padding: 32px 20px 60px; }
+  }
+
+  /* ── Image slots ─────────────────────────────── */
+  .iw img, .screenshot-img-wrap img {
+    display:block; width:100%; height:auto; cursor:zoom-in;
+  }
+  .img-missing {
+    display:none; flex-direction:column; align-items:center;
+    justify-content:center; gap:12px; padding:36px 24px;
+    min-height:160px; width:100%;
+    background:#faf9f7; border:2px dashed #d5cfc6; color:#aaa;
+  }
+  .img-missing .im-path {
+    font-family:'Source Code Pro', monospace;
+    font-size:13px; font-weight:600;
+    color:#5a9e4a; background:#f0f9eb;
+    border:1px solid #c3e6b3; border-radius:4px;
+    padding:4px 12px;
+  }
+  .img-missing .im-hint {
+    font-size:12px; color:#9ca3af; text-align:center;
+    max-width:340px; line-height:1.5;
+  }
+
+
+  /* ── Screenshot image slots ─────────────────── */
+  .iw img, .img-wrap img, .screenshot-img-wrap img {
+    display:block; width:100%; height:auto; cursor:zoom-in;
+  }
+  .img-missing {
+    display:none; flex-direction:column; align-items:center;
+    justify-content:center; gap:12px; padding:40px 24px;
+    min-height:170px; width:100%;
+    background:#faf9f7; border:2px dashed #d5cfc6; color:#aaa;
+    box-sizing:border-box;
+  }
+  .img-missing .im-path {
+    font-family:'Source Code Pro', monospace;
+    font-size:13px; font-weight:600; color:#5a9e4a;
+    background:#f0f9eb; border:1px solid #c3e6b3;
+    border-radius:4px; padding:4px 12px;
+  }
+  .img-missing .im-hint {
+    font-size:12px; color:#9ca3af; text-align:center;
+    max-width:380px; line-height:1.5;
+  }
+
+</style>
+</head>
+<body>
+
+<!-- ════════════════ MAIN -->
+<main id="main">
+<div id="content">
+
+  <div class="chapter-eyebrow">Chapter 9 · JASP Walkthrough</div>
+  <h1 class="chapter-title">Running <em>T</em>-Tests in JASP</h1>
+  <p class="chapter-subtitle">Step-by-step instructions with annotated screenshots</p>
+
+  <div class="page-links">
+    <a class="page-link page-link-concept" href="09_t-tests.html">← Concept &amp; Theory</a>
+    <a class="page-link page-link-jasp"    href="#">JASP Walkthrough (this page)</a>
+  </div>
+
+  <hr class="divider">
+
+  <p>This page walks you through running both types of <em>t</em>-tests in JASP, step by step. Each numbered instruction is paired with an annotated screenshot showing exactly what to click. <strong>Red boxes</strong> in the screenshots highlight the key settings or output values to pay attention to.</p>
+
+  <div class="box box-info">
+    <span class="box-label">📂 Sample Data</span>
+    <p><strong>Independent samples:</strong> Use the Leow &amp; Morgan-Short (2004) dataset (<kbd>LeowMorganShort.csv</kbd>).
+    <br><strong>Paired samples:</strong> Use the Kim (2013) dataset (<kbd>Kim2013.csv</kbd>).
+    <br>Make sure variable types are set correctly before beginning — Scale for continuous variables, Nominal for group labels.</p>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════
+       PART A: INDEPENDENT SAMPLES T-TEST
+  ════════════════════════════════════════════════ -->
+  <h2>Part A · Independent Samples <em>t</em>-Test</h2>
+  <p>Use this test when comparing two <strong>separate groups</strong> of different participants on the same measure. In this example: think-aloud vs. non-think-aloud groups on a receptive posttest.</p>
+
+  <!-- 9A.1 Setting Up -->
+  <h3 id="ind-setup"><span class="sec-num">9A.1</span>Setting Up the Analysis</h3>
+
+  <ol class="step-list">
+    <li>
+      <div class="step-num">1</div>
+      <div class="step-body"><p>In the top menu bar, click <kbd>T-Tests</kbd>.</p></div>
+    </li>
+    <li>
+      <div class="step-num">2</div>
+      <div class="step-body"><p>From the dropdown, select <kbd>Independent Samples T-Test</kbd>.</p></div>
+    </li>
+  </ol>
+
+  <div class="screenshot-block">
+    <div class="screenshot-label">
+      <span class="fig-badge">Fig 9A–1</span>
+      Selecting the Independent Samples T-Test from the T-Tests menu
+    </div>
+    <div class="screenshot-img-wrap" id="wrap-9a1">
+      <img src="screenshots/fig9a-1.png" alt="Fig 9A–1"
+         onclick="openLB(this.src)"
+         onerror="handleImgError(this)">
+      <div class="img-missing">
+        <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:block;opacity:.35;"><rect x="4" y="13" width="40" height="30" rx="4" stroke="currentColor" stroke-width="2.5" fill="none"/><circle cx="15" cy="23" r="4" stroke="currentColor" stroke-width="2" fill="none"/><polyline points="4,36 15,25 23,32 31,22 44,36" stroke="currentColor" stroke-width="2.2" fill="none" stroke-linejoin="round" stroke-linecap="round"/><line x1="24" y1="8" x2="24" y2="1" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/><polyline points="19,6 24,1 29,6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+        <div class="im-path">screenshots/fig9a-1.png</div>
+        <div class="im-hint">T-Tests menu → Independent Samples T-Test</div>
+      </div>
+    </div>
+    <div class="callout">
+      <div class="callout-marker callout-red">→</div>
+      <div class="callout-body"><p>Click <strong>T-Tests</strong> in the top ribbon, then choose <strong>Independent Samples T-Test</strong> from the dropdown. This opens the analysis dialog on the right side of the screen.</p></div>
+    </div>
+  </div>
+
+  <ol class="step-list" start="3">
+    <li>
+      <div class="step-num">3</div>
+      <div class="step-body"><p>Move your <strong>dependent variable</strong> (the continuous outcome — here, <kbd>RecPostScore</kbd>) into the <strong>Dependent Variables</strong> box by clicking the arrow button.</p></div>
+    </li>
+    <li>
+      <div class="step-num">4</div>
+      <div class="step-body"><p>Move your <strong>grouping variable</strong> (the categorical group label — here, <kbd>Group</kbd>) into the <strong>Grouping Variable</strong> box.</p></div>
+    </li>
+    <li>
+      <div class="step-num">5</div>
+      <div class="step-body"><p>Under <strong>Tests</strong>, check ☑ <kbd>Welch</kbd>. This is recommended over Student's <em>t</em>-test because it does not assume equal variances between groups.</p></div>
+    </li>
+    <li>
+      <div class="step-num">6</div>
+      <div class="step-body"><p>Under <strong>Additional Statistics</strong>, check ☑ <kbd>Effect size</kbd>. Select <kbd>Glass' delta</kbd> if your group variances are unequal (check the output later), or <kbd>Cohen's d</kbd> if they are equal. Also check ☑ <kbd>Confidence interval</kbd> for the effect size.</p></div>
+    </li>
+    <li>
+      <div class="step-num">7</div>
+      <div class="step-body"><p>Under <strong>Additional Statistics</strong>, check ☑ <kbd>Descriptives</kbd> to include means and SDs in the output.</p></div>
+    </li>
+    <li>
+      <div class="step-num">8</div>
+      <div class="step-body"><p>Under <strong>Assumption Checks</strong>, check ☑ <kbd>Normality</kbd>, ☑ <kbd>Equality of variances</kbd>, and ☑ <kbd>Q-Q plot residuals</kbd>.</p></div>
+    </li>
+    <li>
+      <div class="step-num">9</div>
+      <div class="step-body"><p>Under <strong>Plots</strong>, check ☑ <kbd>Raincloud plots</kbd> to visualize how scores are distributed in each group.</p></div>
+    </li>
+  </ol>
+
+  <div class="screenshot-block">
+    <div class="screenshot-label">
+      <span class="fig-badge">Fig 9A–2</span>
+      JASP dialog with all recommended settings selected
+    </div>
+    <div class="screenshot-img-wrap" id="wrap-9a2">
+      <img src="screenshots/fig9a-2.png" alt="Fig 9A–2"
+         onclick="openLB(this.src)"
+         onerror="handleImgError(this)">
+      <div class="img-missing">
+        <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:block;opacity:.35;"><rect x="4" y="13" width="40" height="30" rx="4" stroke="currentColor" stroke-width="2.5" fill="none"/><circle cx="15" cy="23" r="4" stroke="currentColor" stroke-width="2" fill="none"/><polyline points="4,36 15,25 23,32 31,22 44,36" stroke="currentColor" stroke-width="2.2" fill="none" stroke-linejoin="round" stroke-linecap="round"/><line x1="24" y1="8" x2="24" y2="1" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/><polyline points="19,6 24,1 29,6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+        <div class="im-path">screenshots/fig9a-2.png</div>
+        <div class="im-hint">Dialog: variables moved, Welch checked, Effect size, Assumption Checks</div>
+      </div>
+    </div>
+    <div class="callout">
+      <div class="callout-marker callout-red">①</div>
+      <div class="callout-body">
+        <p><strong>Top box (Dependent Variables):</strong> <kbd>RecPostScore</kbd> should appear here.</p>
+        <p><strong>Lower box (Grouping Variable):</strong> <kbd>Group</kbd> should appear here.</p>
+        <p><strong>Tests:</strong> <kbd>Welch</kbd> is checked. <kbd>Student</kbd> may remain checked — that is fine, both rows will appear in the output; read the <strong>Welch row</strong>.</p>
+        <p><strong>Additional Statistics:</strong> <kbd>Effect size</kbd>, <kbd>Glass' delta</kbd>, and <kbd>Descriptives</kbd> are all checked.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 9A.2 Output: Descriptives -->
+  <h3 id="ind-output1"><span class="sec-num">9A.2</span>Output: Descriptive Statistics &amp; Plots</h3>
+
+  <p>The first section of the output shows summary statistics for each group and a raincloud plot visualizing the full distribution. Always examine these before interpreting the test result.</p>
+
+  <div class="screenshot-block">
+    <div class="screenshot-label">
+      <span class="fig-badge">Fig 9A–3</span>
+      Group Descriptives table
+    </div>
+    <div class="screenshot-img-wrap" id="wrap-9a3">
+      <img src="screenshots/fig9a-3.png" alt="Fig 9A–3"
+         onclick="openLB(this.src)"
+         onerror="handleImgError(this)">
+      <div class="img-missing">
+        <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:block;opacity:.35;"><rect x="4" y="13" width="40" height="30" rx="4" stroke="currentColor" stroke-width="2.5" fill="none"/><circle cx="15" cy="23" r="4" stroke="currentColor" stroke-width="2" fill="none"/><polyline points="4,36 15,25 23,32 31,22 44,36" stroke="currentColor" stroke-width="2.2" fill="none" stroke-linejoin="round" stroke-linecap="round"/><line x1="24" y1="8" x2="24" y2="1" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/><polyline points="19,6 24,1 29,6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+        <div class="im-path">screenshots/fig9a-3.png</div>
+        <div class="im-hint">Group Descriptives table — N, Mean, SD for each group</div>
+      </div>
+    </div>
+    <div class="callout">
+      <div class="callout-marker callout-red">①</div>
+      <div class="callout-body">
+        <p>Record the <strong>Mean</strong> and <strong>SD</strong> for each group — you will need these for your write-up. Here: Think-Aloud (<em>M</em> = 5.89, <em>SD</em> = 6.04, <em>n</em> = 38) vs. Non-Think-Aloud (<em>M</em> = 3.92, <em>SD</em> = 4.31, <em>n</em> = 39).</p>
+        <p>Notice the large difference in SDs (6.04 vs. 4.31). The variances (SD²) are roughly 36 vs. 18 — this signals <strong>heterogeneous variances</strong>, and confirms we should use Welch's test.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="screenshot-block">
+    <div class="screenshot-label">
+      <span class="fig-badge">Fig 9A–4</span>
+      Raincloud plot
+    </div>
+    <div class="screenshot-img-wrap" id="wrap-9a4">
+      <img src="screenshots/fig9a-4.png" alt="Fig 9A–4"
+         onclick="openLB(this.src)"
+         onerror="handleImgError(this)">
+      <div class="img-missing">
+        <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:block;opacity:.35;"><rect x="4" y="13" width="40" height="30" rx="4" stroke="currentColor" stroke-width="2.5" fill="none"/><circle cx="15" cy="23" r="4" stroke="currentColor" stroke-width="2" fill="none"/><polyline points="4,36 15,25 23,32 31,22 44,36" stroke="currentColor" stroke-width="2.2" fill="none" stroke-linejoin="round" stroke-linecap="round"/><line x1="24" y1="8" x2="24" y2="1" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/><polyline points="19,6 24,1 29,6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+        <div class="im-path">screenshots/fig9a-4.png</div>
+        <div class="im-hint">Raincloud plot — distribution of scores for each group</div>
+      </div>
+    </div>
+    <div class="callout">
+      <div class="callout-marker callout-blue">→</div>
+      <div class="callout-body">
+        <p>The raincloud plot shows the <strong>raw data points</strong> (dots), a <strong>boxplot</strong>, and a <strong>density curve</strong> side by side. Check: Are the distributions roughly symmetric? Are there outliers? Is the spread similar between groups? These are visual checks on the normality and equal-variance assumptions.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 9A.3 Output: Test Results -->
+  <h3 id="ind-output2"><span class="sec-num">9A.3</span>Output: Assumption Checks &amp; Test Results</h3>
+
+  <div class="screenshot-block">
+    <div class="screenshot-label">
+      <span class="fig-badge">Fig 9A–5</span>
+      Assumption Checks — Normality (Shapiro-Wilk) and Equality of Variances
+    </div>
+    <div class="screenshot-img-wrap" id="wrap-9a5">
+      <img src="screenshots/fig9a-5.png" alt="Fig 9A–5"
+         onclick="openLB(this.src)"
+         onerror="handleImgError(this)">
+      <div class="img-missing">
+        <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:block;opacity:.35;"><rect x="4" y="13" width="40" height="30" rx="4" stroke="currentColor" stroke-width="2.5" fill="none"/><circle cx="15" cy="23" r="4" stroke="currentColor" stroke-width="2" fill="none"/><polyline points="4,36 15,25 23,32 31,22 44,36" stroke="currentColor" stroke-width="2.2" fill="none" stroke-linejoin="round" stroke-linecap="round"/><line x1="24" y1="8" x2="24" y2="1" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/><polyline points="19,6 24,1 29,6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+        <div class="im-path">screenshots/fig9a-5.png</div>
+        <div class="im-hint">Assumption Checks: Shapiro-Wilk table + Brown-Forsythe table</div>
+      </div>
+    </div>
+    <div class="callout">
+      <div class="callout-marker callout-red">①</div>
+      <div class="callout-body">
+        <p><strong>Shapiro-Wilk normality test:</strong> If <em>p</em> &lt; .05 for either group, the data depart from normality. Here both groups are significant (<em>p</em> &lt; .001), so normality is violated. Consider bootstrapping.</p>
+        <p><strong>Brown-Forsythe equality of variances:</strong> <em>p</em> = .005, meaning variances are <em>not</em> equal. This confirms we must use the <strong>Welch row</strong> in the main output — not the Student row.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="screenshot-block">
+    <div class="screenshot-label">
+      <span class="fig-badge">Fig 9A–6</span>
+      Independent Samples T-Test results table
+    </div>
+    <div class="screenshot-img-wrap" id="wrap-9a6">
+      <img src="screenshots/fig9a-6.png" alt="Fig 9A–6"
+         onclick="openLB(this.src)"
+         onerror="handleImgError(this)">
+      <div class="img-missing">
+        <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:block;opacity:.35;"><rect x="4" y="13" width="40" height="30" rx="4" stroke="currentColor" stroke-width="2.5" fill="none"/><circle cx="15" cy="23" r="4" stroke="currentColor" stroke-width="2" fill="none"/><polyline points="4,36 15,25 23,32 31,22 44,36" stroke="currentColor" stroke-width="2.2" fill="none" stroke-linejoin="round" stroke-linecap="round"/><line x1="24" y1="8" x2="24" y2="1" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/><polyline points="19,6 24,1 29,6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+        <div class="im-path">screenshots/fig9a-6.png</div>
+        <div class="im-hint">T-test results: t, df, p, Mean Difference, 95% CI, Glass' delta</div>
+      </div>
+    </div>
+    <div class="callout">
+      <div class="callout-marker callout-red">①</div>
+      <div class="callout-body">
+        <p><strong>Read the Welch row</strong> (not Student). Key values to extract:</p>
+        <p>• <em>t</em> = −1.644 · <em>df</em> = 66.81 · <em>p</em> = .105</p>
+        <p>• <strong>95% CI for the mean difference: [−4.37, 0.42]</strong> — this CI contains zero, so the result is <em>not</em> statistically significant.</p>
+        <p>• Glass' Δ = −0.33, 95% CI [−0.78, 0.13] — a small effect; CI also contains zero.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="box box-tip">
+    <span class="box-label">💡 How to read the 95% CI</span>
+    <p>If the confidence interval for the mean difference <strong>contains zero</strong>, the result is not statistically significant — zero is a plausible value for the true difference. If the interval is entirely positive or entirely negative, the result is significant. Always report the CI alongside (or instead of) the <em>p</em>-value.</p>
+  </div>
+
+  <!-- 9A.4 Write-Up -->
+  <h3 id="ind-report"><span class="sec-num">9A.4</span>Model Write-Up</h3>
+
+  <div class="report-template">
+    <span class="report-label">Model Reporting Paragraph — Independent Samples t-Test</span>
+    <p>Data from Leow and Morgan-Short (2004) showed departures from normality and unequal variances between groups. An independent samples Welch's <em>t</em>-test found no evidence of a significant difference in receptive posttest scores between the think-aloud group (<em>M</em> = 5.89, <em>SD</em> = 6.04, <em>n</em> = 38) and the non-think-aloud group (<em>M</em> = 3.92, <em>SD</em> = 4.31, <em>n</em> = 39), <em>t</em>(66.81) = −1.64, <em>p</em> = .105, 95% CI [−4.37, 0.42]. Because the confidence interval contains zero, we cannot conclude that there is a real difference between groups. The effect size was Glass' Δ = −0.33 [−0.78, 0.13], which is considered small by Plonsky and Oswald's (2014) guidelines for SLA research.</p>
+  </div>
+
+
+  <!-- ═══════════════════════════════════════════════
+       PART B: PAIRED SAMPLES T-TEST
+  ════════════════════════════════════════════════ -->
+  <h2>Part B · Paired Samples <em>t</em>-Test</h2>
+  <p>Use this test when the <strong>same participants</strong> are measured at two time points or on two related measures. In this example: the same learners are compared on a sarcasm comprehension pretest vs. posttest.</p>
+
+  <!-- 9B.1 Setting Up -->
+  <h3 id="paired-setup"><span class="sec-num">9B.1</span>Setting Up the Analysis</h3>
+
+  <ol class="step-list">
+    <li>
+      <div class="step-num">1</div>
+      <div class="step-body"><p>In the top menu bar, click <kbd>T-Tests</kbd>.</p></div>
+    </li>
+    <li>
+      <div class="step-num">2</div>
+      <div class="step-body"><p>From the dropdown, select <kbd>Paired Samples T-Test</kbd>.</p></div>
+    </li>
+    <li>
+      <div class="step-num">3</div>
+      <div class="step-body"><p>Click <kbd>Pretest</kbd> in the variable list, then click <kbd>Posttest</kbd>. Both will move together into the right panel as <strong>Pair 1</strong>. Repeat with <kbd>Posttest</kbd> and <kbd>DelayedPost</kbd> to create <strong>Pair 2</strong>.</p></div>
+    </li>
+    <li>
+      <div class="step-num">4</div>
+      <div class="step-body"><p>Under <strong>Tests</strong>, keep ☑ <kbd>Student</kbd> checked (the standard parametric paired test).</p></div>
+    </li>
+    <li>
+      <div class="step-num">5</div>
+      <div class="step-body"><p>Under <strong>Additional Statistics</strong>, check ☑ <kbd>Effect size</kbd> and select <kbd>Cohen's dᵣₘ</kbd> — this is recommended for repeated-measures designs. Also check ☑ <kbd>Confidence interval</kbd>.</p></div>
+    </li>
+    <li>
+      <div class="step-num">6</div>
+      <div class="step-body"><p>Under <strong>Assumption Checks</strong>, check ☑ <kbd>Normality</kbd> (this tests the <em>difference scores</em>, not the raw scores).</p></div>
+    </li>
+    <li>
+      <div class="step-num">7</div>
+      <div class="step-body"><p>Under <strong>Plots</strong>, check ☑ <kbd>Raincloud plots</kbd>.</p></div>
+    </li>
+  </ol>
+
+  <div class="screenshot-block">
+    <div class="screenshot-label">
+      <span class="fig-badge">Fig 9B–1</span>
+      Paired Samples T-Test dialog with all settings selected
+    </div>
+    <div class="screenshot-img-wrap" id="wrap-9b1">
+      <img src="screenshots/fig9b-1.png" alt="Fig 9B–1"
+         onclick="openLB(this.src)"
+         onerror="handleImgError(this)">
+      <div class="img-missing">
+        <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:block;opacity:.35;"><rect x="4" y="13" width="40" height="30" rx="4" stroke="currentColor" stroke-width="2.5" fill="none"/><circle cx="15" cy="23" r="4" stroke="currentColor" stroke-width="2" fill="none"/><polyline points="4,36 15,25 23,32 31,22 44,36" stroke="currentColor" stroke-width="2.2" fill="none" stroke-linejoin="round" stroke-linecap="round"/><line x1="24" y1="8" x2="24" y2="1" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/><polyline points="19,6 24,1 29,6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+        <div class="im-path">screenshots/fig9b-1.png</div>
+        <div class="im-hint">Dialog: variable pairs, Cohen's dᵣₘ, Normality, Raincloud</div>
+      </div>
+    </div>
+    <div class="callout">
+      <div class="callout-marker callout-red">①</div>
+      <div class="callout-body">
+        <p><strong>Pairs panel:</strong> Pair 1 shows <kbd>Pretest</kbd> ↔ <kbd>Posttest</kbd>, Pair 2 shows <kbd>Posttest</kbd> ↔ <kbd>DelayedPost</kbd>.</p>
+        <p><strong>Effect size:</strong> <kbd>Cohen's dᵣₘ</kbd> is selected. This form of <em>d</em> is preferred for repeated-measures designs because it does not overestimate effects.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 9B.2 Output: Correlations -->
+  <h3 id="paired-output1"><span class="sec-num">9B.2</span>Output: Paired Samples Correlations</h3>
+
+  <p>Before the main test result, JASP reports the correlation between each pair of scores. Because the same participants contribute scores at both times, we expect a positive correlation — the paired <em>t</em>-test relies on this.</p>
+
+  <div class="screenshot-block">
+    <div class="screenshot-label">
+      <span class="fig-badge">Fig 9B–2</span>
+      Paired Samples Correlations table
+    </div>
+    <div class="screenshot-img-wrap" id="wrap-9b2">
+      <img src="screenshots/fig9b-2.png" alt="Fig 9B–2"
+         onclick="openLB(this.src)"
+         onerror="handleImgError(this)">
+      <div class="img-missing">
+        <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:block;opacity:.35;"><rect x="4" y="13" width="40" height="30" rx="4" stroke="currentColor" stroke-width="2.5" fill="none"/><circle cx="15" cy="23" r="4" stroke="currentColor" stroke-width="2" fill="none"/><polyline points="4,36 15,25 23,32 31,22 44,36" stroke="currentColor" stroke-width="2.2" fill="none" stroke-linejoin="round" stroke-linecap="round"/><line x1="24" y1="8" x2="24" y2="1" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/><polyline points="19,6 24,1 29,6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+        <div class="im-path">screenshots/fig9b-2.png</div>
+        <div class="im-hint">Paired Samples Correlations: r and p for each pair</div>
+      </div>
+    </div>
+    <div class="callout">
+      <div class="callout-marker callout-blue">→</div>
+      <div class="callout-body">
+        <p>Check that there is a correlation between the two variables. If <em>r</em> is near zero or negative (and not statistically significant), it may indicate that pairing is not useful. Here: Pair 1 <em>r</em> = −.34 (<em>p</em> = .371) — not significant, but the <em>n</em> is only 9, so low power is expected.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 9B.3 Output: Test Results -->
+  <h3 id="paired-output2"><span class="sec-num">9B.3</span>Output: Test Results &amp; Effect Sizes</h3>
+
+  <div class="screenshot-block">
+    <div class="screenshot-label">
+      <span class="fig-badge">Fig 9B–3</span>
+      Paired Samples T-Test results table
+    </div>
+    <div class="screenshot-img-wrap" id="wrap-9b3">
+      <img src="screenshots/fig9b-3.png" alt="Fig 9B–3"
+         onclick="openLB(this.src)"
+         onerror="handleImgError(this)">
+      <div class="img-missing">
+        <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:block;opacity:.35;"><rect x="4" y="13" width="40" height="30" rx="4" stroke="currentColor" stroke-width="2.5" fill="none"/><circle cx="15" cy="23" r="4" stroke="currentColor" stroke-width="2" fill="none"/><polyline points="4,36 15,25 23,32 31,22 44,36" stroke="currentColor" stroke-width="2.2" fill="none" stroke-linejoin="round" stroke-linecap="round"/><line x1="24" y1="8" x2="24" y2="1" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/><polyline points="19,6 24,1 29,6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+        <div class="im-path">screenshots/fig9b-3.png</div>
+        <div class="im-hint">Paired Samples Test: Mean Diff, SD Diff, t, df, p, 95% CI</div>
+      </div>
+    </div>
+    <div class="callout">
+      <div class="callout-marker callout-red">①</div>
+      <div class="callout-body">
+        <p>Key values for Pair 1 (Pretest – Posttest):</p>
+        <p>• Mean Difference = −9.11 · <em>t</em>(8) = −3.99 · <em>p</em> = .004</p>
+        <p>• <strong>95% CI: [−14.37, −3.85]</strong> — the interval is entirely negative (does not cross zero), so the improvement from pretest to posttest is <em>statistically significant</em>.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="screenshot-block">
+    <div class="screenshot-label">
+      <span class="fig-badge">Fig 9B–4</span>
+      Paired Samples Effect Sizes table
+    </div>
+    <div class="screenshot-img-wrap" id="wrap-9b4">
+      <img src="screenshots/fig9b-4.png" alt="Fig 9B–4"
+         onclick="openLB(this.src)"
+         onerror="handleImgError(this)">
+      <div class="img-missing">
+        <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:block;opacity:.35;"><rect x="4" y="13" width="40" height="30" rx="4" stroke="currentColor" stroke-width="2.5" fill="none"/><circle cx="15" cy="23" r="4" stroke="currentColor" stroke-width="2" fill="none"/><polyline points="4,36 15,25 23,32 31,22 44,36" stroke="currentColor" stroke-width="2.2" fill="none" stroke-linejoin="round" stroke-linecap="round"/><line x1="24" y1="8" x2="24" y2="1" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/><polyline points="19,6 24,1 29,6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+        <div class="im-path">screenshots/fig9b-4.png</div>
+        <div class="im-hint">Effect Sizes table: Cohen's dᵣₘ point estimate and 95% CI</div>
+      </div>
+    </div>
+    <div class="callout">
+      <div class="callout-marker callout-red">①</div>
+      <div class="callout-body">
+        <p>For Pair 1: <strong>Cohen's d<sub>rm</sub> = 2.18, 95% CI [0.21, 4.14]</strong>. The pretest-to-posttest improvement was more than twice the SD of the difference scores — a very large effect. However, the wide CI (0.21 to 4.14) reflects the small sample of only 9 participants.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="screenshot-block">
+    <div class="screenshot-label">
+      <span class="fig-badge">Fig 9B–5</span>
+      Raincloud plot — score distributions across time points
+    </div>
+    <div class="screenshot-img-wrap" id="wrap-9b5">
+      <img src="screenshots/fig9b-5.png" alt="Fig 9B–5"
+         onclick="openLB(this.src)"
+         onerror="handleImgError(this)">
+      <div class="img-missing">
+        <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:block;opacity:.35;"><rect x="4" y="13" width="40" height="30" rx="4" stroke="currentColor" stroke-width="2.5" fill="none"/><circle cx="15" cy="23" r="4" stroke="currentColor" stroke-width="2" fill="none"/><polyline points="4,36 15,25 23,32 31,22 44,36" stroke="currentColor" stroke-width="2.2" fill="none" stroke-linejoin="round" stroke-linecap="round"/><line x1="24" y1="8" x2="24" y2="1" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/><polyline points="19,6 24,1 29,6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+        <div class="im-path">screenshots/fig9b-5.png</div>
+        <div class="im-hint">Raincloud plot: Pretest, Posttest, Delayed Posttest distributions</div>
+      </div>
+    </div>
+    <div class="callout">
+      <div class="callout-marker callout-blue">→</div>
+      <div class="callout-body">
+        <p>The raincloud plot shows a clear upward shift from Pretest to Posttest. Include this figure in your write-up with a caption describing what the x- and y-axes represent and what the visual pattern tells us about the instructional effect.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="box box-warn">
+    <span class="box-label">⚠ Small Sample Note</span>
+    <p>With only <em>N</em> = 9 participants, effect size estimates and CIs will be wide and imprecise. The results are promising, but replication with a larger sample is needed before drawing strong conclusions.</p>
+  </div>
+
+  <!-- 9B.4 Write-Up -->
+  <h3 id="paired-report"><span class="sec-num">9B.4</span>Model Write-Up</h3>
+
+  <div class="report-template">
+    <span class="report-label">Model Reporting Paragraph — Paired Samples t-Test</span>
+    <p>A paired samples <em>t</em>-test was conducted to examine whether sarcasm comprehension scores improved from the pretest to the immediate posttest following nine weeks of instruction. The pretest (<em>M</em> = 7.44, <em>SD</em> = 6.24) and posttest (<em>M</em> = 16.56, <em>SD</em> = 2.96) scores showed some departure from normality. Results indicated a statistically significant and large improvement, <em>t</em>(8) = −3.99, <em>p</em> = .004, 95% CI [−14.37, −3.85]. Because this confidence interval does not include zero and is entirely negative, we conclude that scores at posttest were significantly higher than at pretest. The effect size, Cohen's <em>d</em><sub>rm</sub> = 2.18, 95% CI [0.21, 4.14], indicates a very large effect, although the wide interval reflects the small sample size (<em>N</em> = 9) and uncertainty in the estimate. A comparison of the posttest and delayed posttest was also significant, <em>t</em>(8) = −3.44, <em>p</em> = .009, 95% CI [−5.20, −1.03], suggesting that gains were retained five weeks after instruction.</p>
+  </div>
+
+  <!-- Chapter Nav -->
+  <div class="chapter-nav">
+    <a href="09_t-tests.html" style="flex-direction:row;">
+      <span class="arrow">←</span>
+      <span>
+        <span class="nav-label">Back to</span>
+        <span class="nav-title">Ch. 9 · Concept &amp; Theory</span>
+      </span>
+    </a>
+    <a href="#" style="flex-direction:row-reverse;">
+      <span>
+        <span class="nav-label">Next Chapter</span>
+        <span class="nav-title">Ch. 10 · One-Way ANOVA (Within-Subjects)</span>
+      </span>
+      <span class="arrow">→</span>
+    </a>
+  </div>
+
+</div>
+</main>
+
+<!-- ════════════════ LIGHTBOX -->
+<div id="lightbox">
+  <button id="lightbox-close" onclick="closeLightbox()">×</button>
+  <img id="lightbox-img" src="" alt="">
+</div>
+
+<script>
+
+  function handleImgError(img) {
+    img.style.display = 'none';
+    var m = img.nextElementSibling;
+    if (m) m.style.display = 'flex';
+  }
+
+
+  function handleImgError(img) {
+    img.style.display = 'none';
+    var m = img.nextElementSibling;
+    if (m && m.classList.contains('img-missing')) m.style.display = 'flex';
+  }
+
+  /* ── Upload handler ── */" alt="Screenshot" onclick="openLightbox('${url}')">`;
+  }
+
+  /* ── Lightbox ── */
+  function openLightbox(src) {
+    document.getElementById('lightbox-img').src = src;
+    document.getElementById('lightbox').classList.add('open');
+  }
+  function closeLightbox() {
+    document.getElementById('lightbox').classList.remove('open');
+    document.getElementById('lightbox-img').src = '';
+  }
+  document.getElementById('lightbox').addEventListener('click', function(e) {
+    if (e.target === this) closeLightbox();
+  });
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') closeLightbox();
+  });
+
+  /* ── Active nav on scroll ── */
+  const headings = document.querySelectorAll('h3[id]');
+  const navSubs  = document.querySelectorAll('.nav-sub');
+  const io = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        navSubs.forEach(a => {
+          if (a.href && a.getAttribute('href') !== '#')
+            a.classList.remove('active');
+        });
+        const match = document.querySelector(`.nav-sub[href="#${e.target.id}"]`);
+        if (match) match.classList.add('active');
+      }
+    });
+  }, { rootMargin: '-15% 0px -70% 0px' });
+  headings.forEach(h => io.observe(h));
+</script>
+</body>
+</html>

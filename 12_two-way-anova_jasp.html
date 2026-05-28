@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chapter 12: Two-Way ANOVA in JASP | Statistics with JASP</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;0,700;1,400&family=Source+Sans+3:wght@300;400;500;600&family=Source+Code+Pro:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:#faf8f5;--surface:#fff;--sidebar-bg:#1c2a38;
+    --sidebar-hover:#2d3f52;--sidebar-active:#3b8ea5;
+    --ink:#1a1f2e;--muted:#6b7280;
+    --accent:#2a7f9e;--accent2:#c0622a;
+    --red:#dc2626;
+    --border:#e2ddd6;--highlight:#eef7fa;
+    --tip-bg:#f0f9eb;--tip-border:#5a9e4a;
+    --warn-bg:#fdf6ec;--warn-border:#d97c2a;
+    --sidebar-w:280px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Source Sans 3',sans-serif;background:var(--bg);color:var(--ink);font-size:17px;line-height:1.75;display:flex;min-height:100vh;}
+
+  /* SIDEBAR */
+  #sidebar{width:var(--sidebar-w);background:var(--sidebar-bg);color:#c8d4e0;position:fixed;top:0;left:0;bottom:0;overflow-y:auto;z-index:100;font-size:14px;}
+  #sh{padding:24px 20px 16px;border-bottom:1px solid rgba(255,255,255,.08);}
+  #sh .bt{font-family:'Lora',serif;font-size:15px;font-weight:700;color:#fff;line-height:1.3;margin-bottom:4px;}
+  #sh .bs{font-size:12px;color:rgba(200,212,224,.55);letter-spacing:.05em;text-transform:uppercase;}
+  #sidebar nav{padding:12px 0;}
+  .nl{padding:12px 20px 4px;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:rgba(200,212,224,.4);font-weight:600;}
+  .nc{display:block;padding:7px 20px;color:#c8d4e0;text-decoration:none;transition:background .15s,color .15s;line-height:1.4;}
+  .nc:hover{background:var(--sidebar-hover);color:#fff;}
+  .nc.active{background:rgba(59,142,165,.25);color:var(--sidebar-active);border-left:3px solid var(--sidebar-active);padding-left:17px;font-weight:600;}
+  .ns{display:block;padding:5px 20px 5px 36px;color:rgba(200,212,224,.65);text-decoration:none;font-size:13px;transition:color .15s;}
+  .ns:hover{color:#fff;}
+  .ns.active{color:var(--sidebar-active);}
+
+  /* MAIN */
+  #main{flex:1;min-width:0;}
+  #content{max-width:860px;margin:0 auto;padding:56px 48px 80px;}
+
+  .eyebrow{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);font-weight:600;margin-bottom:10px;}
+  h1.cht{font-family:'Lora',serif;font-size:2.4rem;font-weight:700;line-height:1.15;color:var(--ink);margin-bottom:10px;}
+  h1.cht em{font-style:italic;color:var(--accent2);}
+  .chsub{font-family:'Lora',serif;font-size:1rem;font-style:italic;color:var(--muted);margin-bottom:12px;}
+  .pls{display:flex;gap:10px;margin-bottom:32px;flex-wrap:wrap;}
+  .pl{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:5px;font-size:13px;font-weight:600;text-decoration:none;transition:all .15s;}
+  .plc{background:var(--highlight);color:var(--accent);border:1.5px solid var(--accent);}
+  .plc:hover{background:var(--accent);color:#fff;}
+  .plj{background:var(--accent);color:#fff;border:1.5px solid var(--accent);cursor:default;opacity:.85;}
+  hr.dv{border:none;border-top:2px solid var(--border);margin-bottom:40px;}
+
+  h2{font-family:'Lora',serif;font-size:1.6rem;font-weight:700;color:var(--ink);margin:56px 0 16px;padding-bottom:10px;border-bottom:2px solid var(--border);scroll-margin-top:24px;}
+  h2 .sn{color:var(--accent);margin-right:8px;font-weight:400;font-size:1.1rem;}
+  h3{font-family:'Lora',serif;font-size:1.15rem;font-weight:600;color:var(--ink);margin:32px 0 12px;scroll-margin-top:24px;}
+  p{margin-bottom:16px;}
+  strong{font-weight:600;}
+  em{font-style:italic;}
+  a{color:var(--accent);text-decoration:none;}
+  a:hover{text-decoration:underline;}
+  kbd{background:#f0ede8;border:1px solid #ccc;border-radius:3px;padding:1px 7px;font-family:'Source Code Pro',monospace;font-size:13px;color:#333;white-space:nowrap;}
+
+  /* STEP LIST */
+  .sl{list-style:none;padding:0;margin:24px 0;}
+  .sl>li{display:flex;gap:18px;align-items:flex-start;padding:14px 0;border-bottom:1px solid var(--border);}
+  .sl>li:last-child{border-bottom:none;}
+  .snb{flex-shrink:0;width:32px;height:32px;background:var(--accent);color:#fff;border-radius:50%;font-size:14px;font-weight:700;display:flex;align-items:center;justify-content:center;margin-top:2px;}
+  .slb{flex:1;min-width:0;}
+  .slb p{margin:0;}
+
+  /* SCREENSHOT BLOCK */
+  .sb{margin:28px 0 36px;border:1px solid var(--border);border-radius:10px;overflow:hidden;background:var(--surface);}
+  .sbl{display:flex;align-items:center;gap:10px;padding:10px 18px;background:#f4f2ee;border-bottom:1px solid var(--border);font-size:13px;font-weight:600;color:var(--muted);letter-spacing:.04em;}
+  .fb{background:var(--ink);color:#fff;font-size:10px;font-weight:700;letter-spacing:.08em;padding:2px 8px;border-radius:3px;text-transform:uppercase;}
+  .iw{position:relative;background:#f9f8f6;min-height:160px;display:flex;align-items:center;justify-content:center;}
+  .iw img{display:block;width:100%;height:auto;cursor:zoom-in;}
+  
+  .ph:hover{border-color:var(--accent);background:var(--highlight);color:var(--accent);}
+  
+  .phi{line-height:1;display:flex;align-items:center;justify-content:center;}
+  .pht{font-size:14px;font-weight:600;text-align:center;line-height:1.4;}
+  .phh{font-size:12px;opacity:.7;text-align:center;}
+
+  /* CALLOUT */
+  .callout{border-top:1px solid var(--border);padding:14px 20px;display:flex;gap:14px;align-items:flex-start;background:#fff;}
+  .cm{flex-shrink:0;width:22px;height:22px;border-radius:50%;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;margin-top:3px;}
+  .cr{background:#fecaca;color:var(--red);border:2px solid var(--red);}
+  .cb{background:#dbeafe;color:#1d4ed8;border:2px solid #3b82f6;}
+  .cg{background:#dcfce7;color:#15803d;border:2px solid #22c55e;}
+  .cy{background:#fef9c3;color:#854d0e;border:2px solid #ca8a04;}
+  .cbtxt{font-size:15px;line-height:1.6;flex:1;}
+  .cbtxt p{margin:0 0 6px;}
+  .cbtxt p:last-child{margin:0;}
+
+  /* BOXES */
+  .box{border-radius:6px;padding:18px 24px;margin:24px 0;}
+  .box p:last-child{margin:0;}
+  .box-tip{background:var(--tip-bg);border-left:4px solid var(--tip-border);}
+  .box-warn{background:var(--warn-bg);border-left:4px solid var(--warn-border);}
+  .box-info{background:var(--highlight);border-left:4px solid var(--accent);}
+  .blabel{font-size:11px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;margin-bottom:8px;display:block;}
+  .box-tip .blabel{color:var(--tip-border);}
+  .box-warn .blabel{color:var(--warn-border);}
+  .box-info .blabel{color:var(--accent);}
+
+  /* TABLE */
+  .tw{overflow-x:auto;margin:20px 0;border:1px solid var(--border);border-radius:6px;}
+  table{width:100%;border-collapse:collapse;font-size:15px;}
+  thead tr{background:var(--ink);color:#fff;}
+  thead th{padding:10px 14px;text-align:left;font-weight:600;font-size:13px;letter-spacing:.04em;}
+  tbody tr:nth-child(even){background:var(--highlight);}
+  tbody td{padding:9px 14px;border-bottom:1px solid var(--border);vertical-align:top;}
+  tbody tr:last-child td{border-bottom:none;}
+
+  /* READING ORDER BOX */
+  .ro{counter-reset:ro;list-style:none;padding:0;margin:16px 0;}
+  .ro li{counter-increment:ro;display:flex;gap:14px;align-items:flex-start;padding:12px 0;border-bottom:1px solid var(--border);}
+  .ro li:last-child{border-bottom:none;}
+  .ro li::before{content:counter(ro);flex-shrink:0;width:28px;height:28px;background:var(--accent2);color:#fff;border-radius:50%;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;margin-top:2px;}
+  .ro p{margin:0;}
+
+  /* REPORT */
+  .report{background:#fffbf5;border:1px solid #e8d5b7;border-radius:6px;padding:22px 28px 20px;margin:24px 0;font-family:'Lora',serif;font-size:.95rem;line-height:1.85;color:#2a2a2a;position:relative;}
+  .report::before{content:'"';position:absolute;top:-6px;left:18px;font-size:4rem;color:#e8d5b7;line-height:1;}
+  .rl{font-family:'Source Sans 3',sans-serif;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--accent2);font-weight:700;margin-bottom:14px;display:block;font-style:normal;}
+  .report p{margin-bottom:10px;}
+  .report p:last-child{margin:0;}
+
+  /* CHAPTER NAV */
+  .chnav{display:flex;justify-content:space-between;align-items:center;margin-top:64px;padding-top:24px;border-top:2px solid var(--border);gap:16px;}
+  .chnav a{display:flex;align-items:center;gap:8px;padding:12px 20px;border:1.5px solid var(--border);border-radius:6px;color:var(--ink);font-weight:500;font-size:15px;text-decoration:none;transition:border-color .2s,background .2s;}
+  .chnav a:hover{border-color:var(--accent);background:var(--highlight);text-decoration:none;}
+  .nl2{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);display:block;}
+  .arrow{color:var(--accent);font-size:1.2rem;}
+
+  /* LIGHTBOX */
+  #lb{display:none;position:fixed;inset:0;background:rgba(0,0,0,.82);z-index:1000;align-items:center;justify-content:center;padding:24px;cursor:zoom-out;}
+  #lb.open{display:flex;}
+  #lb img{max-width:100%;max-height:90vh;border-radius:6px;box-shadow:0 24px 60px rgba(0,0,0,.5);object-fit:contain;}
+  #lbc{position:absolute;top:16px;right:20px;color:#fff;font-size:2rem;cursor:pointer;line-height:1;background:none;border:none;opacity:.8;}
+  #lbc:hover{opacity:1;}
+
+  @media(max-width:900px){
+    #sidebar{transform:translateX(-100%);}
+    #main{}
+    #content{padding:32px 20px 60px;}
+  }
+
+  /* ── Image slots ─────────────────────────────── */
+  .iw img, .screenshot-img-wrap img {
+    display:block; width:100%; height:auto; cursor:zoom-in;
+  }
+  .img-missing {
+    display:none; flex-direction:column; align-items:center;
+    justify-content:center; gap:12px; padding:36px 24px;
+    min-height:160px; width:100%;
+    background:#faf9f7; border:2px dashed #d5cfc6; color:#aaa;
+  }
+  .img-missing .im-path {
+    font-family:'Source Code Pro', monospace;
+    font-size:13px; font-weight:600;
+    color:#5a9e4a; background:#f0f9eb;
+    border:1px solid #c3e6b3; border-radius:4px;
+    padding:4px 12px;
+  }
+  .img-missing .im-hint {
+    font-size:12px; color:#9ca3af; text-align:center;
+    max-width:340px; line-height:1.5;
+  }
+
+
+  /* ── Screenshot image slots ─────────────────── */
+  .iw img, .img-wrap img, .screenshot-img-wrap img {
+    display:block; width:100%; height:auto; cursor:zoom-in;
+  }
+  .img-missing {
+    display:none; flex-direction:column; align-items:center;
+    justify-content:center; gap:12px; padding:40px 24px;
+    min-height:170px; width:100%;
+    background:#faf9f7; border:2px dashed #d5cfc6; color:#aaa;
+    box-sizing:border-box;
+  }
+  .img-missing .im-path {
+    font-family:'Source Code Pro', monospace;
+    font-size:13px; font-weight:600; color:#5a9e4a;
+    background:#f0f9eb; border:1px solid #c3e6b3;
+    border-radius:4px; padding:4px 12px;
+  }
+  .img-missing .im-hint {
+    font-size:12px; color:#9ca3af; text-align:center;
+    max-width:380px; line-height:1.5;
+  }
+
+</style>
+</head>
+<body>
+
+<main id="main">
+<div id="content">
+
+  <div class="eyebrow">Chapter 12 · JASP Walkthrough</div>
+  <h1 class="cht">Two-Way Factorial <em>ANOVA</em> in JASP</h1>
+  <p class="chsub">Step-by-step instructions with annotated screenshots</p>
+  <div class="pls">
+    <a class="pl plc" href="12_two-way-anova.html">← Concept &amp; Theory</a>
+    <a class="pl plj" href="#">JASP Walkthrough (this page)</a>
+  </div>
+  <hr class="dv">
+
+  <p>This page walks through a 2 × 2 × 2 factorial ANOVA in JASP using the <strong>Obarow (2004)</strong> dataset. We test the effects of Music, Illustrations, and Gender on vocabulary gain scores. Each step is paired with a screenshot slot — click any dashed box to upload. <strong>Red callouts</strong> show what to look at; <strong>blue callouts</strong> explain the output; <strong>yellow callouts</strong> flag common mistakes.</p>
+
+  <div class="box box-info">
+    <span class="blabel">📂 Sample Data</span>
+    <p><strong>File:</strong> <kbd>Obarow.Story1.csv</kbd><br>
+    <strong>Variables:</strong> <kbd>PicturesT1</kbd> (Nominal — pictures/no pictures), <kbd>MusicT1</kbd> (Nominal — music/no music), <kbd>gender</kbd> (Nominal — male/female), <kbd>gnsc1.1</kbd> (Scale — vocabulary gain score).<br>
+    Confirm variable types before starting: IVs = Nominal, DV = Scale.</p>
+  </div>
+
+  <!-- ══════════════════════════
+       12A.1  SETTING UP
+  ══════════════════════════ -->
+  <h2 id="setup"><span class="sn">12A.1</span>Setting Up the Analysis</h2>
+
+  <ol class="sl">
+    <li><div class="snb">1</div><div class="slb"><p>In the top menu bar, click the <kbd>ANOVA</kbd> module.</p></div></li>
+    <li><div class="snb">2</div><div class="slb"><p>Select <kbd>ANOVA</kbd> from the Classical section of the dropdown (the same option used for one-way ANOVA in Chapter 10).</p></div></li>
+    <li><div class="snb">3</div><div class="slb"><p>Move <kbd>gnsc1.1</kbd> (the vocabulary gain score) into the <strong>Dependent Variable</strong> box.</p></div></li>
+    <li><div class="snb">4</div><div class="slb"><p>Move <kbd>PicturesT1</kbd>, <kbd>MusicT1</kbd>, and <kbd>gender</kbd> into the <strong>Fixed Factors</strong> box. For reproducibility, add them in this order: Pictures first, then Music, then Gender.</p></div></li>
+    <li><div class="snb">5</div><div class="slb"><p>Check ☑ <kbd>Descriptive statistics</kbd> and ☑ <kbd>Estimates of effect size</kbd>. Select <kbd>ηp² (partial eta-squared)</kbd> with ☑ <kbd>Confidence interval</kbd>.</p></div></li>
+  </ol>
+
+  <div class="sb">
+    <div class="sbl"><span class="fb">Fig 12–1</span>ANOVA dialog — variables assigned to Dependent Variable and Fixed Factors</div>
+    <div class="iw" id="w-12-1">
+      <img src="screenshots/fig12-1.png" alt="Fig 12–1"
+         onclick="openLB(this.src)"
+         onerror="handleImgError(this)">
+      <div class="img-missing">
+        <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:block;opacity:.35;"><rect x="4" y="13" width="40" height="30" rx="4" stroke="currentColor" stroke-width="2.5" fill="none"/><circle cx="15" cy="23" r="4" stroke="currentColor" stroke-width="2" fill="none"/><polyline points="4,36 15,25 23,32 31,22 44,36" stroke="currentColor" stroke-width="2.2" fill="none" stroke-linejoin="round" stroke-linecap="round"/><line x1="24" y1="8" x2="24" y2="1" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/><polyline points="19,6 24,1 29,6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+        <div class="im-path">screenshots/fig12-1.png</div>
+        <div class="im-hint">DV: gnsc1.1 · Fixed Factors: PicturesT1, MusicT1, gender · Descriptives + ηp² checked</div>
+      </div>
+    </div>
+    <div class="callout">
+      <div class="cm cr">①</div>
+      <div class="cbtxt">
+        <p><strong>Dependent Variable:</strong> <kbd>gnsc1.1</kbd> (gain score) appears here.</p>
+        <p><strong>Fixed Factors:</strong> All three IVs — <kbd>PicturesT1</kbd>, <kbd>MusicT1</kbd>, <kbd>gender</kbd> — appear here. JASP will automatically model all main effects and all interactions among these variables.</p>
+        <p><strong>Descriptive statistics</strong> and <strong>ηp² with CI</strong> are checked.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════
+       12A.2  MODEL MENU
+  ══════════════════════════ -->
+  <h2 id="model"><span class="sn">12A.2</span>Model Menu: Changing to Type II Sum of Squares</h2>
+
+  <p>JASP defaults to Type III Sum of Squares. For factorial ANOVA in most applied linguistics contexts, <strong>Type II SS is preferred</strong>. This must be changed manually.</p>
+
+  <ol class="sl">
+    <li><div class="snb">6</div><div class="slb"><p>Click the <kbd>Model</kbd> section to expand it.</p></div></li>
+    <li><div class="snb">7</div><div class="slb"><p>Under <strong>Sum of Squares</strong>, change the dropdown from <kbd>Type III</kbd> to <kbd>Type II</kbd>.</p></div></li>
+  </ol>
+
+  <div class="sb">
+    <div class="sbl"><span class="fb">Fig 12–2</span>Model menu — Sum of Squares changed to Type II</div>
+    <div class="iw" id="w-12-2">
+      <img src="screenshots/fig12-2.png" alt="Fig 12–2"
+         onclick="openLB(this.src)"
+         onerror="handleImgError(this)">
+      <div class="img-missing">
+        <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:block;opacity:.35;"><rect x="4" y="13" width="40" height="30" rx="4" stroke="currentColor" stroke-width="2.5" fill="none"/><circle cx="15" cy="23" r="4" stroke="currentColor" stroke-width="2" fill="none"/><polyline points="4,36 15,25 23,32 31,22 44,36" stroke="currentColor" stroke-width="2.2" fill="none" stroke-linejoin="round" stroke-linecap="round"/><line x1="24" y1="8" x2="24" y2="1" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/><polyline points="19,6 24,1 29,6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+        <div class="im-path">screenshots/fig12-2.png</div>
+        <div class="im-hint">Model menu open: Sum of Squares dropdown showing "Type II" selected</div>
+      </div>
+    </div>
+    <div class="callout">
+      <div class="cm cy">!</div>
+      <div class="cbtxt">
+        <p><strong>This step is easy to forget.</strong> Always check the Model menu before running. Type III SS gives different (and often misleading) results when group sizes are unequal, which they almost always are in real SLA data. Type II SS is more robust and appropriate for most research designs.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════
+       12A.3  OPTIONS & PLOTS
+  ══════════════════════════ -->
+  <h2 id="options"><span class="sn">12A.3</span>Selecting Options &amp; Plots</h2>
+
+  <ol class="sl">
+    <li><div class="snb">8</div><div class="slb"><p>Open the <kbd>Assumption Checks</kbd> section. Check ☑ <kbd>Homogeneity tests</kbd> (Levene's test) and ☑ <kbd>Q-Q plot of residuals</kbd>.</p></div></li>
+    <li><div class="snb">9</div><div class="slb"><p>Open the <kbd>Descriptives Plots</kbd> section. This is where you set up your interaction plot. Move one variable to <strong>Horizontal axis</strong>, one to <strong>Separate lines</strong>, and (optionally) one to <strong>Separate plots</strong>. A common arrangement for the Obarow data: <kbd>PicturesT1</kbd> on the horizontal axis, <kbd>MusicT1</kbd> as separate lines, and <kbd>gender</kbd> as separate plots.</p></div></li>
+  </ol>
+
+  <div class="sb">
+    <div class="sbl"><span class="fb">Fig 12–3</span>Descriptives Plots menu — variables assigned for an interaction plot</div>
+    <div class="iw" id="w-12-3">
+      <img src="screenshots/fig12-3.png" alt="Fig 12–3"
+         onclick="openLB(this.src)"
+         onerror="handleImgError(this)">
+      <div class="img-missing">
+        <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:block;opacity:.35;"><rect x="4" y="13" width="40" height="30" rx="4" stroke="currentColor" stroke-width="2.5" fill="none"/><circle cx="15" cy="23" r="4" stroke="currentColor" stroke-width="2" fill="none"/><polyline points="4,36 15,25 23,32 31,22 44,36" stroke="currentColor" stroke-width="2.2" fill="none" stroke-linejoin="round" stroke-linecap="round"/><line x1="24" y1="8" x2="24" y2="1" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/><polyline points="19,6 24,1 29,6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+        <div class="im-path">screenshots/fig12-3.png</div>
+        <div class="im-hint">Descriptives Plots: PicturesT1 → Horizontal axis; MusicT1 → Separate lines; gender → Separate plots</div>
+      </div>
+    </div>
+    <div class="callout">
+      <div class="cm cb">→</div>
+      <div class="cbtxt">
+        <p>JASP will produce one interaction plot per level of your <strong>Separate plots</strong> variable (here, one plot for males and one for females). Each plot shows how the effect of Pictures (x-axis) differs for Music vs. No Music conditions (separate lines).</p>
+        <p>Try different variable arrangements to see the data from different angles before settling on one for your report.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════
+       12A.4  DESCRIPTIVES
+  ══════════════════════════ -->
+  <h2 id="descriptives"><span class="sn">12A.4</span>Output: Descriptive Statistics</h2>
+
+  <p>The descriptives table shows the mean, SD, and N for every combination of your IVs. With three 2-level IVs, there are 8 cells (2 × 2 × 2).</p>
+
+  <div class="sb">
+    <div class="sbl"><span class="fb">Fig 12–4</span>Descriptive Statistics table — means and SDs for all 8 cells</div>
+    <div class="iw" id="w-12-4">
+      <img src="screenshots/fig12-4.png" alt="Fig 12–4"
+         onclick="openLB(this.src)"
+         onerror="handleImgError(this)">
+      <div class="img-missing">
+        <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:block;opacity:.35;"><rect x="4" y="13" width="40" height="30" rx="4" stroke="currentColor" stroke-width="2.5" fill="none"/><circle cx="15" cy="23" r="4" stroke="currentColor" stroke-width="2" fill="none"/><polyline points="4,36 15,25 23,32 31,22 44,36" stroke="currentColor" stroke-width="2.2" fill="none" stroke-linejoin="round" stroke-linecap="round"/><line x1="24" y1="8" x2="24" y2="1" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/><polyline points="19,6 24,1 29,6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+        <div class="im-path">screenshots/fig12-4.png</div>
+        <div class="im-hint">Descriptives: 8 rows (all Music×Pictures×Gender combinations), N, Mean, SD for each</div>
+      </div>
+    </div>
+    <div class="callout">
+      <div class="cm cr">①</div>
+      <div class="cbtxt">
+        <p>Note the small <em>n</em> in each cell — some cells have as few as 5 participants. This is a design weakness: with such small cell sizes, power is low and effect size estimates will be imprecise. Report cell sizes in your write-up to alert readers.</p>
+        <p>Also compare the overall male vs. female means: Males <em>M</em> = 1.53 (<em>SD</em> = 1.76) vs. Females <em>M</em> = 0.67 (<em>SD</em> = 1.12). This main effect of Gender will appear in the ANOVA table.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════
+       12A.5  INTERACTION PLOT
+  ══════════════════════════ -->
+  <h2 id="intplot"><span class="sn">12A.5</span>Output: Interaction Plot</h2>
+
+  <p>The interaction plot is the most important visual in a factorial ANOVA. Study it before looking at the ANOVA table — it tells you immediately whether interactions are likely.</p>
+
+  <div class="sb">
+    <div class="sbl"><span class="fb">Fig 12–5</span>Interaction plot — Music × Pictures, separate panels for Gender</div>
+    <div class="iw" id="w-12-5">
+      <img src="screenshots/fig12-5.png" alt="Fig 12–5"
+         onclick="openLB(this.src)"
+         onerror="handleImgError(this)">
+      <div class="img-missing">
+        <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:block;opacity:.35;"><rect x="4" y="13" width="40" height="30" rx="4" stroke="currentColor" stroke-width="2.5" fill="none"/><circle cx="15" cy="23" r="4" stroke="currentColor" stroke-width="2" fill="none"/><polyline points="4,36 15,25 23,32 31,22 44,36" stroke="currentColor" stroke-width="2.2" fill="none" stroke-linejoin="round" stroke-linecap="round"/><line x1="24" y1="8" x2="24" y2="1" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/><polyline points="19,6 24,1 29,6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+        <div class="im-path">screenshots/fig12-5.png</div>
+        <div class="im-hint">Two panels (Male / Female): x-axis = Pictures condition; separate lines = Music condition</div>
+      </div>
+    </div>
+    <div class="callout">
+      <div class="cm cb">→</div>
+      <div class="cbtxt">
+        <p><strong>How to read this plot:</strong> If lines within a panel are roughly parallel, there is no Music × Pictures interaction for that gender. If they cross or strongly diverge, an interaction is present.</p>
+        <p><strong>Comparing the two panels</strong> (Male vs. Female): If the pattern of lines differs between panels, a three-way interaction (Music × Pictures × Gender) may be present.</p>
+        <p>For the Obarow data: Males show a pattern where music helps more without pictures than with pictures, while females show the opposite tendency — but neither effect was strong enough to reach statistical significance given the small sample sizes.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════
+       12A.6  ASSUMPTION CHECKS
+  ══════════════════════════ -->
+  <h2 id="assumptions"><span class="sn">12A.6</span>Output: Assumption Checks</h2>
+
+  <div class="sb">
+    <div class="sbl"><span class="fb">Fig 12–6</span>Levene's Test for Homogeneity of Variances</div>
+    <div class="iw" id="w-12-6">
+      <img src="screenshots/fig12-6.png" alt="Fig 12–6"
+         onclick="openLB(this.src)"
+         onerror="handleImgError(this)">
+      <div class="img-missing">
+        <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:block;opacity:.35;"><rect x="4" y="13" width="40" height="30" rx="4" stroke="currentColor" stroke-width="2.5" fill="none"/><circle cx="15" cy="23" r="4" stroke="currentColor" stroke-width="2" fill="none"/><polyline points="4,36 15,25 23,32 31,22 44,36" stroke="currentColor" stroke-width="2.2" fill="none" stroke-linejoin="round" stroke-linecap="round"/><line x1="24" y1="8" x2="24" y2="1" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/><polyline points="19,6 24,1 29,6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+        <div class="im-path">screenshots/fig12-6.png</div>
+        <div class="im-hint">Levene's test table: F, df1, df2, p — result should be non-significant (p = .090)</div>
+      </div>
+    </div>
+    <div class="callout">
+      <div class="cm cr">①</div>
+      <div class="cbtxt">
+        <p><strong>Levene's test result: <em>F</em>(7, 56) = 1.88, <em>p</em> = .090.</strong> Because <em>p</em> &gt; .05, we do not reject the null hypothesis of equal variances. The homogeneity assumption is met — the parametric factorial ANOVA is appropriate.</p>
+        <p>If Levene's test were significant, consider bootstrapping (available in JASP's Post Hoc Tests menu) to obtain more robust CIs.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="sb">
+    <div class="sbl"><span class="fb">Fig 12–7</span>Q-Q Plot of Residuals</div>
+    <div class="iw" id="w-12-7">
+      <img src="screenshots/fig12-7.png" alt="Fig 12–7"
+         onclick="openLB(this.src)"
+         onerror="handleImgError(this)">
+      <div class="img-missing">
+        <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:block;opacity:.35;"><rect x="4" y="13" width="40" height="30" rx="4" stroke="currentColor" stroke-width="2.5" fill="none"/><circle cx="15" cy="23" r="4" stroke="currentColor" stroke-width="2" fill="none"/><polyline points="4,36 15,25 23,32 31,22 44,36" stroke="currentColor" stroke-width="2.2" fill="none" stroke-linejoin="round" stroke-linecap="round"/><line x1="24" y1="8" x2="24" y2="1" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/><polyline points="19,6 24,1 29,6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+        <div class="im-path">screenshots/fig12-7.png</div>
+        <div class="im-hint">Q-Q plot: residuals plotted against theoretical normal quantiles — points near diagonal = OK</div>
+      </div>
+    </div>
+    <div class="callout">
+      <div class="cm cb">→</div>
+      <div class="cbtxt">
+        <p>Residuals should fall approximately along the diagonal line. Minor deviations at the tails are common even with normal data. A clear S-shape or J-shape pattern would indicate non-normality. For the Obarow data, the Q-Q plot shows no serious problems.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════
+       12A.7  BETWEEN SUBJECTS EFFECTS
+  ══════════════════════════ -->
+  <h2 id="bse"><span class="sn">12A.7</span>Output: Between Subjects Effects Table</h2>
+
+  <p>This is the main ANOVA results table. It contains one row per main effect, one per interaction, and one Residuals row.</p>
+
+  <div class="sb">
+    <div class="sbl"><span class="fb">Fig 12–8</span>Between Subjects Effects table — main effects and interactions</div>
+    <div class="iw" id="w-12-8">
+      <img src="screenshots/fig12-8.png" alt="Fig 12–8"
+         onclick="openLB(this.src)"
+         onerror="handleImgError(this)">
+      <div class="img-missing">
+        <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:block;opacity:.35;"><rect x="4" y="13" width="40" height="30" rx="4" stroke="currentColor" stroke-width="2.5" fill="none"/><circle cx="15" cy="23" r="4" stroke="currentColor" stroke-width="2" fill="none"/><polyline points="4,36 15,25 23,32 31,22 44,36" stroke="currentColor" stroke-width="2.2" fill="none" stroke-linejoin="round" stroke-linecap="round"/><line x1="24" y1="8" x2="24" y2="1" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/><polyline points="19,6 24,1 29,6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+        <div class="im-path">screenshots/fig12-8.png</div>
+        <div class="im-hint">Between Subjects Effects: rows for Pictures, Music, Gender, all 2-way interactions, 3-way interaction, Residuals</div>
+      </div>
+    </div>
+    <div class="callout">
+      <div class="cm cr">①</div>
+      <div class="cbtxt">
+        <p><strong>Read from the bottom interaction upward:</strong></p>
+        <p>• <strong>Pictures × Music × Gender</strong> (three-way): <em>F</em>(1, 56) = 0.60, <em>p</em> = .443 — not significant.</p>
+        <p>• <strong>Two-way interactions</strong> (Pictures × Music; Pictures × Gender; Music × Gender): all <em>p</em> &gt; .05 — none significant.</p>
+        <p>• <strong>Main effects</strong>: Only <strong>Gender</strong> is significant, <em>F</em>(1, 56) = 4.35, <em>p</em> = .042, ηp² = .072. Pictures and Music are not significant.</p>
+      </div>
+    </div>
+    <div class="callout">
+      <div class="cm cr">②</div>
+      <div class="cbtxt">
+        <p>The <strong>Residuals row</strong> (SS = 128.60, df = 56) represents the unexplained within-cell variance — the denominator for all <em>F</em>-ratios. A large Residuals SS relative to the other rows confirms that the model explains relatively little variance (<em>R</em>² ≈ .148).</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="box box-tip">
+    <span class="blabel">💡 Reading Order Reminder</span>
+    <ol class="ro" style="margin:8px 0 0;">
+      <li><p>Check the <strong>highest-order interaction</strong> first (three-way for this design). If significant, interpret it — main effects become secondary.</p></li>
+      <li><p>If three-way is not significant, check each <strong>two-way interaction</strong>. A significant two-way means you must interpret the main effects of those two variables together.</p></li>
+      <li><p>If no interactions are significant, interpret <strong>main effects</strong> independently. For significant main effects with only 2 levels, compare descriptive means directly — no post-hoc test needed.</p></li>
+    </ol>
+  </div>
+
+  <!-- ══════════════════════════
+       12A.8  POST-HOC TESTS
+  ══════════════════════════ -->
+  <h2 id="posthoc"><span class="sn">12A.8</span>Post-Hoc Tests</h2>
+
+  <p>For the Obarow data, the only significant effect is the main effect of Gender — which has only two levels (male/female). Because there are only two groups, you already know from the descriptive statistics which group scored higher. <strong>No post-hoc test is needed</strong> for a significant 2-level main effect.</p>
+
+  <div class="box box-info">
+    <span class="blabel">📌 When You Do Need Post-Hoc Tests</span>
+    <p>Post-hoc tests are needed when a significant effect has <strong>3 or more levels</strong>, or when a significant <strong>interaction</strong> requires follow-up. For interactions, use JASP's <strong>Conditional comparisons</strong> option (in the Post Hoc Tests menu) — this compares levels of one variable at each level of another, properly accounting for the interaction structure.</p>
+  </div>
+
+  <h3>Setting Up Post-Hoc Tests (for practice or when needed)</h3>
+
+  <ol class="sl">
+    <li><div class="snb">10</div><div class="slb"><p>Open the <kbd>Post Hoc Tests</kbd> section.</p></div></li>
+    <li><div class="snb">11</div><div class="slb"><p>Move the variable(s) you want comparisons for into the right panel. For a significant interaction, move the interaction term (e.g., <kbd>MusicT1 × gender</kbd>), not just individual variables.</p></div></li>
+    <li><div class="snb">12</div><div class="slb"><p>Check ☑ <kbd>Effect size</kbd> (Cohen's <em>d</em>ₛ) and ☑ <kbd>Confidence intervals</kbd>. For interactions, also check ☑ <kbd>Conditional comparisons for interactions</kbd>.</p></div></li>
+    <li><div class="snb">13</div><div class="slb"><p>For bootstrapped CIs: click <kbd>From … Bootstraps</kbd> and set to <kbd>10,000</kbd> samples, CI type <kbd>BCa</kbd>. Especially useful when Levene's test is violated.</p></div></li>
+  </ol>
+
+  <div class="sb">
+    <div class="sbl"><span class="fb">Fig 12–9</span>Post Hoc Tests setup — interaction term selected, conditional comparisons enabled</div>
+    <div class="iw" id="w-12-9">
+      <img src="screenshots/fig12-9.png" alt="Fig 12–9"
+         onclick="openLB(this.src)"
+         onerror="handleImgError(this)">
+      <div class="img-missing">
+        <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:block;opacity:.35;"><rect x="4" y="13" width="40" height="30" rx="4" stroke="currentColor" stroke-width="2.5" fill="none"/><circle cx="15" cy="23" r="4" stroke="currentColor" stroke-width="2" fill="none"/><polyline points="4,36 15,25 23,32 31,22 44,36" stroke="currentColor" stroke-width="2.2" fill="none" stroke-linejoin="round" stroke-linecap="round"/><line x1="24" y1="8" x2="24" y2="1" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/><polyline points="19,6 24,1 29,6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+        <div class="im-path">screenshots/fig12-9.png</div>
+        <div class="im-hint">Post Hoc panel: interaction term in right box, Effect size + CI + Conditional comparisons checked</div>
+      </div>
+    </div>
+    <div class="callout">
+      <div class="cm cb">→</div>
+      <div class="cbtxt">
+        <p>When <strong>Conditional comparisons for interactions</strong> is checked, JASP compares groups within each level of the conditioning variable. For example, for a Music × Gender interaction, it compares males vs. females separately for the Music and No Music conditions — allowing you to see where the interaction is driven from.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="sb">
+    <div class="sbl"><span class="fb">Fig 12–10</span>Post Hoc output — pairwise comparisons with CIs and effect sizes</div>
+    <div class="iw" id="w-12-10">
+      <img src="screenshots/fig12-10.png" alt="Fig 12–10"
+         onclick="openLB(this.src)"
+         onerror="handleImgError(this)">
+      <div class="img-missing">
+        <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:block;opacity:.35;"><rect x="4" y="13" width="40" height="30" rx="4" stroke="currentColor" stroke-width="2.5" fill="none"/><circle cx="15" cy="23" r="4" stroke="currentColor" stroke-width="2" fill="none"/><polyline points="4,36 15,25 23,32 31,22 44,36" stroke="currentColor" stroke-width="2.2" fill="none" stroke-linejoin="round" stroke-linecap="round"/><line x1="24" y1="8" x2="24" y2="1" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/><polyline points="19,6 24,1 29,6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+        <div class="im-path">screenshots/fig12-10.png</div>
+        <div class="im-hint">Post Hoc table: Mean Diff, SE, t, p, 95% CI, Cohen's dₛ for each comparison</div>
+      </div>
+    </div>
+    <div class="callout">
+      <div class="cm cr">①</div>
+      <div class="cbtxt">
+        <p>Read the <strong>95% CI column</strong> for each comparison. CIs that do not contain zero indicate a statistically significant difference. The <strong>Cohen's <em>d</em>ₛ column</strong> shows the standardized effect size for that specific pairwise comparison.</p>
+        <p>Wide CIs (as expected with small cell sizes here) indicate uncertainty — the true effect could be much larger or smaller than the point estimate.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════
+       12A.9  WRITE-UP
+  ══════════════════════════ -->
+  <h2 id="report"><span class="sn">12A.9</span>Model Write-Up</h2>
+
+  <div class="report">
+    <span class="rl">Model Reporting Paragraph — Two-Way (+ Gender) Factorial ANOVA</span>
+    <p>A 2 (Music: music vs. no music) × 2 (Illustrations: pictures vs. no pictures) × 2 (Gender: male vs. female) between-subjects factorial ANOVA was conducted on immediate vocabulary gain scores using Type II Sum of Squares. Descriptive statistics showed that males (<em>M</em> = 1.53, <em>SD</em> = 1.76, <em>n</em> = 34) outperformed females (<em>M</em> = 0.67, <em>SD</em> = 1.12, <em>n</em> = 30) overall. Levene's test for homogeneity of variances was not significant, <em>F</em>(7, 56) = 1.88, <em>p</em> = .090, indicating that the equal-variances assumption was met. The Q-Q plot of residuals showed no serious departure from normality.</p>
+    <p>Starting from the highest-order interaction: the three-way Music × Illustrations × Gender interaction was not statistically significant, <em>F</em>(1, 56) = 0.60, <em>p</em> = .443, ηp² = .011. None of the two-way interactions reached significance: Music × Illustrations, <em>F</em>(1, 56) = 0.73, <em>p</em> = .398, ηp² = .013; Music × Gender, <em>F</em>(1, 56) = 2.42, <em>p</em> = .126, ηp² = .041; Illustrations × Gender, <em>F</em>(1, 56) = 0.12, <em>p</em> = .733, ηp² = .002. Among the main effects, Gender was the only significant predictor, <em>F</em>(1, 56) = 4.35, <em>p</em> = .042, ηp² = .072. Because Gender has only two levels and no significant interaction qualified this effect, the direction of the effect is evident from the descriptive statistics: males gained approximately one more vocabulary word than females across all conditions. Neither Music, <em>F</em>(1, 56) = 1.04, <em>p</em> = .312, nor Illustrations, <em>F</em>(1, 56) = 0.16, <em>p</em> = .692, produced significant main effects. The overall model accounted for approximately 15% of the variance in gain scores (<em>R</em>² = .148), though the adjusted estimate was considerably smaller (<em>R</em>² = .042), reflecting low power due to small cell sizes.</p>
+  </div>
+
+  <div class="box box-tip">
+    <span class="blabel">💡 Getting R² from JASP</span>
+    <p>JASP's ANOVA module does not directly report overall <em>R</em>². To obtain it, open the <kbd>Regression</kbd> module, choose <kbd>Linear Regression</kbd>, put <kbd>gnsc1.1</kbd> as the DV, and move all three IVs into the Factors box. Open the Model menu and move all variables (plus their interactions) into Model 1. The output will include <em>R</em>² and adjusted <em>R</em>².</p>
+  </div>
+
+  <div class="chnav">
+    <a href="12_two-way-anova.html" style="flex-direction:row;">
+      <span class="arrow">←</span>
+      <span><span class="nl2">Back to</span><span>Ch. 12 · Concept &amp; Theory</span></span>
+    </a>
+    <a href="#" style="flex-direction:row-reverse;">
+      <span><span class="nl2">Next Chapter</span><span>Ch. 13 · Mixed ANOVA →</span></span>
+      <span class="arrow">→</span>
+    </a>
+  </div>
+
+</div>
+</main>
+
+<div id="lb">
+  <button id="lbc" onclick="closeLB()">×</button>
+  <img id="lbimg" src="" alt="">
+</div>
+
+<script>
+
+  function handleImgError(img) {
+    img.style.display = 'none';
+    var m = img.nextElementSibling;
+    if (m) m.style.display = 'flex';
+  }
+
+
+  function handleImgError(img) {
+    img.style.display = 'none';
+    var m = img.nextElementSibling;
+    if (m && m.classList.contains('img-missing')) m.style.display = 'flex';
+  }" alt="Screenshot" onclick="openLB('${url}')">`;
+  }
+  function openLB(src) { document.getElementById('lbimg').src = src; document.getElementById('lb').classList.add('open'); }
+  function closeLB() { document.getElementById('lb').classList.remove('open'); document.getElementById('lbimg').src = ''; }
+  document.getElementById('lb').addEventListener('click', e => { if (e.target === document.getElementById('lb')) closeLB(); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLB(); });
+
+  const heads = document.querySelectorAll('h2[id]');
+  const subs = document.querySelectorAll('.ns');
+  new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        subs.forEach(a => { if (a.getAttribute('href')?.startsWith('#')) a.classList.remove('active'); });
+        const m = document.querySelector(`.ns[href="#${e.target.id}"]`);
+        if (m) m.classList.add('active');
+      }
+    });
+  }, { rootMargin: '-15% 0px -70% 0px' }).observe && heads.forEach(h => new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting) { subs.forEach(a => { if (a.getAttribute('href')?.startsWith('#')) a.classList.remove('active'); }); const m = document.querySelector(`.ns[href="#${e.target.id}"]`); if (m) m.classList.add('active'); }});
+  }, { rootMargin: '-15% 0px -70% 0px' }).observe(h));
+</script>
+</body>
+</html>

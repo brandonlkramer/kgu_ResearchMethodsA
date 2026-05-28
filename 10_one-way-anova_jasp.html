@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chapter 10: One-Way ANOVA in JASP | Statistics with JASP</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;0,700;1,400&family=Source+Sans+3:wght@300;400;500;600&family=Source+Code+Pro:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:#faf8f5; --surface:#fff; --sidebar-bg:#1c2a38;
+    --sidebar-hover:#2d3f52; --sidebar-active:#3b8ea5;
+    --ink:#1a1f2e; --muted:#6b7280;
+    --accent:#2a7f9e; --accent2:#c0622a;
+    --red:#dc2626; --red-bg:#fef2f2;
+    --border:#e2ddd6; --highlight:#eef7fa;
+    --tip-bg:#f0f9eb; --tip-border:#5a9e4a;
+    --warn-bg:#fdf6ec; --warn-border:#d97c2a;
+    --sidebar-w:280px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Source Sans 3',sans-serif;background:var(--bg);color:var(--ink);font-size:17px;line-height:1.75;display:flex;min-height:100vh;}
+
+  /* SIDEBAR */
+  #sidebar{width:var(--sidebar-w);background:var(--sidebar-bg);color:#c8d4e0;position:fixed;top:0;left:0;bottom:0;overflow-y:auto;display:flex;flex-direction:column;z-index:100;font-size:14px;}
+  #sidebar-header{padding:24px 20px 16px;border-bottom:1px solid rgba(255,255,255,0.08);}
+  #sidebar-header .book-title{font-family:'Lora',serif;font-size:15px;font-weight:700;color:#fff;line-height:1.3;margin-bottom:4px;}
+  #sidebar-header .book-sub{font-size:12px;color:rgba(200,212,224,0.55);letter-spacing:.05em;text-transform:uppercase;}
+  #sidebar nav{padding:12px 0;}
+  .nav-label{padding:12px 20px 4px;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:rgba(200,212,224,0.4);font-weight:600;}
+  .nav-ch{display:block;padding:7px 20px;color:#c8d4e0;text-decoration:none;transition:background .15s,color .15s;line-height:1.4;}
+  .nav-ch:hover{background:var(--sidebar-hover);color:#fff;}
+  .nav-ch.active{background:rgba(59,142,165,0.25);color:var(--sidebar-active);border-left:3px solid var(--sidebar-active);padding-left:17px;font-weight:600;}
+  .nav-sub{display:block;padding:5px 20px 5px 36px;color:rgba(200,212,224,0.65);text-decoration:none;font-size:13px;transition:color .15s;}
+  .nav-sub:hover{color:#fff;}
+  .nav-sub.active{color:var(--sidebar-active);}
+
+  /* MAIN */
+  #main{flex:1;min-width:0;}
+  #content{max-width:860px;margin:0 auto;padding:56px 48px 80px;}
+
+  /* HEADER */
+  .eyebrow{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);font-weight:600;margin-bottom:10px;}
+  h1.ch-title{font-family:'Lora',serif;font-size:2.4rem;font-weight:700;line-height:1.15;color:var(--ink);margin-bottom:10px;}
+  h1.ch-title em{font-style:italic;color:var(--accent2);}
+  .ch-sub{font-family:'Lora',serif;font-size:1rem;font-style:italic;color:var(--muted);margin-bottom:12px;}
+  .page-links{display:flex;gap:10px;margin-bottom:32px;flex-wrap:wrap;}
+  .pl{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:5px;font-size:13px;font-weight:600;text-decoration:none;transition:all .15s;}
+  .pl-concept{background:var(--highlight);color:var(--accent);border:1.5px solid var(--accent);}
+  .pl-concept:hover{background:var(--accent);color:#fff;}
+  .pl-jasp{background:var(--accent);color:#fff;border:1.5px solid var(--accent);cursor:default;opacity:.85;}
+  hr.div{border:none;border-top:2px solid var(--border);margin-bottom:40px;}
+
+  /* HEADINGS */
+  h2{font-family:'Lora',serif;font-size:1.6rem;font-weight:700;color:var(--ink);margin:56px 0 16px;padding-bottom:10px;border-bottom:2px solid var(--border);scroll-margin-top:24px;}
+  h2 .sn{color:var(--accent);margin-right:8px;font-weight:400;font-size:1.1rem;}
+  h3{font-family:'Lora',serif;font-size:1.15rem;font-weight:600;color:var(--ink);margin:36px 0 12px;scroll-margin-top:24px;}
+  h3 .sn{color:var(--accent2);margin-right:6px;font-weight:400;}
+  p{margin-bottom:16px;}
+  strong{font-weight:600;}
+  em{font-style:italic;}
+  a{color:var(--accent);text-decoration:none;}
+  a:hover{text-decoration:underline;}
+
+  /* STEP LIST */
+  .sl{list-style:none;padding:0;margin:24px 0;}
+  .sl>li{display:flex;gap:18px;align-items:flex-start;padding:14px 0;border-bottom:1px solid var(--border);}
+  .sl>li:last-child{border-bottom:none;}
+  .sn-badge{flex-shrink:0;width:32px;height:32px;background:var(--accent);color:#fff;border-radius:50%;font-size:14px;font-weight:700;display:flex;align-items:center;justify-content:center;margin-top:2px;font-family:'Source Sans 3',sans-serif;}
+  .sl-body{flex:1;min-width:0;}
+  .sl-body p{margin:0;}
+  kbd{background:#f0ede8;border:1px solid #ccc;border-radius:3px;padding:1px 7px;font-family:'Source Code Pro',monospace;font-size:13px;color:#333;white-space:nowrap;}
+
+  /* SCREENSHOT BLOCK */
+  .sb{margin:28px 0 36px;border:1px solid var(--border);border-radius:10px;overflow:hidden;background:var(--surface);}
+  .sb-label{display:flex;align-items:center;gap:10px;padding:10px 18px;background:#f4f2ee;border-bottom:1px solid var(--border);font-size:13px;font-weight:600;color:var(--muted);letter-spacing:.04em;}
+  .fig-badge{background:var(--ink);color:#fff;font-size:10px;font-weight:700;letter-spacing:.08em;padding:2px 8px;border-radius:3px;text-transform:uppercase;}
+
+  .img-wrap{position:relative;background:#f9f8f6;min-height:160px;display:flex;align-items:center;justify-content:center;}
+  .img-wrap img{display:block;width:100%;height:auto;cursor:zoom-in;}
+
+  .placeholder{width:100%;padding:40px 24px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;color:#aaa;border:2px dashed #d5cfc6;background:#faf9f7;cursor:pointer;transition:border-color .2s,background .2s;min-height:160px;position:relative;}
+  .placeholder:hover{border-color:var(--accent);background:var(--highlight);color:var(--accent);}
+  .placeholder input[type="file"]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;}
+  .ph-icon{font-size:2.2rem;line-height:1;}
+  .ph-text{font-size:14px;font-weight:600;text-align:center;line-height:1.4;}
+  .ph-hint{font-size:12px;opacity:.7;text-align:center;}
+
+  /* CALLOUT */
+  .callout{border-top:1px solid var(--border);padding:14px 20px;display:flex;gap:14px;align-items:flex-start;background:#fff;}
+  .cm{flex-shrink:0;width:22px;height:22px;border-radius:50%;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;margin-top:3px;}
+  .cm-red{background:#fecaca;color:var(--red);border:2px solid var(--red);}
+  .cm-blue{background:#dbeafe;color:#1d4ed8;border:2px solid #3b82f6;}
+  .cm-green{background:#dcfce7;color:#15803d;border:2px solid #22c55e;}
+  .cb{font-size:15px;line-height:1.6;flex:1;}
+  .cb p{margin:0 0 6px;}
+  .cb p:last-child{margin:0;}
+  .cb strong{color:var(--ink);}
+
+  /* BOXES */
+  .box{border-radius:6px;padding:18px 24px;margin:24px 0;}
+  .box p:last-child{margin:0;}
+  .box-tip{background:var(--tip-bg);border-left:4px solid var(--tip-border);}
+  .box-warn{background:var(--warn-bg);border-left:4px solid var(--warn-border);}
+  .box-info{background:var(--highlight);border-left:4px solid var(--accent);}
+  .box-label{font-size:11px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;margin-bottom:8px;display:block;}
+  .box-tip .box-label{color:var(--tip-border);}
+  .box-warn .box-label{color:var(--warn-border);}
+  .box-info .box-label{color:var(--accent);}
+
+  /* REPORT */
+  .report{background:#fffbf5;border:1px solid #e8d5b7;border-radius:6px;padding:24px 28px 20px;margin:24px 0;font-family:'Lora',serif;font-size:.95rem;line-height:1.85;color:#2a2a2a;position:relative;}
+  .report::before{content:'"';position:absolute;top:-6px;left:18px;font-size:4rem;color:#e8d5b7;font-family:'Lora',serif;line-height:1;}
+  .rl{font-family:'Source Sans 3',sans-serif;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--accent2);font-weight:700;margin-bottom:14px;display:block;font-style:normal;}
+  .report p{margin-bottom:10px;}
+  .report p:last-child{margin:0;}
+
+  /* POST-HOC DECISION */
+  .ph-decision{background:#f4f2ee;border:1px solid var(--border);border-radius:8px;padding:20px 24px;margin:20px 0;}
+  .ph-decision h4{font-size:.85rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:12px;}
+  .ph-row{display:grid;grid-template-columns:1fr 2fr;gap:8px 16px;padding:8px 0;border-bottom:1px solid var(--border);align-items:start;font-size:15px;}
+  .ph-row:last-child{border-bottom:none;}
+  .ph-row .ph-test{font-weight:600;color:var(--ink);}
+  .ph-row .ph-when{color:var(--muted);}
+
+  /* CHAPTER NAV */
+  .ch-nav{display:flex;justify-content:space-between;align-items:center;margin-top:64px;padding-top:24px;border-top:2px solid var(--border);gap:16px;}
+  .ch-nav a{display:flex;align-items:center;gap:8px;padding:12px 20px;border:1.5px solid var(--border);border-radius:6px;color:var(--ink);font-weight:500;font-size:15px;text-decoration:none;transition:border-color .2s,background .2s;}
+  .ch-nav a:hover{border-color:var(--accent);background:var(--highlight);text-decoration:none;}
+  .ch-nav .nl{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);display:block;}
+  .arrow{color:var(--accent);font-size:1.2rem;}
+
+  /* LIGHTBOX */
+  #lightbox{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.82);z-index:1000;align-items:center;justify-content:center;padding:24px;cursor:zoom-out;}
+  #lightbox.open{display:flex;}
+  #lightbox img{max-width:100%;max-height:90vh;border-radius:6px;box-shadow:0 24px 60px rgba(0,0,0,0.5);object-fit:contain;}
+  #lb-close{position:absolute;top:16px;right:20px;color:#fff;font-size:2rem;cursor:pointer;line-height:1;background:none;border:none;opacity:.8;transition:opacity .15s;}
+  #lb-close:hover{opacity:1;}
+
+  @media(max-width:900px){
+    #sidebar{transform:translateX(-100%);}
+    #main{}
+    #content{padding:32px 20px 60px;}
+  }
+
+  /* ── Image slots ─────────────────────────────── */
+  .iw img, .screenshot-img-wrap img {
+    display:block; width:100%; height:auto; cursor:zoom-in;
+  }
+  .img-missing {
+    display:none; flex-direction:column; align-items:center;
+    justify-content:center; gap:12px; padding:36px 24px;
+    min-height:160px; width:100%;
+    background:#faf9f7; border:2px dashed #d5cfc6; color:#aaa;
+  }
+  .img-missing .im-path {
+    font-family:'Source Code Pro', monospace;
+    font-size:13px; font-weight:600;
+    color:#5a9e4a; background:#f0f9eb;
+    border:1px solid #c3e6b3; border-radius:4px;
+    padding:4px 12px;
+  }
+  .img-missing .im-hint {
+    font-size:12px; color:#9ca3af; text-align:center;
+    max-width:340px; line-height:1.5;
+  }
+
+
+  /* ── Screenshot image slots ─────────────────── */
+  .iw img, .img-wrap img, .screenshot-img-wrap img {
+    display:block; width:100%; height:auto; cursor:zoom-in;
+  }
+  .img-missing {
+    display:none; flex-direction:column; align-items:center;
+    justify-content:center; gap:12px; padding:40px 24px;
+    min-height:170px; width:100%;
+    background:#faf9f7; border:2px dashed #d5cfc6; color:#aaa;
+    box-sizing:border-box;
+  }
+  .img-missing .im-path {
+    font-family:'Source Code Pro', monospace;
+    font-size:13px; font-weight:600; color:#5a9e4a;
+    background:#f0f9eb; border:1px solid #c3e6b3;
+    border-radius:4px; padding:4px 12px;
+  }
+  .img-missing .im-hint {
+    font-size:12px; color:#9ca3af; text-align:center;
+    max-width:380px; line-height:1.5;
+  }
+
+
+  .iw img, .img-wrap img, .screenshot-img-wrap img {
+    display:block; width:100%; height:auto; cursor:zoom-in;
+  }
+  .img-missing {
+    display:none; flex-direction:column; align-items:center;
+    justify-content:center; gap:12px; padding:40px 24px;
+    min-height:170px; width:100%;
+    background:#faf9f7; border:2px dashed #d5cfc6; color:#aaa;
+    box-sizing:border-box;
+  }
+  .img-missing .im-path {
+    font-family:'Source Code Pro',monospace; font-size:13px;
+    font-weight:600; color:#5a9e4a; background:#f0f9eb;
+    border:1px solid #c3e6b3; border-radius:4px; padding:4px 12px;
+  }
+  .img-missing .im-hint {
+    font-size:12px; color:#9ca3af; text-align:center;
+    max-width:380px; line-height:1.5;
+  }
+</style>
+</head>
+<body>
+
+<main id="main">
+<div id="content">
+
+  <div class="eyebrow">Chapter 10 · JASP Walkthrough</div>
+  <h1 class="ch-title">One-Way <em>ANOVA</em> in JASP</h1>
+  <p class="ch-sub">Step-by-step instructions with annotated screenshots</p>
+
+  <div class="page-links">
+    <a class="pl pl-concept" href="10_one-way-anova.html">← Concept &amp; Theory</a>
+    <a class="pl pl-jasp" href="#">JASP Walkthrough (this page)</a>
+  </div>
+
+  <hr class="div">
+
+  <p>This page walks through a one-way between-subjects ANOVA in JASP from start to finish, using the <strong>Ellis &amp; Yuan (2004)</strong> dataset. Each step is paired with a screenshot slot — click any dashed box to upload your own screenshot. Red callout boxes highlight exactly what to look at in each output.</p>
+
+  <div class="box box-info">
+    <span class="box-label">📂 Sample Data</span>
+    <p><strong>File:</strong> <kbd>EllisYuan.csv</kbd><br>
+    <strong>Variables:</strong> <kbd>Group</kbd> (Nominal — NP, PTP, OLP) and <kbd>SyntaxVariety</kbd> (Scale — continuous count).<br>
+    Confirm variable types in the JASP spreadsheet view before beginning.</p>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       10A.1  SETTING UP
+  ════════════════════════════════════════ -->
+  <h2 id="setup"><span class="sn">10A.1</span>Setting Up the Analysis</h2>
+
+  <ol class="sl">
+    <li>
+      <div class="sn-badge">1</div>
+      <div class="sl-body"><p>In the top menu bar, click the <kbd>ANOVA</kbd> module.</p></div>
+    </li>
+    <li>
+      <div class="sn-badge">2</div>
+      <div class="sl-body"><p>From the dropdown, select <kbd>ANOVA</kbd> (under the "Classical" heading — not "Repeated Measures ANOVA").</p></div>
+    </li>
+  </ol>
+
+  <div class="sb">
+    <div class="sb-label"><span class="fig-badge">Fig 10–1</span>Selecting ANOVA from the module menu</div>
+    <div class="img-wrap" id="w-10-1">
+      <img src="screenshots/fig10-1.png"
+           alt="Fig 10–1"
+           onclick="openLB(this.src)"
+           onerror="handleImgError(this)">
+      <div class="img-missing">
+        <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:block;opacity:.35;"><rect x="4" y="13" width="40" height="30" rx="4" stroke="currentColor" stroke-width="2.5" fill="none"/><circle cx="15" cy="23" r="4" stroke="currentColor" stroke-width="2" fill="none"/><polyline points="4,36 15,25 23,32 31,22 44,36" stroke="currentColor" stroke-width="2.2" fill="none" stroke-linejoin="round" stroke-linecap="round"/><line x1="24" y1="8" x2="24" y2="1" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/><polyline points="19,6 24,1 29,6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+        <div class="im-path">screenshots/fig10-1.png</div>
+        <div class="im-hint">ANOVA module → Classical → ANOVA</div>
+      </div>
+    </div>
+    <div class="callout">
+      <div class="cm cm-red">→</div>
+      <div class="cb"><p>Click <strong>ANOVA</strong> in the top ribbon, then choose <strong>ANOVA</strong> from the Classical section. This opens the dialog panel on the right side of the screen.</p></div>
+    </div>
+  </div>
+
+  <ol class="sl" start="3">
+    <li>
+      <div class="sn-badge">3</div>
+      <div class="sl-body"><p>Move <kbd>SyntaxVariety</kbd> into the <strong>Dependent Variable</strong> box.</p></div>
+    </li>
+    <li>
+      <div class="sn-badge">4</div>
+      <div class="sl-body"><p>Move <kbd>Group</kbd> into the <strong>Fixed Factors</strong> box.</p></div>
+    </li>
+    <li>
+      <div class="sn-badge">5</div>
+      <div class="sl-body"><p>Check ☑ <kbd>Descriptive statistics</kbd> to display group means and SDs.</p></div>
+    </li>
+    <li>
+      <div class="sn-badge">6</div>
+      <div class="sl-body"><p>Check ☑ <kbd>Estimates of effect size</kbd> and select <kbd>ω² (omega-squared)</kbd>. Also check <kbd>Confidence interval</kbd> for the effect size.</p></div>
+    </li>
+  </ol>
+
+  <div class="sb">
+    <div class="sb-label"><span class="fig-badge">Fig 10–2</span>ANOVA dialog with variables assigned and options selected</div>
+    <div class="img-wrap" id="w-10-2">
+      <img src="screenshots/fig10-2.png"
+           alt="Fig 10–2"
+           onclick="openLB(this.src)"
+           onerror="handleImgError(this)">
+      <div class="img-missing">
+        <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:block;opacity:.35;"><rect x="4" y="13" width="40" height="30" rx="4" stroke="currentColor" stroke-width="2.5" fill="none"/><circle cx="15" cy="23" r="4" stroke="currentColor" stroke-width="2" fill="none"/><polyline points="4,36 15,25 23,32 31,22 44,36" stroke="currentColor" stroke-width="2.2" fill="none" stroke-linejoin="round" stroke-linecap="round"/><line x1="24" y1="8" x2="24" y2="1" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/><polyline points="19,6 24,1 29,6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+        <div class="im-path">screenshots/fig10-2.png</div>
+        <div class="im-hint">Dialog: SyntaxVariety → Dependent, Group → Fixed Factors, Descriptives &amp; ω² checked</div>
+      </div>
+    </div>
+    <div class="callout">
+      <div class="cm cm-red">①</div>
+      <div class="cb">
+        <p><strong>Dependent Variable:</strong> <kbd>SyntaxVariety</kbd> should appear here.</p>
+        <p><strong>Fixed Factors:</strong> <kbd>Group</kbd> should appear here.</p>
+        <p><strong>Descriptive statistics</strong> and <strong>Estimates of effect size → ω²</strong> are both checked.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       10A.2  DESCRIPTIVES & PLOTS
+  ════════════════════════════════════════ -->
+  <h2 id="descriptives"><span class="sn">10A.2</span>Output: Descriptive Statistics &amp; Plots</h2>
+
+  <p>Before reading the test result, examine the descriptive statistics and a plot of the data to understand what is happening in each group.</p>
+
+  <div class="sb">
+    <div class="sb-label"><span class="fig-badge">Fig 10–3</span>Descriptive statistics table — means, SDs, and group sizes</div>
+    <div class="img-wrap" id="w-10-3">
+      <img src="screenshots/fig10-3.png"
+           alt="Fig 10–3"
+           onclick="openLB(this.src)"
+           onerror="handleImgError(this)">
+      <div class="img-missing">
+        <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:block;opacity:.35;"><rect x="4" y="13" width="40" height="30" rx="4" stroke="currentColor" stroke-width="2.5" fill="none"/><circle cx="15" cy="23" r="4" stroke="currentColor" stroke-width="2" fill="none"/><polyline points="4,36 15,25 23,32 31,22 44,36" stroke="currentColor" stroke-width="2.2" fill="none" stroke-linejoin="round" stroke-linecap="round"/><line x1="24" y1="8" x2="24" y2="1" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/><polyline points="19,6 24,1 29,6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+        <div class="im-path">screenshots/fig10-3.png</div>
+        <div class="im-hint">Descriptives table: N, Mean, SD for NP, PTP, OLP groups</div>
+      </div>
+    </div>
+    <div class="callout">
+      <div class="cm cm-red">①</div>
+      <div class="cb">
+        <p>Record the <strong>Mean</strong> and <strong>SD</strong> for each group — you will need them for your write-up:</p>
+        <p>NP: <em>M</em> = 16.21, <em>SD</em> = 4.10, <em>n</em> = 14 &nbsp;·&nbsp; PTP: <em>M</em> = 22.07, <em>SD</em> = 3.58, <em>n</em> = 14 &nbsp;·&nbsp; OLP: <em>M</em> = 18.86, <em>SD</em> = 3.21, <em>n</em> = 14.</p>
+        <p>The PTP group shows the highest mean. The SDs are similar across groups, which is a good preliminary sign that variances are equal.</p>
+      </div>
+    </div>
+  </div>
+
+  <p>To add a descriptive plot: scroll down in the dialog and open the <kbd>Descriptives Plots</kbd> section. Move <kbd>Group</kbd> to the horizontal axis. This produces an error-bar plot of means.</p>
+  <p>For a richer view of the distribution, open <kbd>Raincloud Plots</kbd> and move <kbd>Group</kbd> to the horizontal axis.</p>
+
+  <div class="sb">
+    <div class="sb-label"><span class="fig-badge">Fig 10–4</span>Raincloud plot — distribution of SyntaxVariety scores by group</div>
+    <div class="img-wrap" id="w-10-4">
+      <img src="screenshots/fig10-4.png"
+           alt="Fig 10–4"
+           onclick="openLB(this.src)"
+           onerror="handleImgError(this)">
+      <div class="img-missing">
+        <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:block;opacity:.35;"><rect x="4" y="13" width="40" height="30" rx="4" stroke="currentColor" stroke-width="2.5" fill="none"/><circle cx="15" cy="23" r="4" stroke="currentColor" stroke-width="2" fill="none"/><polyline points="4,36 15,25 23,32 31,22 44,36" stroke="currentColor" stroke-width="2.2" fill="none" stroke-linejoin="round" stroke-linecap="round"/><line x1="24" y1="8" x2="24" y2="1" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/><polyline points="19,6 24,1 29,6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+        <div class="im-path">screenshots/fig10-4.png</div>
+        <div class="im-hint">Raincloud plot: NP, OLP, PTP groups on x-axis; SyntaxVariety on y-axis</div>
+      </div>
+    </div>
+    <div class="callout">
+      <div class="cm cm-blue">→</div>
+      <div class="cb">
+        <p>Check: Are the distributions roughly symmetric within each group? Are boxes (interquartile ranges) of similar size? Any obvious outliers? The PTP group should visually appear higher than the others. One NP outlier at ~25 is visible but not extreme.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       10A.3  ASSUMPTION CHECKS
+  ════════════════════════════════════════ -->
+  <h2 id="assumptions"><span class="sn">10A.3</span>Assumption Checks</h2>
+
+  <p>Open the <kbd>Assumption Checks</kbd> section in the dialog and check ☑ <kbd>Homogeneity tests</kbd> and ☑ <kbd>Q-Q plot of residuals</kbd>.</p>
+
+  <div class="sb">
+    <div class="sb-label"><span class="fig-badge">Fig 10–5</span>Levene's test for homogeneity of variances</div>
+    <div class="img-wrap" id="w-10-5">
+      <img src="screenshots/fig10-5.png"
+           alt="Fig 10–5"
+           onclick="openLB(this.src)"
+           onerror="handleImgError(this)">
+      <div class="img-missing">
+        <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:block;opacity:.35;"><rect x="4" y="13" width="40" height="30" rx="4" stroke="currentColor" stroke-width="2.5" fill="none"/><circle cx="15" cy="23" r="4" stroke="currentColor" stroke-width="2" fill="none"/><polyline points="4,36 15,25 23,32 31,22 44,36" stroke="currentColor" stroke-width="2.2" fill="none" stroke-linejoin="round" stroke-linecap="round"/><line x1="24" y1="8" x2="24" y2="1" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/><polyline points="19,6 24,1 29,6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+        <div class="im-path">screenshots/fig10-5.png</div>
+        <div class="im-hint">Assumption Checks: Levene's test table (F, df1, df2, p)</div>
+      </div>
+    </div>
+    <div class="callout">
+      <div class="cm cm-red">①</div>
+      <div class="cb">
+        <p><strong>Levene's test result:</strong> <em>F</em>(2, 39) = 0.29, <em>p</em> = .750.</p>
+        <p>Because <em>p</em> &gt; .05, we <strong>do not reject</strong> the null hypothesis of equal variances. Variances are assumed equal — the parametric ANOVA is appropriate, and Tukey's post-hoc test can be used.</p>
+        <p>If Levene's test were significant (<em>p</em> &lt; .05), you would switch to the Games–Howell post-hoc test.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="sb">
+    <div class="sb-label"><span class="fig-badge">Fig 10–6</span>Q-Q plot of residuals</div>
+    <div class="img-wrap" id="w-10-6">
+      <img src="screenshots/fig10-6.png"
+           alt="Fig 10–6"
+           onclick="openLB(this.src)"
+           onerror="handleImgError(this)">
+      <div class="img-missing">
+        <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:block;opacity:.35;"><rect x="4" y="13" width="40" height="30" rx="4" stroke="currentColor" stroke-width="2.5" fill="none"/><circle cx="15" cy="23" r="4" stroke="currentColor" stroke-width="2" fill="none"/><polyline points="4,36 15,25 23,32 31,22 44,36" stroke="currentColor" stroke-width="2.2" fill="none" stroke-linejoin="round" stroke-linecap="round"/><line x1="24" y1="8" x2="24" y2="1" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/><polyline points="19,6 24,1 29,6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+        <div class="im-path">screenshots/fig10-6.png</div>
+        <div class="im-hint">Q-Q plot: data points falling roughly along the diagonal line</div>
+      </div>
+    </div>
+    <div class="callout">
+      <div class="cm cm-blue">→</div>
+      <div class="cb">
+        <p>A Q-Q plot shows the distribution of your <em>residuals</em> (the differences between each observed score and its group mean) against what you would expect from a normal distribution. Points falling close to the diagonal line indicate approximately normal residuals — meaning the normality assumption is met.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="box box-tip">
+    <span class="box-label">💡 Which Post-Hoc Test to Choose?</span>
+    <div class="ph-decision" style="margin:10px 0 0;">
+      <h4>Quick Reference</h4>
+      <div class="ph-row"><span class="ph-test">Tukey's HSD</span><span class="ph-when">Equal variances &amp; equal group sizes (the default — use for Ellis &amp; Yuan data)</span></div>
+      <div class="ph-row"><span class="ph-test">Games–Howell</span><span class="ph-when">Levene's test is significant (unequal variances)</span></div>
+      <div class="ph-row"><span class="ph-test">Scheffé</span><span class="ph-when">Unequal group sizes (unbalanced design)</span></div>
+      <div class="ph-row"><span class="ph-test">BCa Bootstrap CIs</span><span class="ph-when">Normality violated — use instead of or alongside <em>p</em>-values</span></div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       10A.4  OMNIBUS F-TEST
+  ════════════════════════════════════════ -->
+  <h2 id="omnibus"><span class="sn">10A.4</span>Output: Omnibus <em>F</em>-Test</h2>
+
+  <p>The first table in the ANOVA output is the <strong>Between Subjects Effects</strong> table. This contains the omnibus <em>F</em>-test result.</p>
+
+  <div class="sb">
+    <div class="sb-label"><span class="fig-badge">Fig 10–7</span>Between Subjects Effects — omnibus ANOVA table</div>
+    <div class="img-wrap" id="w-10-7">
+      <img src="screenshots/fig10-7.png"
+           alt="Fig 10–7"
+           onclick="openLB(this.src)"
+           onerror="handleImgError(this)">
+      <div class="img-missing">
+        <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:block;opacity:.35;"><rect x="4" y="13" width="40" height="30" rx="4" stroke="currentColor" stroke-width="2.5" fill="none"/><circle cx="15" cy="23" r="4" stroke="currentColor" stroke-width="2" fill="none"/><polyline points="4,36 15,25 23,32 31,22 44,36" stroke="currentColor" stroke-width="2.2" fill="none" stroke-linejoin="round" stroke-linecap="round"/><line x1="24" y1="8" x2="24" y2="1" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/><polyline points="19,6 24,1 29,6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+        <div class="im-path">screenshots/fig10-7.png</div>
+        <div class="im-hint">Between Subjects Effects table: Cases, SS, df, MS, F, p, ω²</div>
+      </div>
+    </div>
+    <div class="callout">
+      <div class="cm cm-red">①</div>
+      <div class="cb">
+        <p>Look at the <strong>Group row</strong> (your IV). Key values to extract:</p>
+        <p>• <em>F</em> = 9.05 &nbsp;·&nbsp; df = 2, 39 &nbsp;·&nbsp; <em>p</em> &lt; .001 &nbsp;·&nbsp; ω² = 0.28</p>
+        <p>Because <em>p</em> &lt; .05, the omnibus test is statistically significant — there is at least one significant difference among the three groups. The omega-squared value of 0.28 indicates that planning condition accounts for approximately 28% of the variance in syntactic variety — a large effect.</p>
+        <p>The <strong>Residuals row</strong> shows the within-group variance (SSE = 519.00, df = 39). This is the denominator of the <em>F</em>-ratio.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="box box-warn">
+    <span class="box-label">⚠ The Omnibus Test Is Just the Beginning</span>
+    <p>A significant omnibus <em>F</em>-test only tells you that <em>some</em> groups differ — not <em>which</em> ones. You must run post-hoc tests to identify where the differences lie. Do not stop here.</p>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       10A.5  POST-HOC SETUP
+  ════════════════════════════════════════ -->
+  <h2 id="posthoc-setup"><span class="sn">10A.5</span>Setting Up Post-Hoc Tests</h2>
+
+  <ol class="sl">
+    <li>
+      <div class="sn-badge">1</div>
+      <div class="sl-body"><p>In the ANOVA dialog, open the <kbd>Post Hoc Tests</kbd> section by clicking the triangle to expand it.</p></div>
+    </li>
+    <li>
+      <div class="sn-badge">2</div>
+      <div class="sl-body"><p>Move <kbd>Group</kbd> from the left panel into the right panel to request post-hoc tests for this variable.</p></div>
+    </li>
+    <li>
+      <div class="sn-badge">3</div>
+      <div class="sl-body"><p>Under <strong>Correction</strong>, check ☑ <kbd>Tukey</kbd> (variances are equal, so Tukey is appropriate here).</p></div>
+    </li>
+    <li>
+      <div class="sn-badge">4</div>
+      <div class="sl-body"><p>Check ☑ <kbd>Effect size</kbd> to include Hedges' <em>g</em>ₛ in the output.</p></div>
+    </li>
+    <li>
+      <div class="sn-badge">5</div>
+      <div class="sl-body"><p>Check ☑ <kbd>Confidence intervals</kbd> to include 95% CIs for each pairwise comparison.</p></div>
+    </li>
+    <li>
+      <div class="sn-badge">6</div>
+      <div class="sl-body"><p><em>Optional (recommended):</em> Click <kbd>From … Bootstraps</kbd> and set the number of samples to <kbd>10,000</kbd>. Change the CI type to <kbd>BCa</kbd>. This produces robust CIs that do not rely on normality assumptions.</p></div>
+    </li>
+  </ol>
+
+  <div class="sb">
+    <div class="sb-label"><span class="fig-badge">Fig 10–8</span>Post Hoc Tests dialog — Group moved across, Tukey &amp; Effect size checked</div>
+    <div class="img-wrap" id="w-10-8">
+      <img src="screenshots/fig10-8.png"
+           alt="Fig 10–8"
+           onclick="openLB(this.src)"
+           onerror="handleImgError(this)">
+      <div class="img-missing">
+        <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:block;opacity:.35;"><rect x="4" y="13" width="40" height="30" rx="4" stroke="currentColor" stroke-width="2.5" fill="none"/><circle cx="15" cy="23" r="4" stroke="currentColor" stroke-width="2" fill="none"/><polyline points="4,36 15,25 23,32 31,22 44,36" stroke="currentColor" stroke-width="2.2" fill="none" stroke-linejoin="round" stroke-linecap="round"/><line x1="24" y1="8" x2="24" y2="1" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/><polyline points="19,6 24,1 29,6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+        <div class="im-path">screenshots/fig10-8.png</div>
+        <div class="im-hint">Post Hoc Tests panel: Group moved to right, Tukey + Effect size + CI + Bootstrap checked</div>
+      </div>
+    </div>
+    <div class="callout">
+      <div class="cm cm-red">①</div>
+      <div class="cb">
+        <p><strong>Right panel:</strong> <kbd>Group</kbd> should appear in the box on the right — this tells JASP to run pairwise comparisons for all levels of <kbd>Group</kbd>.</p>
+        <p><strong>Correction:</strong> <kbd>Tukey</kbd> is checked. If your variances had been unequal, you would check <kbd>Games-Howell</kbd> instead.</p>
+        <p><strong>Effect size</strong> and <strong>Confidence intervals</strong> are both checked to get Hedges' <em>g</em>ₛ and 95% CIs for each comparison.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       10A.6  POST-HOC OUTPUT
+  ════════════════════════════════════════ -->
+  <h2 id="posthoc-output"><span class="sn">10A.6</span>Output: Post-Hoc Comparisons</h2>
+
+  <p>The post-hoc output shows a row for every pair of groups. The most important columns are the <strong>mean difference</strong> and its <strong>95% CI</strong> — if the CI does not contain zero, the difference is statistically significant.</p>
+
+  <div class="sb">
+    <div class="sb-label"><span class="fig-badge">Fig 10–9</span>Post Hoc Comparisons table — all pairwise results</div>
+    <div class="img-wrap" id="w-10-9">
+      <img src="screenshots/fig10-9.png"
+           alt="Fig 10–9"
+           onclick="openLB(this.src)"
+           onerror="handleImgError(this)">
+      <div class="img-missing">
+        <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:block;opacity:.35;"><rect x="4" y="13" width="40" height="30" rx="4" stroke="currentColor" stroke-width="2.5" fill="none"/><circle cx="15" cy="23" r="4" stroke="currentColor" stroke-width="2" fill="none"/><polyline points="4,36 15,25 23,32 31,22 44,36" stroke="currentColor" stroke-width="2.2" fill="none" stroke-linejoin="round" stroke-linecap="round"/><line x1="24" y1="8" x2="24" y2="1" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/><polyline points="19,6 24,1 29,6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+        <div class="im-path">screenshots/fig10-9.png</div>
+        <div class="im-hint">Post Hoc table: Mean Diff, SE, t, p (Tukey), 95% CI, Hedges' gₛ for NP/PTP/OLP pairs</div>
+      </div>
+    </div>
+    <div class="callout">
+      <div class="cm cm-red">①</div>
+      <div class="cb">
+        <p>There are three rows — one per pair. Read each 95% CI:</p>
+        <p>• <strong>NP vs. PTP</strong>: CI = [3.17, 8.78] — does <em>not</em> contain zero → <strong>significant</strong>. PTP scored higher.</p>
+        <p>• <strong>NP vs. OLP</strong>: CI = [−0.10, 5.34] — contains zero → <strong>not significant</strong>.</p>
+        <p>• <strong>PTP vs. OLP</strong>: CI = [0.93, 5.85] — does <em>not</em> contain zero → <strong>significant</strong>. PTP scored higher.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="sb">
+    <div class="sb-label"><span class="fig-badge">Fig 10–10</span>Post Hoc Effect Sizes — Hedges' <em>g</em>ₛ with 95% CIs</div>
+    <div class="img-wrap" id="w-10-10">
+      <img src="screenshots/fig10-10.png"
+           alt="Fig 10–10"
+           onclick="openLB(this.src)"
+           onerror="handleImgError(this)">
+      <div class="img-missing">
+        <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:block;opacity:.35;"><rect x="4" y="13" width="40" height="30" rx="4" stroke="currentColor" stroke-width="2.5" fill="none"/><circle cx="15" cy="23" r="4" stroke="currentColor" stroke-width="2" fill="none"/><polyline points="4,36 15,25 23,32 31,22 44,36" stroke="currentColor" stroke-width="2.2" fill="none" stroke-linejoin="round" stroke-linecap="round"/><line x1="24" y1="8" x2="24" y2="1" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/><polyline points="19,6 24,1 29,6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+        <div class="im-path">screenshots/fig10-10.png</div>
+        <div class="im-hint">Effect Sizes table: Hedges' gₛ point estimate and 95% CI for each pair</div>
+      </div>
+    </div>
+    <div class="callout">
+      <div class="cm cm-red">①</div>
+      <div class="cb">
+        <p>Hedges' <em>g</em>ₛ corrects for small sample sizes and uses the pooled SD as the standardizer. Values for the Ellis &amp; Yuan data:</p>
+        <p>• NP vs. PTP: <em>g</em>ₛ = 1.48 [0.61, 2.24] — <strong>large effect</strong></p>
+        <p>• NP vs. OLP: <em>g</em>ₛ = 0.70 [0.11, 1.47] — medium, but CI includes small-to-large range</p>
+        <p>• PTP vs. OLP: <em>g</em>ₛ = 0.92 [0.20, 1.61] — medium-to-large effect</p>
+        <p>By Plonsky &amp; Oswald's (2014) SLA benchmarks: 0.60 = small, 1.00 = medium, 1.50 = large.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="box box-info">
+    <span class="box-label">📌 Interpreting the Full Pattern</span>
+    <p>The PTP group is significantly different from both other groups. The NP and OLP groups are not significantly different from each other. This means the key finding is that <strong>pre-task planning produced more syntactic variety</strong> than either no planning or online planning, while unlimited writing time (OLP) did not offer a significant advantage over no planning at all.</p>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       10A.7  WRITE-UP
+  ════════════════════════════════════════ -->
+  <h2 id="report"><span class="sn">10A.7</span>Model Write-Up</h2>
+
+  <div class="report">
+    <span class="rl">Model Reporting Paragraph — One-Way ANOVA</span>
+    <p>To examine whether planning condition affected the syntactic variety of learners' writing, a one-way between-subjects ANOVA was conducted. Descriptive statistics were: no planning (NP), <em>M</em> = 16.21, <em>SD</em> = 4.10, <em>n</em> = 14; pre-task planning (PTP), <em>M</em> = 22.07, <em>SD</em> = 3.58, <em>n</em> = 14; online planning (OLP), <em>M</em> = 18.86, <em>SD</em> = 3.21, <em>n</em> = 14. Levene's test indicated that the equal-variances assumption was met, <em>F</em>(2, 39) = 0.29, <em>p</em> = .750, and the Q-Q plot of residuals did not show serious departures from normality.</p>
+    <p>The omnibus <em>F</em>-test was statistically significant, <em>F</em>(2, 39) = 9.05, <em>p</em> &lt; .001, ω² = 0.28, indicating that planning condition explained approximately 28% of the variance in syntactic variety. Tukey post-hoc tests revealed that the PTP group produced significantly more syntactic variety than the NP group (mean difference = 5.86, 95% CI [3.17, 8.78], Hedges' <em>g</em>ₛ = 1.48 [0.61, 2.24], a large effect) and significantly more than the OLP group (mean difference = 3.21, 95% CI [0.93, 5.85], Hedges' <em>g</em>ₛ = 0.92 [0.20, 1.61], a medium-to-large effect). The difference between the NP and OLP groups was not statistically significant (mean difference = 2.64, 95% CI [−0.10, 5.34], Hedges' <em>g</em>ₛ = 0.70 [0.11, 1.47]). These findings suggest that pre-task planning time led to meaningfully greater syntactic complexity in writing, while unlimited online planning time did not confer a significant advantage over no planning.</p>
+  </div>
+
+  <div class="ch-nav">
+    <a href="10_one-way-anova.html" style="flex-direction:row;">
+      <span class="arrow">←</span>
+      <span><span class="nl">Back to</span><span>Ch. 10 · Concept &amp; Theory</span></span>
+    </a>
+    <a href="#" style="flex-direction:row-reverse;">
+      <span><span class="nl">Next Chapter</span><span>Ch. 11 · Two-Way ANOVA →</span></span>
+      <span class="arrow">→</span>
+    </a>
+  </div>
+
+</div>
+</main>
+
+<!-- LIGHTBOX -->
+<div id="lightbox">
+  <button id="lb-close" onclick="closeLB()">×</button>
+  <img id="lb-img" src="" alt="">
+</div>
+
+<script>
+
+  function handleImgError(img) {
+    img.style.display = 'none';
+    var m = img.nextElementSibling;
+    if (m) m.style.display = 'flex';
+  }
+
+
+  function handleImgError(img) {
+    img.style.display = 'none';
+    var m = img.nextElementSibling;
+    if (m) m.style.display = 'flex';
+  }
+
+
+  function handleImgError(img) {
+    img.style.display = 'none';
+    var m = img.nextElementSibling;
+    if (m && m.classList.contains('img-missing')) m.style.display = 'flex';
+  }" alt="Screenshot" onclick="openLB('${url}')">`;
+  }
+
+  function openLB(src) {
+    document.getElementById('lb-img').src = src;
+    document.getElementById('lightbox').classList.add('open');
+  }
+  function closeLB() {
+    document.getElementById('lightbox').classList.remove('open');
+    document.getElementById('lb-img').src = '';
+  }
+  document.getElementById('lightbox').addEventListener('click', e => { if (e.target === document.getElementById('lightbox')) closeLB(); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLB(); });
+
+  // Scroll-spy
+  const heads = document.querySelectorAll('h2[id]');
+  const subs = document.querySelectorAll('.nav-sub');
+  const io = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        subs.forEach(a => { if (a.getAttribute('href') && a.getAttribute('href').startsWith('#')) a.classList.remove('active'); });
+        const m = document.querySelector(`.nav-sub[href="#${e.target.id}"]`);
+        if (m) m.classList.add('active');
+      }
+    });
+  }, { rootMargin: '-15% 0px -70% 0px' });
+  heads.forEach(h => io.observe(h));
+</script>
+</body>
+</html>

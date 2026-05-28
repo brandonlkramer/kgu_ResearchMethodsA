@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chapter 6: Correlation in JASP | Statistics with JASP</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;0,700;1,400&family=Source+Sans+3:wght@300;400;500;600&family=Source+Code+Pro:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:#faf8f5;--surface:#fff;--sidebar-bg:#1c2a38;
+    --sidebar-hover:#2d3f52;--sidebar-active:#3b8ea5;
+    --ink:#1a1f2e;--muted:#6b7280;
+    --accent:#2a7f9e;--accent2:#c0622a;
+    --red:#dc2626;
+    --border:#e2ddd6;--highlight:#eef7fa;
+    --tip-bg:#f0f9eb;--tip-border:#5a9e4a;
+    --warn-bg:#fdf6ec;--warn-border:#d97c2a;
+    --sidebar-w:280px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Source Sans 3',sans-serif;background:var(--bg);color:var(--ink);font-size:17px;line-height:1.75;display:flex;min-height:100vh;}
+
+  /* SIDEBAR */
+  #sidebar{width:var(--sidebar-w);background:var(--sidebar-bg);color:#c8d4e0;position:fixed;top:0;left:0;bottom:0;overflow-y:auto;z-index:100;font-size:14px;}
+  #sh{padding:24px 20px 16px;border-bottom:1px solid rgba(255,255,255,.08);}
+  #sh .bt{font-family:'Lora',serif;font-size:15px;font-weight:700;color:#fff;line-height:1.3;margin-bottom:4px;}
+  #sh .bs{font-size:12px;color:rgba(200,212,224,.55);letter-spacing:.05em;text-transform:uppercase;}
+  #sidebar nav{padding:12px 0;}
+  .nl{padding:12px 20px 4px;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:rgba(200,212,224,.4);font-weight:600;}
+  .nc{display:block;padding:7px 20px;color:#c8d4e0;text-decoration:none;transition:background .15s,color .15s;line-height:1.4;}
+  .nc:hover{background:var(--sidebar-hover);color:#fff;}
+  .nc.active{background:rgba(59,142,165,.25);color:var(--sidebar-active);border-left:3px solid var(--sidebar-active);padding-left:17px;font-weight:600;}
+  .ns{display:block;padding:5px 20px 5px 36px;color:rgba(200,212,224,.65);text-decoration:none;font-size:13px;transition:color .15s;}
+  .ns:hover{color:#fff;}
+  .ns.active{color:var(--sidebar-active);}
+
+  /* MAIN */
+  #main{flex:1;min-width:0;}
+  #content{max-width:860px;margin:0 auto;padding:56px 48px 80px;}
+
+  .eyebrow{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);font-weight:600;margin-bottom:10px;}
+  h1.cht{font-family:'Lora',serif;font-size:2.4rem;font-weight:700;line-height:1.15;color:var(--ink);margin-bottom:10px;}
+  h1.cht em{font-style:italic;color:var(--accent2);}
+  .chsub{font-family:'Lora',serif;font-size:1rem;font-style:italic;color:var(--muted);margin-bottom:12px;}
+  .pls{display:flex;gap:10px;margin-bottom:32px;flex-wrap:wrap;}
+  .pl{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:5px;font-size:13px;font-weight:600;text-decoration:none;transition:all .15s;}
+  .plc{background:var(--highlight);color:var(--accent);border:1.5px solid var(--accent);}
+  .plc:hover{background:var(--accent);color:#fff;}
+  .plj{background:var(--accent);color:#fff;border:1.5px solid var(--accent);cursor:default;opacity:.85;}
+  hr.dv{border:none;border-top:2px solid var(--border);margin-bottom:40px;}
+
+  h2{font-family:'Lora',serif;font-size:1.6rem;font-weight:700;color:var(--ink);margin:56px 0 16px;padding-bottom:10px;border-bottom:2px solid var(--border);scroll-margin-top:24px;}
+  h2 .sn{color:var(--accent);margin-right:8px;font-weight:400;font-size:1.1rem;}
+  h3{font-family:'Lora',serif;font-size:1.15rem;font-weight:600;color:var(--ink);margin:32px 0 12px;scroll-margin-top:24px;}
+  p{margin-bottom:16px;}
+  strong{font-weight:600;}
+  em{font-style:italic;}
+  a{color:var(--accent);text-decoration:none;}
+  a:hover{text-decoration:underline;}
+  kbd{background:#f0ede8;border:1px solid #ccc;border-radius:3px;padding:1px 7px;font-family:'Source Code Pro',monospace;font-size:13px;color:#333;white-space:nowrap;}
+
+  /* STEP LIST */
+  .sl{list-style:none;padding:0;margin:24px 0;}
+  .sl>li{display:flex;gap:18px;align-items:flex-start;padding:14px 0;border-bottom:1px solid var(--border);}
+  .sl>li:last-child{border-bottom:none;}
+  .snb{flex-shrink:0;width:32px;height:32px;background:var(--accent);color:#fff;border-radius:50%;font-size:14px;font-weight:700;display:flex;align-items:center;justify-content:center;margin-top:2px;}
+  .slb{flex:1;min-width:0;}
+  .slb p{margin:0;}
+
+  /* SCREENSHOT BLOCK */
+  .sb{margin:28px 0 36px;border:1px solid var(--border);border-radius:10px;overflow:hidden;background:var(--surface);}
+  .sbl{display:flex;align-items:center;gap:10px;padding:10px 18px;background:#f4f2ee;border-bottom:1px solid var(--border);font-size:13px;font-weight:600;color:var(--muted);letter-spacing:.04em;}
+  .fb{background:var(--ink);color:#fff;font-size:10px;font-weight:700;letter-spacing:.08em;padding:2px 8px;border-radius:3px;text-transform:uppercase;}
+  .iw{position:relative;background:#f9f8f6;min-height:160px;display:flex;align-items:center;justify-content:center;}
+  .iw img{display:block;width:100%;height:auto;cursor:zoom-in;}
+  
+  .ph:hover{border-color:var(--accent);background:var(--highlight);color:var(--accent);}
+  
+  .phi{line-height:1;display:flex;align-items:center;justify-content:center;}
+  .pht{font-size:14px;font-weight:600;text-align:center;line-height:1.4;}
+  .phh{font-size:12px;opacity:.7;text-align:center;}
+
+  /* CALLOUT */
+  .callout{border-top:1px solid var(--border);padding:14px 20px;display:flex;gap:14px;align-items:flex-start;background:#fff;}
+  .cm{flex-shrink:0;width:22px;height:22px;border-radius:50%;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;margin-top:3px;}
+  .cr{background:#fecaca;color:var(--red);border:2px solid var(--red);}
+  .cb{background:#dbeafe;color:#1d4ed8;border:2px solid #3b82f6;}
+  .cg{background:#dcfce7;color:#15803d;border:2px solid #22c55e;}
+  .cy{background:#fef9c3;color:#854d0e;border:2px solid #ca8a04;}
+  .cbtxt{font-size:15px;line-height:1.6;flex:1;}
+  .cbtxt p{margin:0 0 6px;}
+  .cbtxt p:last-child{margin:0;}
+
+  /* BOXES */
+  .box{border-radius:6px;padding:18px 24px;margin:24px 0;}
+  .box p:last-child{margin:0;}
+  .box-tip{background:var(--tip-bg);border-left:4px solid var(--tip-border);}
+  .box-warn{background:var(--warn-bg);border-left:4px solid var(--warn-border);}
+  .box-info{background:var(--highlight);border-left:4px solid var(--accent);}
+  .blabel{font-size:11px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;margin-bottom:8px;display:block;}
+  .box-tip .blabel{color:var(--tip-border);}
+  .box-warn .blabel{color:var(--warn-border);}
+  .box-info .blabel{color:var(--accent);}
+
+  /* TABLE */
+  .tw{overflow-x:auto;margin:20px 0;border:1px solid var(--border);border-radius:6px;}
+  table{width:100%;border-collapse:collapse;font-size:15px;}
+  thead tr{background:var(--ink);color:#fff;}
+  thead th{padding:10px 14px;text-align:left;font-weight:600;font-size:13px;letter-spacing:.04em;}
+  tbody tr:nth-child(even){background:var(--highlight);}
+  tbody td{padding:9px 14px;border-bottom:1px solid var(--border);vertical-align:top;}
+  tbody tr:last-child td{border-bottom:none;}
+  .tc{text-align:center;}
+
+  /* REPORT */
+  .report{background:#fffbf5;border:1px solid #e8d5b7;border-radius:6px;padding:22px 28px 20px;margin:24px 0;font-family:'Lora',serif;font-size:.95rem;line-height:1.85;color:#2a2a2a;position:relative;}
+  .report::before{content:'"';position:absolute;top:-6px;left:18px;font-size:4rem;color:#e8d5b7;line-height:1;}
+  .rl{font-family:'Source Sans 3',sans-serif;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--accent2);font-weight:700;margin-bottom:14px;display:block;font-style:normal;}
+  .report p{margin-bottom:10px;}
+  .report p:last-child{margin:0;}
+
+  /* CHAPTER NAV */
+  .chnav{display:flex;justify-content:space-between;align-items:center;margin-top:64px;padding-top:24px;border-top:2px solid var(--border);gap:16px;}
+  .chnav a{display:flex;align-items:center;gap:8px;padding:12px 20px;border:1.5px solid var(--border);border-radius:6px;color:var(--ink);font-weight:500;font-size:15px;text-decoration:none;transition:border-color .2s,background .2s;}
+  .chnav a:hover{border-color:var(--accent);background:var(--highlight);text-decoration:none;}
+  .nl2{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);display:block;}
+  .arrow{color:var(--accent);font-size:1.2rem;}
+
+  /* LIGHTBOX */
+  #lb{display:none;position:fixed;inset:0;background:rgba(0,0,0,.82);z-index:1000;align-items:center;justify-content:center;padding:24px;cursor:zoom-out;}
+  #lb.open{display:flex;}
+  #lb img{max-width:100%;max-height:90vh;border-radius:6px;box-shadow:0 24px 60px rgba(0,0,0,.5);object-fit:contain;}
+  #lbc{position:absolute;top:16px;right:20px;color:#fff;font-size:2rem;cursor:pointer;line-height:1;background:none;border:none;opacity:.8;}
+  #lbc:hover{opacity:1;}
+
+  @media(max-width:900px){
+    #sidebar{transform:translateX(-100%);}
+    #main{}
+    #content{padding:32px 20px 60px;}
+  }
+
+  /* ── Image slots ─────────────────────────────── */
+  .iw img, .screenshot-img-wrap img {
+    display:block; width:100%; height:auto; cursor:zoom-in;
+  }
+  .img-missing {
+    display:none; flex-direction:column; align-items:center;
+    justify-content:center; gap:12px; padding:36px 24px;
+    min-height:160px; width:100%;
+    background:#faf9f7; border:2px dashed #d5cfc6; color:#aaa;
+  }
+  .img-missing .im-path {
+    font-family:'Source Code Pro', monospace;
+    font-size:13px; font-weight:600;
+    color:#5a9e4a; background:#f0f9eb;
+    border:1px solid #c3e6b3; border-radius:4px;
+    padding:4px 12px;
+  }
+  .img-missing .im-hint {
+    font-size:12px; color:#9ca3af; text-align:center;
+    max-width:340px; line-height:1.5;
+  }
+
+
+  /* ── Screenshot image slots ─────────────────── */
+  .iw img, .img-wrap img, .screenshot-img-wrap img {
+    display:block; width:100%; height:auto; cursor:zoom-in;
+  }
+  .img-missing {
+    display:none; flex-direction:column; align-items:center;
+    justify-content:center; gap:12px; padding:40px 24px;
+    min-height:170px; width:100%;
+    background:#faf9f7; border:2px dashed #d5cfc6; color:#aaa;
+    box-sizing:border-box;
+  }
+  .img-missing .im-path {
+    font-family:'Source Code Pro', monospace;
+    font-size:13px; font-weight:600; color:#5a9e4a;
+    background:#f0f9eb; border:1px solid #c3e6b3;
+    border-radius:4px; padding:4px 12px;
+  }
+  .img-missing .im-hint {
+    font-size:12px; color:#9ca3af; text-align:center;
+    max-width:380px; line-height:1.5;
+  }
+
+</style>
+</head>
+<body>
+
+<main id="main">
+<div id="content">
+
+  <div class="eyebrow">Chapter 6 · JASP Walkthrough</div>
+  <h1 class="cht">Correlation in <em>JASP</em></h1>
+  <p class="chsub">Step-by-step instructions with annotated screenshots</p>
+  <div class="pls">
+    <a class="pl plc" href="06_correlation.html">← Concept &amp; Theory</a>
+    <a class="pl plj" href="#">JASP Walkthrough (this page)</a>
+  </div>
+  <hr class="dv">
+
+  <p>This page walks through the full correlation workflow in JASP using two example datasets — <strong>Flege et al. (1999)</strong> for a single correlation between Age of Arrival and English pronunciation, and <strong>DeKeyser (2000)</strong> for a scatterplot with grouped data. Click any dashed box to upload your screenshot. <strong>Red callouts</strong> show key values; <strong>blue callouts</strong> explain interpretation; <strong>yellow callouts</strong> flag common mistakes.</p>
+
+  <div class="box box-info">
+    <span class="blabel">📂 Sample Data</span>
+    <p><strong>Flege et al. (1999):</strong> <kbd>FlegeYeniKomshianLiu.csv</kbd> — variables include <kbd>AOA</kbd> (Age of Arrival, continuous Scale) and <kbd>PronEng</kbd> (English pronunciation rating 1–9, Scale). <em>N</em> = 240.<br>
+    <strong>DeKeyser (2000):</strong> <kbd>DeKeyser2000.csv</kbd> — variables include <kbd>Age</kbd> (continuous), <kbd>GJTScore</kbd> (grammar test score), and <kbd>Status</kbd> (nominal group: arrived before/after age 15).</p>
+  </div>
+
+  <!-- ══════════════════════
+       6A.1 SCATTERPLOT FIRST
+  ══════════════════════ -->
+  <h2 id="scatter"><span class="sn">6A.1</span>Step 1: Scatterplot First — Always</h2>
+
+  <p>Before running any correlation, you must examine a scatterplot. In JASP, scatterplots are produced through the <strong>Descriptives</strong> module, not the Regression module where correlation lives.</p>
+
+  <ol class="sl">
+    <li><div class="snb">1</div><div class="slb"><p>Load the Flege et al. data (<kbd>FlegeYeniKomshianLiu.csv</kbd>). Confirm <kbd>AOA</kbd> and <kbd>PronEng</kbd> are both set to <strong>Scale</strong>.</p></div></li>
+    <li><div class="snb">2</div><div class="slb"><p>Click the <kbd>Descriptives</kbd> module in the top menu.</p></div></li>
+    <li><div class="snb">3</div><div class="slb"><p>Move <kbd>PronEng</kbd> into the <strong>Variables</strong> box and <kbd>AOA</kbd> into the <strong>Variables</strong> box.</p></div></li>
+    <li><div class="snb">4</div><div class="slb"><p>Scroll down to the <kbd>Basic Plots</kbd> section. Check ☑ <kbd>Scatter plots</kbd>. JASP will produce a scatterplot for each pair of variables.</p></div></li>
+    <li><div class="snb">5</div><div class="slb"><p>Within the scatterplot options, ensure ☑ <kbd>Regression line</kbd> is selected. This adds the linear best-fit line to the plot.</p></div></li>
+  </ol>
+
+  <div class="sb">
+    <div class="sbl"><span class="fb">Fig 6–1</span>Scatterplot setup in the Descriptives module</div>
+    <div class="iw" id="w-6-1">
+      <img src="screenshots/fig6-1.png" alt="Fig 6–1"
+         onclick="openLB(this.src)"
+         onerror="handleImgError(this)">
+      <div class="img-missing">
+        <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:block;opacity:.35;"><rect x="4" y="13" width="40" height="30" rx="4" stroke="currentColor" stroke-width="2.5" fill="none"/><circle cx="15" cy="23" r="4" stroke="currentColor" stroke-width="2" fill="none"/><polyline points="4,36 15,25 23,32 31,22 44,36" stroke="currentColor" stroke-width="2.2" fill="none" stroke-linejoin="round" stroke-linecap="round"/><line x1="24" y1="8" x2="24" y2="1" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/><polyline points="19,6 24,1 29,6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+        <div class="im-path">screenshots/fig6-1.png</div>
+        <div class="im-hint">Descriptives module: AOA + PronEng in Variables box, Scatter plots checked</div>
+      </div>
+    </div>
+    <div class="callout">
+      <div class="cm cr">①</div>
+      <div class="cbtxt">
+        <p><strong>Variables box:</strong> Both <kbd>AOA</kbd> and <kbd>PronEng</kbd> should appear here. JASP automatically generates a scatterplot for every pair of variables listed.</p>
+        <p><strong>Basic Plots → Scatter plots:</strong> must be checked to generate the scatterplot in the output panel.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="sb">
+    <div class="sbl"><span class="fb">Fig 6–2</span>Scatterplot output — AOA × Pronunciation Score</div>
+    <div class="iw" id="w-6-2">
+      <img src="screenshots/fig6-2.png" alt="Fig 6–2"
+         onclick="openLB(this.src)"
+         onerror="handleImgError(this)">
+      <div class="img-missing">
+        <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:block;opacity:.35;"><rect x="4" y="13" width="40" height="30" rx="4" stroke="currentColor" stroke-width="2.5" fill="none"/><circle cx="15" cy="23" r="4" stroke="currentColor" stroke-width="2" fill="none"/><polyline points="4,36 15,25 23,32 31,22 44,36" stroke="currentColor" stroke-width="2.2" fill="none" stroke-linejoin="round" stroke-linecap="round"/><line x1="24" y1="8" x2="24" y2="1" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/><polyline points="19,6 24,1 29,6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+        <div class="im-path">screenshots/fig6-2.png</div>
+        <div class="im-hint">Scatterplot: AOA on x-axis, Pronunciation Score on y-axis, regression line descending left-to-right</div>
+      </div>
+    </div>
+    <div class="callout">
+      <div class="cm cb">→</div>
+      <div class="cbtxt">
+        <p><strong>What to look for:</strong> Is the trend roughly <em>linear</em> — does the regression line follow the data reasonably well? For the Flege data, the answer is yes: a clear, steep negative slope is visible, with data points clustering fairly tightly around the line.</p>
+        <p><strong>Positive or negative?</strong> A line sloping down from left to right = negative correlation. As AOA increases (older), pronunciation scores decrease.</p>
+        <p><strong>Outliers?</strong> Any points far from the regression line may be influential. The Flege data has a few — note their location but they do not disrupt the overall pattern here.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="box box-warn">
+    <span class="blabel">⚠ Check for Non-Linearity</span>
+    <p>If the Loess smoother (a flexible curved line) diverges substantially from the straight regression line, the relationship may be non-linear. A Pearson correlation summarizes a <em>linear</em> relationship — if the true relationship curves, the <em>r</em> value will underestimate the strength of the association. JASP's scatterplot includes a Loess option; always compare both lines.</p>
+  </div>
+
+  <!-- ══════════════════════
+       6A.2 GROUPED SCATTERPLOT
+  ══════════════════════ -->
+  <h2 id="split-scatter"><span class="sn">6A.2</span>Scatterplot with Groups</h2>
+
+  <p>When you have a categorical variable that divides participants into groups, you can color-code the scatterplot to see whether the relationship differs across groups.</p>
+
+  <ol class="sl">
+    <li><div class="snb">6</div><div class="slb"><p>Load the DeKeyser (2000) data. In Descriptives, move <kbd>GJTScore</kbd> and <kbd>Age</kbd> into the Variables box.</p></div></li>
+    <li><div class="snb">7</div><div class="slb"><p>Move <kbd>Status</kbd> (arrived before/after age 15) into the <strong>Split</strong> box directly below the Variables box. JASP will color-code the scatterplot points by group.</p></div></li>
+    <li><div class="snb">8</div><div class="slb"><p>Check ☑ <kbd>Scatter plots</kbd> and ☑ <kbd>Regression line</kbd> as before.</p></div></li>
+  </ol>
+
+  <div class="sb">
+    <div class="sbl"><span class="fb">Fig 6–3</span>Grouped scatterplot — DeKeyser (2000) data with Status as Split variable</div>
+    <div class="iw" id="w-6-3">
+      <img src="screenshots/fig6-3.png" alt="Fig 6–3"
+         onclick="openLB(this.src)"
+         onerror="handleImgError(this)">
+      <div class="img-missing">
+        <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:block;opacity:.35;"><rect x="4" y="13" width="40" height="30" rx="4" stroke="currentColor" stroke-width="2.5" fill="none"/><circle cx="15" cy="23" r="4" stroke="currentColor" stroke-width="2" fill="none"/><polyline points="4,36 15,25 23,32 31,22 44,36" stroke="currentColor" stroke-width="2.2" fill="none" stroke-linejoin="round" stroke-linecap="round"/><line x1="24" y1="8" x2="24" y2="1" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/><polyline points="19,6 24,1 29,6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+        <div class="im-path">screenshots/fig6-3.png</div>
+        <div class="im-hint">Scatterplot: Age on x-axis, GJT Score on y-axis, two colors for Status groups</div>
+      </div>
+    </div>
+    <div class="callout">
+      <div class="cm cb">→</div>
+      <div class="cbtxt">
+        <p>Splitting by Status reveals two clusters: early arrivals (arrived before age 15) cluster in the top-left with higher scores at younger ages; late arrivals cluster in the bottom-right with lower scores at older ages. Both groups show negative trends, consistent with a critical period interpretation.</p>
+        <p>Seeing the data split by group can also warn you of <strong>Simpson's paradox</strong> — where a correlation within groups runs in the opposite direction from the overall correlation. Always check.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════
+       6A.3 SETTING UP CORRELATION
+  ══════════════════════ -->
+  <h2 id="setup"><span class="sn">6A.3</span>Setting Up the Correlation</h2>
+
+  <p>Correlation in JASP lives under the <strong>Regression</strong> module — not under Descriptives or a dedicated Correlation module.</p>
+
+  <ol class="sl">
+    <li><div class="snb">9</div><div class="slb"><p>Click the <kbd>Regression</kbd> module in the top menu bar.</p></div></li>
+    <li><div class="snb">10</div><div class="slb"><p>Select <kbd>Correlation</kbd> from the dropdown.</p></div></li>
+    <li><div class="snb">11</div><div class="slb"><p>Move <kbd>AOA</kbd> and <kbd>PronEng</kbd> into the <strong>Variables</strong> box. You can add as many variables as you want — JASP computes all pairwise correlations simultaneously.</p></div></li>
+  </ol>
+
+  <div class="sb">
+    <div class="sbl"><span class="fb">Fig 6–4</span>Regression module → Correlation dialog</div>
+    <div class="iw" id="w-6-4">
+      <img src="screenshots/fig6-4.png" alt="Fig 6–4"
+         onclick="openLB(this.src)"
+         onerror="handleImgError(this)">
+      <div class="img-missing">
+        <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:block;opacity:.35;"><rect x="4" y="13" width="40" height="30" rx="4" stroke="currentColor" stroke-width="2.5" fill="none"/><circle cx="15" cy="23" r="4" stroke="currentColor" stroke-width="2" fill="none"/><polyline points="4,36 15,25 23,32 31,22 44,36" stroke="currentColor" stroke-width="2.2" fill="none" stroke-linejoin="round" stroke-linecap="round"/><line x1="24" y1="8" x2="24" y2="1" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/><polyline points="19,6 24,1 29,6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+        <div class="im-path">screenshots/fig6-4.png</div>
+        <div class="im-hint">Correlation dialog: AOA and PronEng in Variables box</div>
+      </div>
+    </div>
+    <div class="callout">
+      <div class="cm cy">!</div>
+      <div class="cbtxt">
+        <p><strong>Common mistake:</strong> Looking for correlation under the wrong module. It is in <strong>Regression → Correlation</strong>, not in Descriptives or any dedicated Correlation section. If you can't find it, click the Regression module in the top ribbon first.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════
+       6A.4 OPTIONS
+  ══════════════════════ -->
+  <h2 id="options"><span class="sn">6A.4</span>Options to Select</h2>
+
+  <ol class="sl">
+    <li><div class="snb">12</div><div class="slb"><p>Under <strong>Sample Correlation Coefficients</strong>, keep ☑ <kbd>Pearson's r</kbd> checked (the default). This is the standard parametric correlation.</p></div></li>
+    <li><div class="snb">13</div><div class="slb"><p>Under <strong>Additional Options</strong>, check ☑ <kbd>Confidence intervals</kbd>. Set the level to <kbd>95%</kbd>. This is essential — always report CIs alongside <em>r</em>.</p></div></li>
+    <li><div class="snb">14</div><div class="slb"><p>Check ☑ <kbd>Sample size</kbd> — this adds <em>N</em> to the output table, which must always be reported.</p></div></li>
+    <li><div class="snb">15</div><div class="slb"><p><strong>Uncheck</strong> ☒ <kbd>Report significance</kbd> and ☒ <kbd>Flag significant correlations</kbd> — these add <em>p</em>-values and asterisks, which are not recommended for correlations (see concept page Section 6.8). Removing them keeps the focus on effect size and CI.</p></div></li>
+  </ol>
+
+  <div class="sb">
+    <div class="sbl"><span class="fb">Fig 6–5</span>Correlation options — CI and Sample size checked, significance unflagged</div>
+    <div class="iw" id="w-6-5">
+      <img src="screenshots/fig6-5.png" alt="Fig 6–5"
+         onclick="openLB(this.src)"
+         onerror="handleImgError(this)">
+      <div class="img-missing">
+        <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:block;opacity:.35;"><rect x="4" y="13" width="40" height="30" rx="4" stroke="currentColor" stroke-width="2.5" fill="none"/><circle cx="15" cy="23" r="4" stroke="currentColor" stroke-width="2" fill="none"/><polyline points="4,36 15,25 23,32 31,22 44,36" stroke="currentColor" stroke-width="2.2" fill="none" stroke-linejoin="round" stroke-linecap="round"/><line x1="24" y1="8" x2="24" y2="1" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/><polyline points="19,6 24,1 29,6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+        <div class="im-path">screenshots/fig6-5.png</div>
+        <div class="im-hint">Options: Pearson's r checked; Confidence intervals 95% checked; Sample size checked; Report significance unchecked</div>
+      </div>
+    </div>
+    <div class="callout">
+      <div class="cm cr">①</div>
+      <div class="cbtxt">
+        <p><strong>Confidence intervals (95%):</strong> checked — gives the lower and upper bound of the CI for <em>r</em>.</p>
+        <p><strong>Sample size:</strong> checked — adds <em>N</em> to the output, required for reporting.</p>
+        <p><strong>Report significance / Flag significant correlations:</strong> both unchecked — removes <em>p</em>-values and asterisks from the table. The <em>r</em> value and its CI are more informative.</p>
+      </div>
+    </div>
+    <div class="callout">
+      <div class="cm cy">!</div>
+      <div class="cbtxt">
+        <p><strong>Spearman's ρ and Kendall's τ-b</strong> are also available as checkboxes. Leave these unchecked unless you have a specific reason to use a non-parametric test. For most SLA research with continuous variables, Pearson's <em>r</em> is appropriate.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════
+       6A.5 READING THE OUTPUT
+  ══════════════════════ -->
+  <h2 id="output"><span class="sn">6A.5</span>Reading the Output</h2>
+
+  <p>JASP produces a correlation table with one row per variable pair. The key columns are the correlation coefficient, the CI bounds, and the sample size.</p>
+
+  <div class="sb">
+    <div class="sbl"><span class="fb">Fig 6–6</span>Correlation output table — AOA × PronEng</div>
+    <div class="iw" id="w-6-6">
+      <img src="screenshots/fig6-6.png" alt="Fig 6–6"
+         onclick="openLB(this.src)"
+         onerror="handleImgError(this)">
+      <div class="img-missing">
+        <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:block;opacity:.35;"><rect x="4" y="13" width="40" height="30" rx="4" stroke="currentColor" stroke-width="2.5" fill="none"/><circle cx="15" cy="23" r="4" stroke="currentColor" stroke-width="2" fill="none"/><polyline points="4,36 15,25 23,32 31,22 44,36" stroke="currentColor" stroke-width="2.2" fill="none" stroke-linejoin="round" stroke-linecap="round"/><line x1="24" y1="8" x2="24" y2="1" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/><polyline points="19,6 24,1 29,6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+        <div class="im-path">screenshots/fig6-6.png</div>
+        <div class="im-hint">Correlation table: Variables | r | 95% CI Lower | 95% CI Upper | N</div>
+      </div>
+    </div>
+    <div class="callout">
+      <div class="cm cr">①</div>
+      <div class="cbtxt">
+        <p>Read the key values from the output row for <strong>AOA – PronEng</strong>:</p>
+        <p>• <strong><em>r</em> = −.86</strong> — a large negative correlation</p>
+        <p>• <strong>95% CI = [−.89, −.82]</strong> — a narrow interval because <em>N</em> is large; zero is far outside</p>
+        <p>• <strong><em>N</em> = 240</strong> — report this alongside <em>r</em></p>
+        <p>Calculate <em>r</em>² yourself: (−.86)² = <strong>.74</strong> — AOA explains 74% of the variance in pronunciation ratings.</p>
+      </div>
+    </div>
+    <div class="callout">
+      <div class="cm cb">→</div>
+      <div class="cbtxt">
+        <p><strong>Interpreting the CI:</strong> Because the CI [−.89, −.82] does not contain zero, and is entirely on the negative side, we can conclude the true population correlation is negative and large. If the CI had contained zero (e.g., [−.20, .05]), we could not rule out the possibility of no relationship.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════
+       6A.6 CORRELATION MATRIX
+  ══════════════════════ -->
+  <h2 id="matrix"><span class="sn">6A.6</span>Running Multiple Correlations at Once</h2>
+
+  <p>When you have several variables and want all pairwise correlations simultaneously, simply add more variables to the Variables box. JASP will automatically produce a full correlation matrix.</p>
+
+  <ol class="sl">
+    <li><div class="snb">16</div><div class="slb"><p>In the Correlation dialog, move additional variables into the Variables box alongside <kbd>AOA</kbd> and <kbd>PronEng</kbd>. For the Flege dataset, you might add <kbd>LOR</kbd> (length of residence) or other continuous measures.</p></div></li>
+    <li><div class="snb">17</div><div class="slb"><p>The output table will expand to show a row for every pair of variables. Each cell contains <em>r</em>, 95% CI, and <em>N</em>.</p></div></li>
+  </ol>
+
+  <div class="sb">
+    <div class="sbl"><span class="fb">Fig 6–7</span>Multiple correlations — expanded output table with several variable pairs</div>
+    <div class="iw" id="w-6-7">
+      <img src="screenshots/fig6-7.png" alt="Fig 6–7"
+         onclick="openLB(this.src)"
+         onerror="handleImgError(this)">
+      <div class="img-missing">
+        <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:block;opacity:.35;"><rect x="4" y="13" width="40" height="30" rx="4" stroke="currentColor" stroke-width="2.5" fill="none"/><circle cx="15" cy="23" r="4" stroke="currentColor" stroke-width="2" fill="none"/><polyline points="4,36 15,25 23,32 31,22 44,36" stroke="currentColor" stroke-width="2.2" fill="none" stroke-linejoin="round" stroke-linecap="round"/><line x1="24" y1="8" x2="24" y2="1" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/><polyline points="19,6 24,1 29,6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+        <div class="im-path">screenshots/fig6-7.png</div>
+        <div class="im-hint">Correlation matrix table: multiple variables, r + CI + N for every pair</div>
+      </div>
+    </div>
+    <div class="callout">
+      <div class="cm cb">→</div>
+      <div class="cbtxt">
+        <p>The matrix is symmetric — the correlation between Variable A and Variable B is the same as between B and A. JASP displays the lower triangle by default. For reporting, you can present this as a table in your paper, listing only the values in one triangle to avoid redundancy.</p>
+        <p>Look across the rows to compare which variable is most strongly related to your outcome of interest. Wide CIs indicate pairs with small <em>N</em> or weak relationships — treat those estimates with caution.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════
+       6A.7 SCATTERPLOT MATRIX
+  ══════════════════════ -->
+  <h2 id="scatter-matrix"><span class="sn">6A.7</span>Scatterplot Matrix</h2>
+
+  <p>When running multiple correlations, a <strong>scatterplot matrix</strong> (sometimes called a pairs plot or splom) shows all pairwise scatterplots simultaneously in a grid — one plot per pair. This is an efficient way to visually check linearity and outliers for every combination at once.</p>
+
+  <ol class="sl">
+    <li><div class="snb">18</div><div class="slb"><p>In the Correlation dialog, scroll down to the <kbd>Plots</kbd> section.</p></div></li>
+    <li><div class="snb">19</div><div class="slb"><p>Check ☑ <kbd>Scatter plots</kbd>. JASP will produce a grid of scatterplots, one for each pair of variables in your Variables box.</p></div></li>
+    <li><div class="snb">20</div><div class="slb"><p>Also check ☑ <kbd>Densities for variables</kbd> to add distribution curves along the diagonal of the matrix.</p></div></li>
+  </ol>
+
+  <div class="sb">
+    <div class="sbl"><span class="fb">Fig 6–8</span>Scatterplot matrix — all pairwise plots in a grid</div>
+    <div class="iw" id="w-6-8">
+      <img src="screenshots/fig6-8.png" alt="Fig 6–8"
+         onclick="openLB(this.src)"
+         onerror="handleImgError(this)">
+      <div class="img-missing">
+        <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:block;opacity:.35;"><rect x="4" y="13" width="40" height="30" rx="4" stroke="currentColor" stroke-width="2.5" fill="none"/><circle cx="15" cy="23" r="4" stroke="currentColor" stroke-width="2" fill="none"/><polyline points="4,36 15,25 23,32 31,22 44,36" stroke="currentColor" stroke-width="2.2" fill="none" stroke-linejoin="round" stroke-linecap="round"/><line x1="24" y1="8" x2="24" y2="1" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/><polyline points="19,6 24,1 29,6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+        <div class="im-path">screenshots/fig6-8.png</div>
+        <div class="im-hint">Scatterplot matrix: 3×3 or 4×4 grid of paired scatterplots with regression lines and density curves on diagonal</div>
+      </div>
+    </div>
+    <div class="callout">
+      <div class="cm cb">→</div>
+      <div class="cbtxt">
+        <p>Scan the matrix quickly: panels where points cluster tightly along a line indicate strong correlations; scattered clouds indicate weak ones. The diagonal shows the distribution (histogram or density curve) of each variable individually — useful for checking normality.</p>
+        <p>Any panel that shows a curved, U-shaped, or fan-shaped pattern signals that the linearity or homoscedasticity assumption may be violated for that pair.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════
+       6A.8 WRITE-UP
+  ══════════════════════ -->
+  <h2 id="report"><span class="sn">6A.8</span>Model Write-Up</h2>
+
+  <div class="box box-tip">
+    <span class="blabel">💡 What to include in every correlation report</span>
+    <p>① Name of the test (Pearson's <em>r</em>) &nbsp;·&nbsp; ② The <em>r</em> value &nbsp;·&nbsp; ③ 95% CI for <em>r</em> &nbsp;·&nbsp; ④ Sample size <em>N</em> &nbsp;·&nbsp; ⑤ <em>r</em>² (calculated from <em>r</em>) &nbsp;·&nbsp; ⑥ Effect size interpretation using Plonsky &amp; Oswald (2014) benchmarks for SLA. No <em>p</em>-value is necessary.</p>
+  </div>
+
+  <div class="report">
+    <span class="rl">Model Reporting Paragraph — Single Correlation</span>
+    <p>To examine the relationship between age of arrival (AOA) in the USA and English pronunciation ability, a Pearson correlation was conducted on the Flege et al. (1999) dataset (<em>N</em> = 240). A scatterplot with regression and Loess lines confirmed an approximately linear negative relationship with no unusual outliers. The correlation was large and negative: <em>r</em> = −.86, 95% CI [−.89, −.82], <em>r</em>² = .74. This indicates that AOA accounts for approximately 74% of the variance in English pronunciation ratings. The narrow CI reflects the precision afforded by the large sample — we can be confident the true population correlation falls between <em>r</em> = −.82 and <em>r</em> = −.89, a consistently large effect by Plonsky and Oswald's (2014) SLA benchmarks. Learners who arrived in the USA at younger ages consistently received higher (more native-like) pronunciation ratings from native English speaker judges.</p>
+  </div>
+
+  <div class="report">
+    <span class="rl">Model Reporting Paragraph — Multiple Correlations</span>
+    <p>Pearson correlations were examined among three variables in the Larson-Hall (2008) dataset (<em>N</em> = 200): scores on a grammaticality judgment test (GJT), total hours of English study, and language aptitude scores. A scatterplot matrix was inspected first; relationships appeared roughly linear and no influential outliers were identified. Hours of study showed a small positive relationship with GJT scores, <em>r</em> = .18, 95% CI [.05, .32], <em>r</em>² = .03 — English study time accounts for only approximately 3% of the variance in grammar scores, a small effect. The relationship between aptitude and GJT performance was negligible, <em>r</em> = .08, 95% CI [−.06, .22], <em>r</em>² &lt; .01. Because the CI for the aptitude correlation spans zero, we cannot conclude there is a meaningful relationship between these two variables in this sample.</p>
+  </div>
+
+  <div class="chnav">
+    <a href="06_correlation.html" style="flex-direction:row;">
+      <span class="arrow">←</span>
+      <span><span class="nl2">Back to</span><span>Ch. 6 · Concept &amp; Theory</span></span>
+    </a>
+    <a href="#" style="flex-direction:row-reverse;">
+      <span><span class="nl2">Next Chapter</span><span>Ch. 7 · Non-Parametric Statistics →</span></span>
+      <span class="arrow">→</span>
+    </a>
+  </div>
+
+</div>
+</main>
+
+<div id="lb">
+  <button id="lbc" onclick="closeLB()">×</button>
+  <img id="lbimg" src="" alt="">
+</div>
+
+<script>
+
+  function handleImgError(img) {
+    img.style.display = 'none';
+    var m = img.nextElementSibling;
+    if (m) m.style.display = 'flex';
+  }
+
+
+  function handleImgError(img) {
+    img.style.display = 'none';
+    var m = img.nextElementSibling;
+    if (m && m.classList.contains('img-missing')) m.style.display = 'flex';
+  }" alt="Screenshot" onclick="openLB('${url}')">`;
+  }
+  function openLB(src) { document.getElementById('lbimg').src = src; document.getElementById('lb').classList.add('open'); }
+  function closeLB() { document.getElementById('lb').classList.remove('open'); document.getElementById('lbimg').src = ''; }
+  document.getElementById('lb').addEventListener('click', e => { if (e.target === document.getElementById('lb')) closeLB(); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLB(); });
+
+  const heads = document.querySelectorAll('h2[id]');
+  const subs = document.querySelectorAll('.ns');
+  const io = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        subs.forEach(a => { if (a.getAttribute('href')?.startsWith('#')) a.classList.remove('active'); });
+        const m = document.querySelector(`.ns[href="#${e.target.id}"]`);
+        if (m) m.classList.add('active');
+      }
+    });
+  }, { rootMargin: '-15% 0px -70% 0px' });
+  heads.forEach(h => io.observe(h));
+</script>
+</body>
+</html>

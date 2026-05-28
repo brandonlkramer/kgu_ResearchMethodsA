@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chapter 11: RM-ANOVA in JASP | Statistics with JASP</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;0,700;1,400&family=Source+Sans+3:wght@300;400;500;600&family=Source+Code+Pro:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:#faf8f5;--surface:#fff;--sidebar-bg:#1c2a38;
+    --sidebar-hover:#2d3f52;--sidebar-active:#3b8ea5;
+    --ink:#1a1f2e;--muted:#6b7280;
+    --accent:#2a7f9e;--accent2:#c0622a;
+    --red:#dc2626;
+    --border:#e2ddd6;--highlight:#eef7fa;
+    --tip-bg:#f0f9eb;--tip-border:#5a9e4a;
+    --warn-bg:#fdf6ec;--warn-border:#d97c2a;
+    --sidebar-w:280px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Source Sans 3',sans-serif;background:var(--bg);color:var(--ink);font-size:17px;line-height:1.75;display:flex;min-height:100vh;}
+
+  /* SIDEBAR */
+  #sidebar{width:var(--sidebar-w);background:var(--sidebar-bg);color:#c8d4e0;position:fixed;top:0;left:0;bottom:0;overflow-y:auto;display:flex;flex-direction:column;z-index:100;font-size:14px;}
+  #sh{padding:24px 20px 16px;border-bottom:1px solid rgba(255,255,255,.08);}
+  #sh .bt{font-family:'Lora',serif;font-size:15px;font-weight:700;color:#fff;line-height:1.3;margin-bottom:4px;}
+  #sh .bs{font-size:12px;color:rgba(200,212,224,.55);letter-spacing:.05em;text-transform:uppercase;}
+  #sidebar nav{padding:12px 0;}
+  .nl{padding:12px 20px 4px;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:rgba(200,212,224,.4);font-weight:600;}
+  .nc{display:block;padding:7px 20px;color:#c8d4e0;text-decoration:none;transition:background .15s,color .15s;line-height:1.4;}
+  .nc:hover{background:var(--sidebar-hover);color:#fff;}
+  .nc.active{background:rgba(59,142,165,.25);color:var(--sidebar-active);border-left:3px solid var(--sidebar-active);padding-left:17px;font-weight:600;}
+  .ns{display:block;padding:5px 20px 5px 36px;color:rgba(200,212,224,.65);text-decoration:none;font-size:13px;transition:color .15s;}
+  .ns:hover{color:#fff;}
+  .ns.active{color:var(--sidebar-active);}
+
+  /* MAIN */
+  #main{flex:1;min-width:0;}
+  #content{max-width:860px;margin:0 auto;padding:56px 48px 80px;}
+
+  .eyebrow{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);font-weight:600;margin-bottom:10px;}
+  h1.cht{font-family:'Lora',serif;font-size:2.4rem;font-weight:700;line-height:1.15;color:var(--ink);margin-bottom:10px;}
+  h1.cht em{font-style:italic;color:var(--accent2);}
+  .chsub{font-family:'Lora',serif;font-size:1rem;font-style:italic;color:var(--muted);margin-bottom:12px;}
+  .pls{display:flex;gap:10px;margin-bottom:32px;flex-wrap:wrap;}
+  .pl{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:5px;font-size:13px;font-weight:600;text-decoration:none;transition:all .15s;}
+  .plc{background:var(--highlight);color:var(--accent);border:1.5px solid var(--accent);}
+  .plc:hover{background:var(--accent);color:#fff;}
+  .plj{background:var(--accent);color:#fff;border:1.5px solid var(--accent);cursor:default;opacity:.85;}
+  hr.dv{border:none;border-top:2px solid var(--border);margin-bottom:40px;}
+
+  h2{font-family:'Lora',serif;font-size:1.6rem;font-weight:700;color:var(--ink);margin:56px 0 16px;padding-bottom:10px;border-bottom:2px solid var(--border);scroll-margin-top:24px;}
+  h2 .sn{color:var(--accent);margin-right:8px;font-weight:400;font-size:1.1rem;}
+  h3{font-family:'Lora',serif;font-size:1.15rem;font-weight:600;color:var(--ink);margin:36px 0 12px;scroll-margin-top:24px;}
+  h3 .sn{color:var(--accent2);margin-right:6px;font-weight:400;}
+  p{margin-bottom:16px;}
+  strong{font-weight:600;}
+  em{font-style:italic;}
+  a{color:var(--accent);text-decoration:none;}
+  a:hover{text-decoration:underline;}
+  kbd{background:#f0ede8;border:1px solid #ccc;border-radius:3px;padding:1px 7px;font-family:'Source Code Pro',monospace;font-size:13px;color:#333;white-space:nowrap;}
+
+  /* STEP LIST */
+  .sl{list-style:none;padding:0;margin:24px 0;}
+  .sl>li{display:flex;gap:18px;align-items:flex-start;padding:14px 0;border-bottom:1px solid var(--border);}
+  .sl>li:last-child{border-bottom:none;}
+  .snb{flex-shrink:0;width:32px;height:32px;background:var(--accent);color:#fff;border-radius:50%;font-size:14px;font-weight:700;display:flex;align-items:center;justify-content:center;margin-top:2px;}
+  .slb{flex:1;min-width:0;}
+  .slb p{margin:0;}
+
+  /* SCREENSHOT BLOCK */
+  .sb{margin:28px 0 36px;border:1px solid var(--border);border-radius:10px;overflow:hidden;background:var(--surface);}
+  .sbl{display:flex;align-items:center;gap:10px;padding:10px 18px;background:#f4f2ee;border-bottom:1px solid var(--border);font-size:13px;font-weight:600;color:var(--muted);letter-spacing:.04em;}
+  .fb{background:var(--ink);color:#fff;font-size:10px;font-weight:700;letter-spacing:.08em;padding:2px 8px;border-radius:3px;text-transform:uppercase;}
+  .iw{position:relative;background:#f9f8f6;min-height:160px;display:flex;align-items:center;justify-content:center;}
+  .iw img{display:block;width:100%;height:auto;cursor:zoom-in;}
+  
+  .ph:hover{border-color:var(--accent);background:var(--highlight);color:var(--accent);}
+  
+  .phi{line-height:1;display:flex;align-items:center;justify-content:center;}
+  .pht{font-size:14px;font-weight:600;text-align:center;line-height:1.4;}
+  .phh{font-size:12px;opacity:.7;text-align:center;}
+
+  /* CALLOUT */
+  .callout{border-top:1px solid var(--border);padding:14px 20px;display:flex;gap:14px;align-items:flex-start;background:#fff;}
+  .cm{flex-shrink:0;width:22px;height:22px;border-radius:50%;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;margin-top:3px;}
+  .cr{background:#fecaca;color:var(--red);border:2px solid var(--red);}
+  .cb{background:#dbeafe;color:#1d4ed8;border:2px solid #3b82f6;}
+  .cg{background:#dcfce7;color:#15803d;border:2px solid #22c55e;}
+  .cy{background:#fef9c3;color:#854d0e;border:2px solid #ca8a04;}
+  .cbtxt{font-size:15px;line-height:1.6;flex:1;}
+  .cbtxt p{margin:0 0 6px;}
+  .cbtxt p:last-child{margin:0;}
+
+  /* BOXES */
+  .box{border-radius:6px;padding:18px 24px;margin:24px 0;}
+  .box p:last-child{margin:0;}
+  .box-tip{background:var(--tip-bg);border-left:4px solid var(--tip-border);}
+  .box-warn{background:var(--warn-bg);border-left:4px solid var(--warn-border);}
+  .box-info{background:var(--highlight);border-left:4px solid var(--accent);}
+  .blabel{font-size:11px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;margin-bottom:8px;display:block;}
+  .box-tip .blabel{color:var(--tip-border);}
+  .box-warn .blabel{color:var(--warn-border);}
+  .box-info .blabel{color:var(--accent);}
+
+  /* INLINE CORRECTION TABLE */
+  .tw{overflow-x:auto;margin:20px 0;border:1px solid var(--border);border-radius:6px;}
+  table{width:100%;border-collapse:collapse;font-size:15px;}
+  thead tr{background:var(--ink);color:#fff;}
+  thead th{padding:10px 14px;text-align:left;font-weight:600;font-size:13px;letter-spacing:.04em;}
+  tbody tr:nth-child(even){background:var(--highlight);}
+  tbody td{padding:9px 14px;border-bottom:1px solid var(--border);vertical-align:top;}
+  tbody tr:last-child td{border-bottom:none;}
+  .tc{text-align:center;}
+  .hi{color:var(--accent);font-weight:700;}
+
+  /* REPORT */
+  .report{background:#fffbf5;border:1px solid #e8d5b7;border-radius:6px;padding:22px 28px 20px;margin:24px 0;font-family:'Lora',serif;font-size:.95rem;line-height:1.85;color:#2a2a2a;position:relative;}
+  .report::before{content:'"';position:absolute;top:-6px;left:18px;font-size:4rem;color:#e8d5b7;line-height:1;}
+  .rl{font-family:'Source Sans 3',sans-serif;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--accent2);font-weight:700;margin-bottom:14px;display:block;font-style:normal;}
+  .report p{margin-bottom:10px;}
+  .report p:last-child{margin:0;}
+
+  /* CHAPTER NAV */
+  .chnav{display:flex;justify-content:space-between;align-items:center;margin-top:64px;padding-top:24px;border-top:2px solid var(--border);gap:16px;}
+  .chnav a{display:flex;align-items:center;gap:8px;padding:12px 20px;border:1.5px solid var(--border);border-radius:6px;color:var(--ink);font-weight:500;font-size:15px;text-decoration:none;transition:border-color .2s,background .2s;}
+  .chnav a:hover{border-color:var(--accent);background:var(--highlight);text-decoration:none;}
+  .nl2{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);display:block;}
+  .arrow{color:var(--accent);font-size:1.2rem;}
+
+  /* LIGHTBOX */
+  #lb{display:none;position:fixed;inset:0;background:rgba(0,0,0,.82);z-index:1000;align-items:center;justify-content:center;padding:24px;cursor:zoom-out;}
+  #lb.open{display:flex;}
+  #lb img{max-width:100%;max-height:90vh;border-radius:6px;box-shadow:0 24px 60px rgba(0,0,0,.5);object-fit:contain;}
+  #lbc{position:absolute;top:16px;right:20px;color:#fff;font-size:2rem;cursor:pointer;line-height:1;background:none;border:none;opacity:.8;transition:opacity .15s;}
+  #lbc:hover{opacity:1;}
+
+  @media(max-width:900px){
+    #sidebar{transform:translateX(-100%);}
+    #main{}
+    #content{padding:32px 20px 60px;}
+  }
+
+  /* ── Image slots ─────────────────────────────── */
+  .iw img, .screenshot-img-wrap img {
+    display:block; width:100%; height:auto; cursor:zoom-in;
+  }
+  .img-missing {
+    display:none; flex-direction:column; align-items:center;
+    justify-content:center; gap:12px; padding:36px 24px;
+    min-height:160px; width:100%;
+    background:#faf9f7; border:2px dashed #d5cfc6; color:#aaa;
+  }
+  .img-missing .im-path {
+    font-family:'Source Code Pro', monospace;
+    font-size:13px; font-weight:600;
+    color:#5a9e4a; background:#f0f9eb;
+    border:1px solid #c3e6b3; border-radius:4px;
+    padding:4px 12px;
+  }
+  .img-missing .im-hint {
+    font-size:12px; color:#9ca3af; text-align:center;
+    max-width:340px; line-height:1.5;
+  }
+
+
+  /* ── Screenshot image slots ─────────────────── */
+  .iw img, .img-wrap img, .screenshot-img-wrap img {
+    display:block; width:100%; height:auto; cursor:zoom-in;
+  }
+  .img-missing {
+    display:none; flex-direction:column; align-items:center;
+    justify-content:center; gap:12px; padding:40px 24px;
+    min-height:170px; width:100%;
+    background:#faf9f7; border:2px dashed #d5cfc6; color:#aaa;
+    box-sizing:border-box;
+  }
+  .img-missing .im-path {
+    font-family:'Source Code Pro', monospace;
+    font-size:13px; font-weight:600; color:#5a9e4a;
+    background:#f0f9eb; border:1px solid #c3e6b3;
+    border-radius:4px; padding:4px 12px;
+  }
+  .img-missing .im-hint {
+    font-size:12px; color:#9ca3af; text-align:center;
+    max-width:380px; line-height:1.5;
+  }
+
+</style>
+</head>
+<body>
+
+<main id="main">
+<div id="content">
+
+  <div class="eyebrow">Chapter 11 · JASP Walkthrough</div>
+  <h1 class="cht">Repeated-Measures <em>ANOVA</em> in JASP</h1>
+  <p class="chsub">Step-by-step instructions with annotated screenshots</p>
+
+  <div class="pls">
+    <a class="pl plc" href="11_rm-anova.html">← Concept &amp; Theory</a>
+    <a class="pl plj" href="#">JASP Walkthrough (this page)</a>
+  </div>
+
+  <hr class="dv">
+
+  <p>This page walks through a one-way repeated-measures ANOVA in JASP using the <strong>Kim (2013)</strong> sarcasm dataset. The same nine participants were tested at three time points, making this a within-subjects design. Each step is paired with a screenshot slot — click any dashed box to upload your own screenshot. <strong>Red callouts</strong> highlight what to look at; <strong>blue callouts</strong> give interpretive guidance; <strong>yellow callouts</strong> flag common mistakes.</p>
+
+  <div class="box box-info">
+    <span class="blabel">📂 Sample Data</span>
+    <p><strong>File:</strong> <kbd>Kim2013.csv</kbd><br>
+    <strong>Format:</strong> Wide format — one row per participant, three score columns: <kbd>Pretest</kbd>, <kbd>Posttest</kbd>, <kbd>DelayedPost</kbd>.<br>
+    Confirm all three score variables are set to <strong>Scale</strong> before starting.</p>
+  </div>
+
+  <!-- ══════════════════════════════
+       11A.1  SETTING UP THE FACTOR
+  ══════════════════════════════ -->
+  <h2 id="setup"><span class="sn">11A.1</span>Setting Up the Repeated-Measures Factor</h2>
+
+  <p>In RM-ANOVA, JASP needs to know the <em>name</em> of your within-subjects variable and how many levels it has — before you can assign data to it. This is the key step that makes RM-ANOVA different from other ANOVAs.</p>
+
+  <ol class="sl">
+    <li>
+      <div class="snb">1</div>
+      <div class="slb"><p>In the top menu bar, click the <kbd>ANOVA</kbd> module.</p></div>
+    </li>
+    <li>
+      <div class="snb">2</div>
+      <div class="slb"><p>Select <kbd>Repeated Measures ANOVA</kbd> from the dropdown.</p></div>
+    </li>
+    <li>
+      <div class="snb">3</div>
+      <div class="slb"><p>In the <strong>Repeated Measures Factors</strong> box, click where it says <kbd>RM Factor 1</kbd> and type a descriptive name for your within-subjects variable. Here, type <kbd>Time</kbd>.</p></div>
+    </li>
+    <li>
+      <div class="snb">4</div>
+      <div class="slb"><p>Below the factor name, you will see level labels. Click each one and rename them to match your conditions: <kbd>Pretest</kbd>, <kbd>Posttest</kbd>, <kbd>DelayedPost</kbd>. Click the <kbd>+</kbd> button to add a third level if only two appear by default.</p></div>
+    </li>
+  </ol>
+
+  <div class="sb">
+    <div class="sbl"><span class="fb">Fig 11–1</span>Repeated Measures ANOVA dialog — naming the factor and its levels</div>
+    <div class="iw" id="w-11-1">
+      <img src="screenshots/fig11-1.png" alt="Fig 11–1"
+         onclick="openLB(this.src)"
+         onerror="handleImgError(this)">
+      <div class="img-missing">
+        <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:block;opacity:.35;"><rect x="4" y="13" width="40" height="30" rx="4" stroke="currentColor" stroke-width="2.5" fill="none"/><circle cx="15" cy="23" r="4" stroke="currentColor" stroke-width="2" fill="none"/><polyline points="4,36 15,25 23,32 31,22 44,36" stroke="currentColor" stroke-width="2.2" fill="none" stroke-linejoin="round" stroke-linecap="round"/><line x1="24" y1="8" x2="24" y2="1" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/><polyline points="19,6 24,1 29,6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+        <div class="im-path">screenshots/fig11-1.png</div>
+        <div class="im-hint">Repeated Measures Factors box: "Time" with 3 levels — Pretest, Posttest, DelayedPost</div>
+      </div>
+    </div>
+    <div class="callout">
+      <div class="cm cr">①</div>
+      <div class="cbtxt">
+        <p><strong>Factor name:</strong> "Time" appears at the top of the Repeated Measures Factors box.</p>
+        <p><strong>Level labels:</strong> The three levels — Pretest, Posttest, DelayedPost — are listed below the factor name. These labels will appear in all output tables and plots.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════
+       11A.2  ASSIGNING CELLS
+  ══════════════════════════════ -->
+  <h2 id="cells"><span class="sn">11A.2</span>Assigning Variables to Cells</h2>
+
+  <p>Once the factor and levels are defined, JASP creates a <strong>Repeated Measures Cells</strong> box with one cell per level. Each cell must be matched to the corresponding column in your data.</p>
+
+  <ol class="sl">
+    <li>
+      <div class="snb">5</div>
+      <div class="slb"><p>In the variable list on the left, click <kbd>Pretest</kbd> and move it to the cell labeled <strong>Pretest</strong> in the Repeated Measures Cells box.</p></div>
+    </li>
+    <li>
+      <div class="snb">6</div>
+      <div class="slb"><p>Move <kbd>Posttest</kbd> to the <strong>Posttest</strong> cell, and <kbd>DelayedPost</kbd> to the <strong>DelayedPost</strong> cell.</p></div>
+    </li>
+  </ol>
+
+  <div class="sb">
+    <div class="sbl"><span class="fb">Fig 11–2</span>Repeated Measures Cells — each level matched to its data column</div>
+    <div class="iw" id="w-11-2">
+      <img src="screenshots/fig11-2.png" alt="Fig 11–2"
+         onclick="openLB(this.src)"
+         onerror="handleImgError(this)">
+      <div class="img-missing">
+        <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:block;opacity:.35;"><rect x="4" y="13" width="40" height="30" rx="4" stroke="currentColor" stroke-width="2.5" fill="none"/><circle cx="15" cy="23" r="4" stroke="currentColor" stroke-width="2" fill="none"/><polyline points="4,36 15,25 23,32 31,22 44,36" stroke="currentColor" stroke-width="2.2" fill="none" stroke-linejoin="round" stroke-linecap="round"/><line x1="24" y1="8" x2="24" y2="1" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/><polyline points="19,6 24,1 29,6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+        <div class="im-path">screenshots/fig11-2.png</div>
+        <div class="im-hint">Repeated Measures Cells: Pretest→Level1, Posttest→Level2, DelayedPost→Level3</div>
+      </div>
+    </div>
+    <div class="callout">
+      <div class="cm cr">①</div>
+      <div class="cbtxt">
+        <p>Each row in the Repeated Measures Cells box should show the level label on the left and the corresponding data variable on the right. The order matters — make sure the levels match the correct columns.</p>
+      </div>
+    </div>
+    <div class="callout">
+      <div class="cm cy">!</div>
+      <div class="cbtxt">
+        <p><strong>Common mistake:</strong> Assigning variables to the wrong cells (e.g., putting Posttest in the Pretest cell). Always double-check that each level label corresponds to the correct time point in your data.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════
+       11A.3  OPTIONS
+  ══════════════════════════════ -->
+  <h2 id="options"><span class="sn">11A.3</span>Selecting Analysis Options</h2>
+
+  <ol class="sl">
+    <li>
+      <div class="snb">7</div>
+      <div class="slb"><p>Check ☑ <kbd>Descriptive statistics</kbd> to display means, SDs, and N for each level.</p></div>
+    </li>
+    <li>
+      <div class="snb">8</div>
+      <div class="slb"><p>Check ☑ <kbd>Estimates of effect size</kbd> and select <kbd>η²p (partial eta-squared)</kbd>. Also check ☑ <kbd>Confidence interval</kbd>.</p></div>
+    </li>
+    <li>
+      <div class="snb">9</div>
+      <div class="slb"><p>Open the <kbd>Assumption Checks</kbd> section. Check ☑ <kbd>Sphericity tests</kbd> and select all three corrections: <kbd>None</kbd>, <kbd>Greenhouse-Geisser</kbd>, and <kbd>Huynh-Feldt</kbd>. Also check ☑ <kbd>Q-Q plot of residuals</kbd>.</p></div>
+    </li>
+    <li>
+      <div class="snb">10</div>
+      <div class="slb"><p>Open the <kbd>Descriptive Plots</kbd> section. Move <kbd>Time</kbd> to the horizontal axis to produce a means plot across testing times.</p></div>
+    </li>
+  </ol>
+
+  <div class="sb">
+    <div class="sbl"><span class="fb">Fig 11–3</span>Full dialog with all options selected</div>
+    <div class="iw" id="w-11-3">
+      <img src="screenshots/fig11-3.png" alt="Fig 11–3"
+         onclick="openLB(this.src)"
+         onerror="handleImgError(this)">
+      <div class="img-missing">
+        <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:block;opacity:.35;"><rect x="4" y="13" width="40" height="30" rx="4" stroke="currentColor" stroke-width="2.5" fill="none"/><circle cx="15" cy="23" r="4" stroke="currentColor" stroke-width="2" fill="none"/><polyline points="4,36 15,25 23,32 31,22 44,36" stroke="currentColor" stroke-width="2.2" fill="none" stroke-linejoin="round" stroke-linecap="round"/><line x1="24" y1="8" x2="24" y2="1" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/><polyline points="19,6 24,1 29,6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+        <div class="im-path">screenshots/fig11-3.png</div>
+        <div class="im-hint">Full dialog: cells filled, Descriptives, ηp², Sphericity (all 3 corrections), Q-Q plot checked</div>
+      </div>
+    </div>
+    <div class="callout">
+      <div class="cm cr">①</div>
+      <div class="cbtxt">
+        <p><strong>Repeated Measures Cells:</strong> All three variables assigned correctly.</p>
+        <p><strong>Descriptive statistics</strong> and <strong>Estimates of effect size → ηp²</strong> are checked.</p>
+        <p><strong>Assumption Checks → Sphericity tests:</strong> All three options (None, Greenhouse-Geisser, Huynh-Feldt) are selected so all correction rows appear in the output.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════
+       11A.4  DESCRIPTIVES & PLOT
+  ══════════════════════════════ -->
+  <h2 id="descriptives"><span class="sn">11A.4</span>Output: Descriptive Statistics &amp; Plot</h2>
+
+  <div class="sb">
+    <div class="sbl"><span class="fb">Fig 11–4</span>Descriptive Statistics table</div>
+    <div class="iw" id="w-11-4">
+      <img src="screenshots/fig11-4.png" alt="Fig 11–4"
+         onclick="openLB(this.src)"
+         onerror="handleImgError(this)">
+      <div class="img-missing">
+        <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:block;opacity:.35;"><rect x="4" y="13" width="40" height="30" rx="4" stroke="currentColor" stroke-width="2.5" fill="none"/><circle cx="15" cy="23" r="4" stroke="currentColor" stroke-width="2" fill="none"/><polyline points="4,36 15,25 23,32 31,22 44,36" stroke="currentColor" stroke-width="2.2" fill="none" stroke-linejoin="round" stroke-linecap="round"/><line x1="24" y1="8" x2="24" y2="1" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/><polyline points="19,6 24,1 29,6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+        <div class="im-path">screenshots/fig11-4.png</div>
+        <div class="im-hint">Descriptives table: Time (Pretest/Posttest/Delayed), N, Mean, SD</div>
+      </div>
+    </div>
+    <div class="callout">
+      <div class="cm cr">①</div>
+      <div class="cbtxt">
+        <p>Record means and SDs for each time point — you will need these in your write-up:</p>
+        <p>Pretest: <em>M</em> = 7.44, <em>SD</em> = 5.20 &nbsp;·&nbsp; Posttest: <em>M</em> = 16.56, <em>SD</em> = 2.96 &nbsp;·&nbsp; Delayed: <em>M</em> = 19.67, <em>SD</em> = 2.96; all <em>N</em> = 9.</p>
+        <p>Notice the large SD at Pretest relative to the other two — participants started with varied ability but converged after instruction.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="sb">
+    <div class="sbl"><span class="fb">Fig 11–5</span>Descriptive plot — means across time points</div>
+    <div class="iw" id="w-11-5">
+      <img src="screenshots/fig11-5.png" alt="Fig 11–5"
+         onclick="openLB(this.src)"
+         onerror="handleImgError(this)">
+      <div class="img-missing">
+        <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:block;opacity:.35;"><rect x="4" y="13" width="40" height="30" rx="4" stroke="currentColor" stroke-width="2.5" fill="none"/><circle cx="15" cy="23" r="4" stroke="currentColor" stroke-width="2" fill="none"/><polyline points="4,36 15,25 23,32 31,22 44,36" stroke="currentColor" stroke-width="2.2" fill="none" stroke-linejoin="round" stroke-linecap="round"/><line x1="24" y1="8" x2="24" y2="1" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/><polyline points="19,6 24,1 29,6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+        <div class="im-path">screenshots/fig11-5.png</div>
+        <div class="im-hint">Means plot: Time on x-axis, Score on y-axis — upward trend across 3 time points</div>
+      </div>
+    </div>
+    <div class="callout">
+      <div class="cm cb">→</div>
+      <div class="cbtxt">
+        <p>The means plot should show a clear upward trend from Pretest to Posttest to Delayed Posttest — scores improve with each successive testing time. Error bars represent standard error. Include this figure in your report with a descriptive caption.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════
+       11A.5  SPHERICITY
+  ══════════════════════════════ -->
+  <h2 id="sphericity"><span class="sn">11A.5</span>Output: Sphericity Tests</h2>
+
+  <p>The sphericity output is found <em>below</em> the main within-subjects effects table in JASP. Look for the section labeled <strong>Test of Sphericity (Mauchly)</strong>.</p>
+
+  <div class="sb">
+    <div class="sbl"><span class="fb">Fig 11–6</span>Mauchly's Test of Sphericity</div>
+    <div class="iw" id="w-11-6">
+      <img src="screenshots/fig11-6.png" alt="Fig 11–6"
+         onclick="openLB(this.src)"
+         onerror="handleImgError(this)">
+      <div class="img-missing">
+        <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:block;opacity:.35;"><rect x="4" y="13" width="40" height="30" rx="4" stroke="currentColor" stroke-width="2.5" fill="none"/><circle cx="15" cy="23" r="4" stroke="currentColor" stroke-width="2" fill="none"/><polyline points="4,36 15,25 23,32 31,22 44,36" stroke="currentColor" stroke-width="2.2" fill="none" stroke-linejoin="round" stroke-linecap="round"/><line x1="24" y1="8" x2="24" y2="1" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/><polyline points="19,6 24,1 29,6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+        <div class="im-path">screenshots/fig11-6.png</div>
+        <div class="im-hint">Mauchly's test table: W, df, p, and ε values for GG and HF corrections</div>
+      </div>
+    </div>
+    <div class="callout">
+      <div class="cm cr">①</div>
+      <div class="cbtxt">
+        <p><strong>Mauchly's W and p-value:</strong> If <em>p</em> &lt; .05, sphericity is violated and a correction is required.</p>
+        <p><strong>ε (epsilon) values:</strong> The table also shows the Greenhouse–Geisser (GG) and Huynh–Feldt (HF) epsilon values. These are used to adjust the degrees of freedom in the main effects table. An ε of 1.00 = perfect sphericity; the lower it falls below 1.00, the more severe the violation.</p>
+      </div>
+    </div>
+    <div class="callout">
+      <div class="cm cy">!</div>
+      <div class="cbtxt">
+        <p><strong>Always apply a correction</strong> regardless of Mauchly's result. The test has low power with small samples (like <em>N</em> = 9 here) and may fail to detect real violations. Applying the GG or HF correction is a conservative but standard practice.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="box box-info">
+    <span class="blabel">📌 Which Correction to Use?</span>
+    <div class="tw" style="margin:10px 0 0;">
+      <table>
+        <thead><tr><th>Situation</th><th>Use This Correction</th></tr></thead>
+        <tbody>
+          <tr><td>ε (GG) &lt; .75 — moderate to severe violation</td><td><strong>Greenhouse–Geisser</strong> (more conservative)</td></tr>
+          <tr><td>ε (GG) &gt; .75 — mild violation</td><td><strong>Huynh–Feldt</strong> (less conservative)</td></tr>
+          <tr><td>Mauchly's <em>p</em> &gt; .05 — no violation</td><td>Still apply <strong>Greenhouse–Geisser</strong> as a precaution (Howell, 2002)</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════
+       11A.6  WITHIN-SUBJECTS EFFECTS
+  ══════════════════════════════ -->
+  <h2 id="within"><span class="sn">11A.6</span>Output: Within-Subjects Effects Table</h2>
+
+  <p>The main result of the RM-ANOVA is in the <strong>Within Subjects Effects</strong> table — found at the <em>top</em> of the output in JASP. Each within-subjects variable appears as a block with one row per correction option.</p>
+
+  <div class="sb">
+    <div class="sbl"><span class="fb">Fig 11–7</span>Within Subjects Effects — the main RM-ANOVA result</div>
+    <div class="iw" id="w-11-7">
+      <img src="screenshots/fig11-7.png" alt="Fig 11–7"
+         onclick="openLB(this.src)"
+         onerror="handleImgError(this)">
+      <div class="img-missing">
+        <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:block;opacity:.35;"><rect x="4" y="13" width="40" height="30" rx="4" stroke="currentColor" stroke-width="2.5" fill="none"/><circle cx="15" cy="23" r="4" stroke="currentColor" stroke-width="2" fill="none"/><polyline points="4,36 15,25 23,32 31,22 44,36" stroke="currentColor" stroke-width="2.2" fill="none" stroke-linejoin="round" stroke-linecap="round"/><line x1="24" y1="8" x2="24" y2="1" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/><polyline points="19,6 24,1 29,6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+        <div class="im-path">screenshots/fig11-7.png</div>
+        <div class="im-hint">Within Subjects Effects: Time rows (None / GG / HF), SS, df, MS, F, p, ηp²</div>
+      </div>
+    </div>
+    <div class="callout">
+      <div class="cm cr">①</div>
+      <div class="cbtxt">
+        <p>Find the block of rows for <strong>Time</strong>. Each row represents a different sphericity assumption:</p>
+        <p>• <strong>None</strong> — uncorrected (df = 2 for Time; df = 16 for Residuals with <em>N</em>=9)</p>
+        <p>• <strong>Greenhouse–Geisser</strong> — more conservative corrected df</p>
+        <p>• <strong>Huynh–Feldt</strong> — less conservative corrected df</p>
+        <p>The <em>F</em>-value is the <strong>same across all rows</strong> — only the df (and therefore <em>p</em>) changes. Read your chosen correction row and report its corrected df.</p>
+      </div>
+    </div>
+    <div class="callout">
+      <div class="cm cr">②</div>
+      <div class="cbtxt">
+        <p>The <strong>ηp² (partial eta-squared)</strong> column shows the effect size. A value of .01 is small, .06 medium, .14 large by Cohen's guidelines. For the Kim data, we expect a very large effect given the paired t-test results already established strong differences.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="box box-tip">
+    <span class="blabel">💡 How to Report the Corrected F-Test</span>
+    <p>Report the corrected degrees of freedom in parentheses alongside the F value. For the Greenhouse–Geisser correction, this looks like: <em>F</em>(1.35, 10.79) = [value], <em>p</em> = [value], ηp² = [value], where the two corrected df values are: df_Time × ε and df_Residuals × ε. JASP calculates these for you — simply read them from the GG or HF row.</p>
+  </div>
+
+  <!-- ══════════════════════════════
+       11A.7  POST-HOC TESTS
+  ══════════════════════════════ -->
+  <h2 id="posthoc"><span class="sn">11A.7</span>Post-Hoc Tests</h2>
+
+  <p>The omnibus <em>F</em>-test tells you that <em>some</em> time points differ — post-hoc tests identify <em>which</em> pairs. Open the <kbd>Post Hoc Tests</kbd> section and move <kbd>Time</kbd> to the right panel.</p>
+
+  <ol class="sl">
+    <li>
+      <div class="snb">11</div>
+      <div class="slb"><p>Open the <kbd>Post Hoc Tests</kbd> section. Move <kbd>Time</kbd> into the right panel to request all pairwise comparisons among Pretest, Posttest, and Delayed Posttest.</p></div>
+    </li>
+    <li>
+      <div class="snb">12</div>
+      <div class="slb"><p>Check ☑ <kbd>Effect size</kbd> — this adds Cohen's <em>d</em>ₛ to the output.</p></div>
+    </li>
+    <li>
+      <div class="snb">13</div>
+      <div class="slb"><p>Check ☑ <kbd>Confidence intervals</kbd> — adds 95% CIs for both the mean difference and the effect size.</p></div>
+    </li>
+    <li>
+      <div class="snb">14</div>
+      <div class="slb"><p>Under <strong>Correction</strong>, check ☑ <kbd>Bonferroni</kbd> to adjust <em>p</em>-values for the three pairwise comparisons. (With three pairs, Bonferroni divides α by 3.)</p></div>
+    </li>
+  </ol>
+
+  <div class="sb">
+    <div class="sbl"><span class="fb">Fig 11–8</span>Post Hoc Tests setup — Time moved across, options selected</div>
+    <div class="iw" id="w-11-8">
+      <img src="screenshots/fig11-8.png" alt="Fig 11–8"
+         onclick="openLB(this.src)"
+         onerror="handleImgError(this)">
+      <div class="img-missing">
+        <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:block;opacity:.35;"><rect x="4" y="13" width="40" height="30" rx="4" stroke="currentColor" stroke-width="2.5" fill="none"/><circle cx="15" cy="23" r="4" stroke="currentColor" stroke-width="2" fill="none"/><polyline points="4,36 15,25 23,32 31,22 44,36" stroke="currentColor" stroke-width="2.2" fill="none" stroke-linejoin="round" stroke-linecap="round"/><line x1="24" y1="8" x2="24" y2="1" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/><polyline points="19,6 24,1 29,6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+        <div class="im-path">screenshots/fig11-8.png</div>
+        <div class="im-hint">Post Hoc panel: Time in right box, Effect size + CI + Bonferroni checked</div>
+      </div>
+    </div>
+    <div class="callout">
+      <div class="cm cr">①</div>
+      <div class="cbtxt">
+        <p><strong>Right panel:</strong> <kbd>Time</kbd> should appear — this generates comparisons for all pairs: Pretest–Posttest, Pretest–Delayed, and Posttest–Delayed.</p>
+        <p><strong>Effect size, Confidence intervals, and Bonferroni</strong> should all be checked.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="sb">
+    <div class="sbl"><span class="fb">Fig 11–9</span>Post Hoc Comparisons output table</div>
+    <div class="iw" id="w-11-9">
+      <img src="screenshots/fig11-9.png" alt="Fig 11–9"
+         onclick="openLB(this.src)"
+         onerror="handleImgError(this)">
+      <div class="img-missing">
+        <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:block;opacity:.35;"><rect x="4" y="13" width="40" height="30" rx="4" stroke="currentColor" stroke-width="2.5" fill="none"/><circle cx="15" cy="23" r="4" stroke="currentColor" stroke-width="2" fill="none"/><polyline points="4,36 15,25 23,32 31,22 44,36" stroke="currentColor" stroke-width="2.2" fill="none" stroke-linejoin="round" stroke-linecap="round"/><line x1="24" y1="8" x2="24" y2="1" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/><polyline points="19,6 24,1 29,6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+        <div class="im-path">screenshots/fig11-9.png</div>
+        <div class="im-hint">Post Hoc table: 3 rows (Pre–Post, Pre–Delayed, Post–Delayed); Mean Diff, SE, t, p (Bonferroni), 95% CI, Cohen's dₛ</div>
+      </div>
+    </div>
+    <div class="callout">
+      <div class="cm cr">①</div>
+      <div class="cbtxt">
+        <p>There are three rows — one per pair. Key results from the Kim data (based on paired t-test results):</p>
+        <p>• <strong>Pretest – Posttest:</strong> Mean diff ≈ −9.11, 95% CI [−14.37, −3.85] — significant (CI does not cross zero). Large effect.</p>
+        <p>• <strong>Pretest – Delayed:</strong> Even larger mean difference — significant.</p>
+        <p>• <strong>Posttest – Delayed:</strong> Mean diff ≈ −3.11, 95% CI [−5.20, −1.03] — significant. Medium effect.</p>
+      </div>
+    </div>
+    <div class="callout">
+      <div class="cm cb">→</div>
+      <div class="cbtxt">
+        <p>Cohen's <em>d</em>ₛ in the post-hoc output uses the pooled SD as the standardizer — note this is different from Cohen's <em>d</em>ᵣₘ used in paired t-tests (which accounts for the correlation between repeated measures). For within-subjects designs, <em>d</em>ᵣₘ is the more appropriate effect size, but it requires separate paired t-test output to obtain. Both are acceptable to report; just be clear which you used.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════
+       11A.8  WRITE-UP
+  ══════════════════════════════ -->
+  <h2 id="report"><span class="sn">11A.8</span>Model Write-Up</h2>
+
+  <p>Fill in the values in square brackets [ ] from your own JASP output. The structure and language below are the template.</p>
+
+  <div class="report">
+    <span class="rl">Model Reporting Paragraph — One-Way Repeated-Measures ANOVA</span>
+    <p>To examine whether sarcasm comprehension scores changed significantly across three testing times, a one-way repeated-measures ANOVA was conducted with Time (Pretest, Posttest, Delayed Posttest) as the within-subjects factor and sarcasm test score (max = 30) as the dependent variable. Descriptive statistics were: Pretest, <em>M</em> = 7.44, <em>SD</em> = 5.20; Posttest, <em>M</em> = 16.56, <em>SD</em> = 2.96; Delayed Posttest, <em>M</em> = 19.67, <em>SD</em> = 2.96; all <em>N</em> = 9. The Q-Q plot of residuals suggested some departure from normality, particularly at the Pretest. Mauchly's test of sphericity indicated [whether sphericity was/was not violated], <em>W</em> = [W], <em>p</em> = [p]; accordingly, the Greenhouse–Geisser correction was applied (ε = [ε]).</p>
+    <p>The within-subjects effect of Time was statistically significant, <em>F</em>([corrected df<sub>Time</sub>], [corrected df<sub>Residuals</sub>]) = [<em>F</em>], <em>p</em> [<em>p</em>-value], ηp² = [value], indicating that sarcasm test scores changed significantly across the three testing times. Post-hoc pairwise comparisons with Bonferroni correction showed that scores improved significantly from Pretest to Posttest (mean difference = −9.11, 95% CI [−14.37, −3.85], Cohen's <em>d</em>ₛ = [value]) and from Pretest to Delayed Posttest (mean difference = [value], 95% CI [[CI]], Cohen's <em>d</em>ₛ = [value]). Scores also increased significantly from Posttest to Delayed Posttest (mean difference = −3.11, 95% CI [−5.20, −1.03], Cohen's <em>d</em>ₛ = [value]), though the gain was smaller. These results suggest that concept-based instruction led to significant improvement in sarcasm comprehension, and that gains were maintained and extended through the delayed testing period.</p>
+  </div>
+
+  <div class="box box-tip">
+    <span class="blabel">💡 Filling in the Template</span>
+    <p>The corrected df values are found in the <strong>Greenhouse–Geisser row</strong> of the Within Subjects Effects table. Report both: the Time df (e.g., 1.35) and the Residuals df (e.g., 10.79). For example: <em>F</em>(1.35, 10.79) = X.XX. All other values — <em>F</em>, <em>p</em>, ηp², mean differences, CIs, and effect sizes — come directly from the JASP output tables.</p>
+  </div>
+
+  <div class="chnav">
+    <a href="11_rm-anova.html" style="flex-direction:row;">
+      <span class="arrow">←</span>
+      <span><span class="nl2">Back to</span><span>Ch. 11 · Concept &amp; Theory</span></span>
+    </a>
+    <a href="#" style="flex-direction:row-reverse;">
+      <span><span class="nl2">Next Chapter</span><span>Ch. 12 · Two-Way ANOVA →</span></span>
+      <span class="arrow">→</span>
+    </a>
+  </div>
+
+</div>
+</main>
+
+<!-- LIGHTBOX -->
+<div id="lb">
+  <button id="lbc" onclick="closeLB()">×</button>
+  <img id="lbimg" src="" alt="">
+</div>
+
+<script>
+
+  function handleImgError(img) {
+    img.style.display = 'none';
+    var m = img.nextElementSibling;
+    if (m) m.style.display = 'flex';
+  }
+
+
+  function handleImgError(img) {
+    img.style.display = 'none';
+    var m = img.nextElementSibling;
+    if (m && m.classList.contains('img-missing')) m.style.display = 'flex';
+  }" alt="Screenshot" onclick="openLB('${url}')">`;
+  }
+  function openLB(src) {
+    document.getElementById('lbimg').src = src;
+    document.getElementById('lb').classList.add('open');
+  }
+  function closeLB() {
+    document.getElementById('lb').classList.remove('open');
+    document.getElementById('lbimg').src = '';
+  }
+  document.getElementById('lb').addEventListener('click', e => { if (e.target === document.getElementById('lb')) closeLB(); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLB(); });
+
+  // Scroll-spy
+  const heads = document.querySelectorAll('h2[id]');
+  const subs = document.querySelectorAll('.ns');
+  const io = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        subs.forEach(a => { if (a.getAttribute('href') && a.getAttribute('href').startsWith('#')) a.classList.remove('active'); });
+        const m = document.querySelector(`.ns[href="#${e.target.id}"]`);
+        if (m) m.classList.add('active');
+      }
+    });
+  }, { rootMargin: '-15% 0px -70% 0px' });
+  heads.forEach(h => io.observe(h));
+</script>
+</body>
+</html>

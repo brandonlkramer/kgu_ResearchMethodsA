@@ -35,7 +35,7 @@
   .ns.active{color:var(--sidebar-active);}
 
   /* MAIN */
-  #main{margin-left:var(--sidebar-w);flex:1;min-width:0;}
+  #main{flex:1;min-width:0;}
   #content{max-width:820px;margin:0 auto;padding:56px 48px 80px;}
 
   .eyebrow{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);font-weight:600;margin-bottom:10px;}
@@ -139,7 +139,7 @@
 
   @media(max-width:900px){
     #sidebar{transform:translateX(-100%);}
-    #main{margin-left:0;}
+    #main{}
     #content{padding:32px 20px 60px;}
     .scatter-gallery{grid-template-columns:1fr;}
     .r-benchmarks{grid-template-columns:1fr;}
@@ -147,39 +147,6 @@
 </style>
 </head>
 <body>
-
-<aside id="sidebar">
-  <div id="sh"><div class="bt">Statistics with JASP</div><div class="bs">Applied Linguistics &amp; Language Research</div></div>
-  <nav>
-    <div class="nl">Chapters</div>
-    <a class="nc" href="#">1 · What is JASP?</a>
-    <a class="nc" href="#">2 · Generating Data for JASP</a>
-    <a class="nc" href="#">3 · Variables &amp; Value Labels</a>
-    <a class="nc" href="#">4 · Chi-Square (2×2)</a>
-    <a class="nc" href="#">5 · Chi-Square (i×j)</a>
-    <a class="nc active" href="#">6 · Correlation</a>
-    <a class="ns active" href="#">→ Concept &amp; Theory ← you are here</a>
-    <a class="ns" href="06_correlation_jasp.html">→ Running in JASP</a>
-    <a class="ns" href="#what">6.1 What Is Correlation?</a>
-    <a class="ns" href="#scatterplots">6.2 Scatterplots First</a>
-    <a class="ns" href="#r">6.3 The Correlation Coefficient</a>
-    <a class="ns" href="#r2">6.4 r² — Variance Explained</a>
-    <a class="ns" href="#causation">6.5 Correlation ≠ Causation</a>
-    <a class="ns" href="#assumptions">6.6 Assumptions</a>
-    <a class="ns" href="#types">6.7 Types of Correlation</a>
-    <a class="ns" href="#effect">6.8 Effect Size &amp; Benchmarks</a>
-    <a class="ns" href="#ci">6.9 Confidence Intervals</a>
-    <a class="ns" href="#multi">6.10 Correlation Matrices</a>
-    <a class="ns" href="#reporting">6.11 Writing Up Results</a>
-    <a class="ns" href="#summary">6.12 Summary</a>
-    <a class="nc" href="#">7 · Non-Parametric Statistics</a>
-    <a class="nc" href="#">8 · Multiple Regression</a>
-    <a class="nc" href="09_t-tests.html">9 · T-Tests</a>
-    <a class="nc" href="10_one-way-anova.html">10 · One-Way ANOVA (Between)</a>
-    <a class="nc" href="11_rm-anova.html">11 · One-Way ANOVA (Within)</a>
-    <a class="nc" href="12_two-way-anova.html">12 · Two-Way Factorial ANOVA</a>
-  </nav>
-</aside>
 
 <main id="main">
 <div id="content">

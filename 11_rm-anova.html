@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chapter 11: One-Way Repeated Measures ANOVA | Statistics with JASP</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;0,700;1,400&family=Source+Sans+3:wght@300;400;500;600&family=Source+Code+Pro:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:#faf8f5;--surface:#fff;--sidebar-bg:#1c2a38;
+    --sidebar-hover:#2d3f52;--sidebar-active:#3b8ea5;
+    --ink:#1a1f2e;--muted:#6b7280;
+    --accent:#2a7f9e;--accent2:#c0622a;
+    --border:#e2ddd6;--highlight:#eef7fa;
+    --tip-bg:#f0f9eb;--tip-border:#5a9e4a;
+    --warn-bg:#fdf6ec;--warn-border:#d97c2a;
+    --sidebar-w:280px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Source Sans 3',sans-serif;background:var(--bg);color:var(--ink);font-size:17px;line-height:1.75;display:flex;min-height:100vh;}
+
+  /* SIDEBAR */
+  #sidebar{width:var(--sidebar-w);background:var(--sidebar-bg);color:#c8d4e0;position:fixed;top:0;left:0;bottom:0;overflow-y:auto;display:flex;flex-direction:column;z-index:100;font-size:14px;}
+  #sh{padding:24px 20px 16px;border-bottom:1px solid rgba(255,255,255,.08);}
+  #sh .bt{font-family:'Lora',serif;font-size:15px;font-weight:700;color:#fff;line-height:1.3;margin-bottom:4px;}
+  #sh .bs{font-size:12px;color:rgba(200,212,224,.55);letter-spacing:.05em;text-transform:uppercase;}
+  #sidebar nav{padding:12px 0;}
+  .nl{padding:12px 20px 4px;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:rgba(200,212,224,.4);font-weight:600;}
+  .nc{display:block;padding:7px 20px;color:#c8d4e0;text-decoration:none;transition:background .15s,color .15s;line-height:1.4;}
+  .nc:hover{background:var(--sidebar-hover);color:#fff;}
+  .nc.active{background:rgba(59,142,165,.25);color:var(--sidebar-active);border-left:3px solid var(--sidebar-active);padding-left:17px;font-weight:600;}
+  .ns{display:block;padding:5px 20px 5px 36px;color:rgba(200,212,224,.65);text-decoration:none;font-size:13px;transition:color .15s;}
+  .ns:hover{color:#fff;}
+  .ns.active{color:var(--sidebar-active);}
+
+  /* MAIN */
+  #main{flex:1;min-width:0;}
+  #content{max-width:820px;margin:0 auto;padding:56px 48px 80px;}
+
+  .eyebrow{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);font-weight:600;margin-bottom:10px;}
+  h1.cht{font-family:'Lora',serif;font-size:2.4rem;font-weight:700;line-height:1.15;color:var(--ink);margin-bottom:10px;}
+  h1.cht em{font-style:italic;color:var(--accent2);}
+  .chsub{font-family:'Lora',serif;font-size:1rem;font-style:italic;color:var(--muted);margin-bottom:12px;}
+  .pls{display:flex;gap:10px;margin-bottom:32px;flex-wrap:wrap;}
+  .pl{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:5px;font-size:13px;font-weight:600;text-decoration:none;transition:all .15s;}
+  .plc{background:var(--accent);color:#fff;border:1.5px solid var(--accent);cursor:default;opacity:.85;}
+  .plj{background:var(--highlight);color:var(--accent);border:1.5px solid var(--accent);}
+  .plj:hover{background:var(--accent);color:#fff;}
+  hr.dv{border:none;border-top:2px solid var(--border);margin-bottom:40px;}
+
+  h2{font-family:'Lora',serif;font-size:1.6rem;font-weight:700;color:var(--ink);margin:52px 0 16px;padding-bottom:8px;border-bottom:2px solid var(--border);scroll-margin-top:24px;}
+  h2 .sn{color:var(--accent);margin-right:8px;font-weight:400;font-size:1.1rem;}
+  h3{font-family:'Lora',serif;font-size:1.18rem;font-weight:600;color:var(--ink);margin:36px 0 12px;scroll-margin-top:24px;}
+  h3 .sn{color:var(--accent2);margin-right:6px;font-weight:400;}
+  h4{font-size:.9rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:28px 0 8px;}
+  p{margin-bottom:16px;}
+  strong{font-weight:600;}
+  em{font-style:italic;}
+  a{color:var(--accent);text-decoration:none;}
+  a:hover{text-decoration:underline;}
+  kbd{background:#f0ede8;border:1px solid #ccc;border-radius:3px;padding:1px 7px;font-family:'Source Code Pro',monospace;font-size:13px;color:#333;}
+
+  /* PULL QUOTE */
+  blockquote.pq{border-left:4px solid var(--accent);background:var(--highlight);padding:20px 28px;margin:32px 0;border-radius:0 6px 6px 0;}
+  blockquote.pq p{font-family:'Lora',serif;font-style:italic;font-size:1.05rem;color:#2a3a4a;margin-bottom:8px;line-height:1.6;}
+  blockquote.pq cite{font-size:.85rem;color:var(--muted);font-style:normal;}
+
+  /* BOXES */
+  .box{border-radius:6px;padding:18px 24px;margin:24px 0;}
+  .box p:last-child{margin:0;}
+  .box-tip{background:var(--tip-bg);border-left:4px solid var(--tip-border);}
+  .box-warn{background:var(--warn-bg);border-left:4px solid var(--warn-border);}
+  .box-info{background:var(--highlight);border-left:4px solid var(--accent);}
+  .box-ex{background:#fffbf5;border-left:4px solid var(--accent2);}
+  .blabel{font-size:11px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;margin-bottom:8px;display:block;}
+  .box-tip .blabel{color:var(--tip-border);}
+  .box-warn .blabel{color:var(--warn-border);}
+  .box-info .blabel{color:var(--accent);}
+  .box-ex .blabel{color:var(--accent2);}
+
+  /* TABLES */
+  .tw{overflow-x:auto;margin:24px 0;border:1px solid var(--border);border-radius:6px;}
+  table{width:100%;border-collapse:collapse;font-size:15px;}
+  thead tr{background:var(--ink);color:#fff;}
+  thead th{padding:11px 16px;text-align:left;font-weight:600;font-size:13px;letter-spacing:.04em;}
+  tbody tr:nth-child(even){background:var(--highlight);}
+  tbody td{padding:10px 16px;border-bottom:1px solid var(--border);vertical-align:top;}
+  tbody tr:last-child td{border-bottom:none;}
+  .tc{text-align:center;}
+
+  /* COMPARISON GRID */
+  .cmp{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:24px 0;}
+  .cmpcard{border:2px solid var(--border);border-radius:8px;padding:18px;transition:border-color .2s;}
+  .cmpcard:hover{border-color:var(--accent);}
+  .cmpcard .ctag{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);font-weight:700;margin-bottom:6px;}
+  .cmpcard .cname{font-family:'Lora',serif;font-size:1rem;font-weight:700;color:var(--ink);margin-bottom:8px;}
+  .cmpcard p{font-size:14px;color:var(--muted);margin:0;}
+
+  /* VARIANCE DIAGRAM */
+  .vdiag{background:#1c2a38;border-radius:10px;padding:28px 32px;margin:28px 0;color:#e2f0f7;}
+  .vdiag .vtitle{font-family:'Lora',serif;font-size:1rem;color:#7dd3fc;font-weight:600;margin-bottom:18px;text-align:center;letter-spacing:.04em;text-transform:uppercase;font-size:12px;}
+  .vrow{display:flex;gap:12px;margin-bottom:12px;align-items:stretch;}
+  .vbox{flex:1;background:rgba(255,255,255,.07);border-radius:8px;padding:14px 16px;font-size:14px;line-height:1.5;}
+  .vbox strong{color:#7dd3fc;display:block;font-size:11px;letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px;}
+  .vbox.highlight-box{border:1px solid #3b8ea5;}
+  .varrow{display:flex;align-items:center;justify-content:center;color:#7dd3fc;font-size:1.5rem;flex-shrink:0;}
+
+  /* SPHERICITY EXPLAINER */
+  .sph-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin:20px 0;}
+  .sph-card{border:1.5px solid var(--border);border-radius:8px;padding:14px 16px;text-align:center;}
+  .sph-card.good{border-color:var(--tip-border);background:var(--tip-bg);}
+  .sph-card.bad{border-color:var(--warn-border);background:var(--warn-bg);}
+  .sph-card.fix{border-color:var(--accent);background:var(--highlight);}
+  .sph-icon{font-size:1.6rem;margin-bottom:6px;}
+  .sph-label{font-size:11px;letter-spacing:.08em;text-transform:uppercase;font-weight:700;margin-bottom:6px;}
+  .sph-card.good .sph-label{color:var(--tip-border);}
+  .sph-card.bad .sph-label{color:var(--warn-border);}
+  .sph-card.fix .sph-label{color:var(--accent);}
+  .sph-card p{font-size:13px;color:var(--muted);margin:0;line-height:1.4;}
+
+  /* ASSUMPTION LIST */
+  .al{list-style:none;padding:0;margin:16px 0;}
+  .al li{display:flex;gap:14px;align-items:flex-start;padding:12px 0;border-bottom:1px solid var(--border);}
+  .al li:last-child{border-bottom:none;}
+  .aicon{width:26px;height:26px;flex-shrink:0;border-radius:50%;background:var(--highlight);border:2px solid var(--accent);color:var(--accent);font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;margin-top:2px;}
+  .al strong{display:block;font-size:15px;margin-bottom:2px;}
+  .al span{font-size:15px;color:var(--muted);}
+
+  /* STAT OUTPUT */
+  .so{background:#1c2a38;color:#e2f0f7;border-radius:8px;padding:22px 26px;margin:24px 0;font-family:'Source Code Pro',monospace;font-size:13px;line-height:1.9;overflow-x:auto;}
+  .so .sh{color:#7dd3fc;font-weight:600;border-bottom:1px solid rgba(255,255,255,.12);padding-bottom:8px;margin-bottom:12px;font-family:'Source Sans 3',sans-serif;font-size:12px;letter-spacing:.08em;text-transform:uppercase;}
+  .so .sr{display:grid;gap:4px 16px;padding:4px 0;border-bottom:1px solid rgba(255,255,255,.05);font-size:12.5px;}
+  .sr5{grid-template-columns:2fr 1.2fr 1fr 1fr 0.8fr;}
+  .sr7{grid-template-columns:2fr 1.5fr 1.2fr 1fr 1fr 1fr 0.8fr;}
+  .so .sr.hdr{color:#94a3b8;font-size:11.5px;}
+  .so .hi{color:#fbbf24;font-weight:600;}
+  .so .dim{color:rgba(200,212,224,.5);}
+  .so .section-gap{height:6px;}
+
+  /* REPORT */
+  .report{background:#fffbf5;border:1px solid #e8d5b7;border-radius:6px;padding:22px 28px 20px;margin:24px 0;font-family:'Lora',serif;font-size:.95rem;line-height:1.85;color:#2a2a2a;position:relative;}
+  .report::before{content:'"';position:absolute;top:-6px;left:18px;font-size:4rem;color:#e8d5b7;line-height:1;}
+  .rl{font-family:'Source Sans 3',sans-serif;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--accent2);font-weight:700;margin-bottom:14px;display:block;font-style:normal;}
+  .report p{margin-bottom:10px;}
+  .report p:last-child{margin:0;}
+
+  /* CHAPTER NAV */
+  .chnav{display:flex;justify-content:space-between;align-items:center;margin-top:64px;padding-top:24px;border-top:2px solid var(--border);gap:16px;}
+  .chnav a{display:flex;align-items:center;gap:8px;padding:12px 20px;border:1.5px solid var(--border);border-radius:6px;color:var(--ink);font-weight:500;font-size:15px;text-decoration:none;transition:border-color .2s,background .2s;}
+  .chnav a:hover{border-color:var(--accent);background:var(--highlight);text-decoration:none;}
+  .chnav .nl2{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);display:block;}
+  .arrow{color:var(--accent);font-size:1.2rem;}
+
+  @media(max-width:900px){
+    #sidebar{transform:translateX(-100%);}
+    #main{}
+    #content{padding:32px 20px 60px;}
+    .cmp{grid-template-columns:1fr;}
+    .sph-grid{grid-template-columns:1fr;}
+    .vrow{flex-direction:column;}
+  }
+</style>
+</head>
+<body>
+
+<main id="main">
+<div id="content">
+
+  <div class="eyebrow">Chapter 11</div>
+  <h1 class="cht">One-Way ANOVA<br><em>(Within-Subjects / Repeated Measures)</em></h1>
+  <p class="chsub">Teaching Sarcasm &amp; the Problem of Sphericity</p>
+
+  <div class="pls">
+    <a class="pl plc" href="#">Concept &amp; Theory (this page)</a>
+    <a class="pl plj" href="11_rm-anova_jasp.html">JASP Walkthrough →</a>
+  </div>
+
+  <hr class="dv">
+
+  <blockquote class="pq">
+    <p>To put it succinctly, subjects differ. When subjects are observed only once, these subject differences contribute to the error term. When subjects are observed repeatedly, we can obtain an estimate of the degree of subject differences and partial these differences out of the error term.</p>
+    <cite>— Howell (2002, p. 480)</cite>
+  </blockquote>
+
+  <p>A <strong>repeated-measures ANOVA</strong> (RM-ANOVA) extends the one-way between-subjects ANOVA to situations where the <em>same participants</em> contribute scores at every level of the independent variable. Rather than comparing independent groups, you are comparing the same group at three or more time points — or under three or more conditions.</p>
+
+  <p>This chapter focuses on the <strong>one-way</strong> RM-ANOVA: one within-subjects IV with three or more levels, and one continuous DV. (When both a within-subjects and between-subjects IV are present, the design is called a mixed or split-plot ANOVA, covered in Chapter 13.)</p>
+
+  <!-- 11.1 -->
+  <h2 id="when"><span class="sn">11.1</span>When to Use a Repeated-Measures ANOVA</h2>
+
+  <p>Choose a one-way RM-ANOVA when the same participants appear in every condition of your categorical independent variable.</p>
+
+  <div class="cmp">
+    <div class="cmpcard">
+      <div class="ctag">Use this when</div>
+      <div class="cname">Same People,<br>3+ Conditions</div>
+      <p>The same participants are measured at three or more time points, or under three or more conditions. A within-subjects IV has at least 3 levels.</p>
+    </div>
+    <div class="cmpcard">
+      <div class="ctag">Don't use if</div>
+      <div class="cname">Only 2 Levels</div>
+      <p>With only two levels (e.g., pretest vs. posttest), use a <strong>paired samples <em>t</em>-test</strong> instead (see Ch. 9). RM-ANOVA is needed for 3 or more levels.</p>
+    </div>
+    <div class="cmpcard">
+      <div class="ctag">Don't use if</div>
+      <div class="cname">Different People<br>in Each Group</div>
+      <p>When different participants appear in each group, use a <strong>between-subjects ANOVA</strong> (Ch. 10). RM-ANOVA assumes within-person correlation.</p>
+    </div>
+    <div class="cmpcard">
+      <div class="ctag">Extends from</div>
+      <div class="cname">Paired <em>t</em>-Test</div>
+      <p>Just as paired <em>t</em>-tests handle two repeated measures, RM-ANOVA handles three or more without inflating the Type I error rate.</p>
+    </div>
+  </div>
+
+  <!-- 11.2 -->
+  <h2 id="power"><span class="sn">11.2</span>Why Repeated Measures Increases Power</h2>
+
+  <p>The key advantage of RM-ANOVA over a standard between-subjects ANOVA is that it can <strong>factor out individual differences</strong> from the error term. Because the same person contributes scores at every level, we can estimate and remove the variance that comes simply from people being different from each other — leaving a smaller, cleaner error term.</p>
+
+  <div class="vdiag">
+    <div class="vtitle">How Variance Is Partitioned</div>
+    <div class="vrow">
+      <div class="vbox">
+        <strong>Between-Subjects ANOVA (Ch. 10)</strong>
+        Total variance is split into:<br><br>
+        • Between-group variance (treatment effect)<br>
+        • Within-group variance (error — includes <em>all</em> individual differences)
+      </div>
+      <div class="varrow">→</div>
+      <div class="vbox highlight-box">
+        <strong>Repeated-Measures ANOVA (Ch. 11)</strong>
+        Total variance is split into:<br><br>
+        • Between-condition variance (treatment effect)<br>
+        • <em>Subject</em> variance (individual differences — factored out)<br>
+        • Residual error (smaller — more power)
+      </div>
+    </div>
+    <div style="margin-top:12px;font-size:13px;color:rgba(200,212,224,.7);font-style:italic;">
+      A smaller error term means the F-ratio is larger for the same treatment effect → greater statistical power → easier to detect real differences.
+    </div>
+  </div>
+
+  <!-- 11.3 -->
+  <h2 id="example"><span class="sn">11.3</span>Example Study: Kim (2013)</h2>
+
+  <div class="box box-ex">
+    <span class="blabel">📖 Example: Kim (2013)</span>
+    <p>Kim (2013) investigated whether concept-based instruction using Schema for the Orienting Basis of Action (SCOBAs) could help L1 Korean learners of English better recognize sarcasm. Nine participants completed a sarcasm comprehension test — worth up to 30 points — at three time points:</p>
+    <p>
+      <strong>Pretest</strong> — before any instruction<br>
+      <strong>Posttest</strong> — one week after completing nine weekly instructional sessions<br>
+      <strong>Delayed Posttest</strong> — five weeks after the posttest
+    </p>
+    <p>Because the same nine participants took all three tests, this is a repeated-measures design. With three time points (3 levels), it calls for a one-way RM-ANOVA rather than multiple paired <em>t</em>-tests.</p>
+  </div>
+
+  <h3>Variables</h3>
+  <div class="tw">
+    <table>
+      <thead><tr><th>Variable</th><th>Role</th><th>Type</th><th>Details</th></tr></thead>
+      <tbody>
+        <tr><td><kbd>Time</kbd></td><td>Independent Variable (IV)</td><td>Within-subjects (3 levels)</td><td>Pretest · Posttest · Delayed Posttest</td></tr>
+        <tr><td><kbd>Score</kbd></td><td>Dependent Variable (DV)</td><td>Scale (continuous)</td><td>Sarcasm test score (0–30 points)</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Descriptive Statistics</h3>
+  <div class="tw">
+    <table>
+      <thead><tr><th>Time Point</th><th class="tc"><em>N</em></th><th class="tc"><em>M</em></th><th class="tc"><em>SD</em></th></tr></thead>
+      <tbody>
+        <tr><td>Pretest</td><td class="tc">9</td><td class="tc">7.4</td><td class="tc">5.2</td></tr>
+        <tr><td>Posttest</td><td class="tc">9</td><td class="tc">16.6</td><td class="tc">3.0</td></tr>
+        <tr><td>Delayed Posttest</td><td class="tc">9</td><td class="tc">19.7</td><td class="tc">3.0</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p>There is a clear upward trend across the three time points. The large SD at pretest relative to posttest and delayed posttest suggests that learners began with very different starting points but converged after instruction — a common pattern in language learning research.</p>
+
+  <!-- 11.4 -->
+  <h2 id="format"><span class="sn">11.4</span>Data Format: Wide Form</h2>
+
+  <p>For RM-ANOVA in JASP, data must be in <strong>wide format</strong>: each participant occupies <em>one row</em>, and each time point (or condition) occupies a <em>separate column</em>. This is different from the long format required by most between-subjects analyses.</p>
+
+  <div class="tw">
+    <table>
+      <thead><tr><th>Participant</th><th class="tc">Pretest</th><th class="tc">Posttest</th><th class="tc">DelayedPost</th></tr></thead>
+      <tbody>
+        <tr><td>P01</td><td class="tc">4</td><td class="tc">14</td><td class="tc">18</td></tr>
+        <tr><td>P02</td><td class="tc">19</td><td class="tc">17</td><td class="tc">23</td></tr>
+        <tr><td>P03</td><td class="tc">7</td><td class="tc">16</td><td class="tc">20</td></tr>
+        <tr><td>…</td><td class="tc">…</td><td class="tc">…</td><td class="tc">…</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="box box-warn">
+    <span class="blabel">⚠ Wide Format Required</span>
+    <p>JASP's RM-ANOVA requires one row per participant with each repeated measurement in its own column. The number of columns for your within-subjects IV equals the number of levels (here, 3 — one for each testing time). If your data are in long format, they must be restructured before running the analysis.</p>
+  </div>
+
+  <!-- 11.5 -->
+  <h2 id="assumptions"><span class="sn">11.5</span>Assumptions &amp; Sphericity</h2>
+
+  <p>The RM-ANOVA shares the standard parametric assumptions of normality and homogeneity of variances, but adds a third assumption that is unique to repeated-measures designs: <strong>sphericity</strong>.</p>
+
+  <ul class="al">
+    <li>
+      <div class="aicon">1</div>
+      <div>
+        <strong>Normality of residuals</strong>
+        <span>The residuals (differences between observed scores and fitted values) should be approximately normally distributed. Check with a Q-Q plot in JASP. RM-ANOVA is moderately robust to violations with larger samples.</span>
+      </div>
+    </li>
+    <li>
+      <div class="aicon">2</div>
+      <div>
+        <strong>Homogeneity of variances</strong>
+        <span>Variance of scores should be similar across the levels of the within-subjects IV. Examine side-by-side boxplots. Note that unequal variance in repeated-measures data is related to the sphericity assumption below.</span>
+      </div>
+    </li>
+    <li>
+      <div class="aicon">★</div>
+      <div>
+        <strong>Sphericity</strong>
+        <span>The variances of the <em>differences</em> between all pairs of conditions should be equal. This is the critical and unique assumption of RM-ANOVA — explained in detail below.</span>
+      </div>
+    </li>
+  </ul>
+
+  <h3>What Is Sphericity?</h3>
+
+  <p>Sphericity requires that the variance of the <em>difference scores</em> between each pair of time points is equal across all pairs. For example, with three time points (Pretest, Posttest, Delayed):</p>
+
+  <div class="tw">
+    <table>
+      <thead><tr><th>Pair of Conditions</th><th>Difference Scores</th><th>Variance of Differences</th></tr></thead>
+      <tbody>
+        <tr><td>Pretest − Posttest</td><td>For each person: their pretest score minus their posttest score</td><td>Should be ≈ equal to others</td></tr>
+        <tr><td>Pretest − Delayed</td><td>For each person: pretest minus delayed posttest score</td><td>Should be ≈ equal to others</td></tr>
+        <tr><td>Posttest − Delayed</td><td>For each person: posttest minus delayed posttest score</td><td>Should be ≈ equal to others</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p>When these variances are <em>not</em> equal, the <em>F</em>-test is too liberal — it produces <em>p</em>-values that are too small and inflates the Type I error rate. The solution is to apply a correction factor to the degrees of freedom.</p>
+
+  <div class="sph-grid">
+    <div class="sph-card good">
+      <div class="sph-icon">✅</div>
+      <div class="sph-label">Sphericity Met</div>
+      <p>Mauchly's <em>p</em> &gt; .05. Variances of difference scores are approximately equal. The uncorrected <em>F</em>-test is valid.</p>
+    </div>
+    <div class="sph-card bad">
+      <div class="sph-icon">⚠️</div>
+      <div class="sph-label">Sphericity Violated</div>
+      <p>Mauchly's <em>p</em> &lt; .05. Difference score variances are unequal. The uncorrected <em>F</em>-test is too liberal. A correction is needed.</p>
+    </div>
+    <div class="sph-card fix">
+      <div class="sph-icon">🔧</div>
+      <div class="sph-label">Always Correct Anyway</div>
+      <p>Howell (2002) recommends applying a correction factor regardless of Mauchly's result, since the test itself is unreliable (low power with small samples).</p>
+    </div>
+  </div>
+
+  <!-- 11.6 -->
+  <h2 id="corrections"><span class="sn">11.6</span>Sphericity Corrections</h2>
+
+  <p>Both the Greenhouse–Geisser (GG) and Huynh–Feldt (HF) corrections work by multiplying the degrees of freedom by a correction factor called <strong>epsilon (ε)</strong>. This reduces the effective df and raises the <em>p</em>-value, making the test more conservative.</p>
+
+  <div class="tw">
+    <table>
+      <thead><tr><th>Correction</th><th>When to Use</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>None</strong> (Sphericity assumed)</td>
+          <td>Only if sphericity is clearly met</td>
+          <td>Most liberal; produces smallest p-values</td>
+        </tr>
+        <tr>
+          <td><strong>Greenhouse–Geisser (GG)</strong></td>
+          <td>When ε &lt; .75, or as a conservative default</td>
+          <td>More conservative than HF; ε can range from 1/(k−1) to 1.00</td>
+        </tr>
+        <tr>
+          <td><strong>Huynh–Feldt (HF)</strong></td>
+          <td>When ε &gt; .75 (Field, 2018); or as default (Abdi, 2010)</td>
+          <td>Less conservative than GG; can slightly exceed 1.00 (capped at 1.00 in JASP)</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="box box-tip">
+    <span class="blabel">💡 Practical Recommendation</span>
+    <p>Always report a corrected result. A common approach is to use the <strong>Greenhouse–Geisser</strong> correction by default (when ε &lt; .75) and <strong>Huynh–Feldt</strong> when ε &gt; .75. Howell (2002) recommends applying a correction even when Mauchly's test is not significant, since the test has low power in small samples. In practice, the correction rarely changes the conclusion — but always report which correction was used and what ε was.</p>
+  </div>
+
+  <!-- 11.7 -->
+  <h2 id="output"><span class="sn">11.7</span>Reading the Output</h2>
+
+  <p>The main result is in the <strong>Within Subjects Effects</strong> table. Each within-subjects variable appears as a block of rows, one per correction option (None, Greenhouse–Geisser, Huynh–Feldt). Read the corrected row that matches your chosen correction.</p>
+
+  <div class="so">
+    <div class="sh">Within Subjects Effects — Kim (2013) Sarcasm Data (illustrative)</div>
+    <div class="sr sr7 hdr"><span>Cases</span><span>Correction</span><span>SS</span><span>df</span><span>MS</span><span><em>F</em></span><span>η²p</span></div>
+    <div class="sr sr7"><span>Time</span><span class="dim">None</span><span>—</span><span>2.00</span><span>—</span><span>—</span><span>—</span></div>
+    <div class="sr sr7"><span></span><span>Greenhouse–Geisser</span><span>—</span><span class="hi">~1.35</span><span>—</span><span>—</span><span>—</span></div>
+    <div class="sr sr7"><span></span><span>Huynh–Feldt</span><span>—</span><span class="hi">~1.54</span><span>—</span><span>—</span><span>—</span></div>
+    <div class="section-gap"></div>
+    <div class="sr sr7"><span>Residuals</span><span class="dim">None</span><span>—</span><span>16.00</span><span>—</span><span>—</span><span>—</span></div>
+    <div class="sr sr7"><span></span><span>Greenhouse–Geisser</span><span>—</span><span class="hi">~10.79</span><span>—</span><span>—</span><span>—</span></div>
+    <div class="sr sr7"><span></span><span>Huynh–Feldt</span><span>—</span><span class="hi">~12.29</span><span>—</span><span>—</span><span>—</span></div>
+  </div>
+
+  <div class="box box-info">
+    <span class="blabel">📌 How to Read the Table</span>
+    <p>The <strong>df</strong> column is where corrections are visible. Without correction, df = k−1 = 2 for Time (three conditions) and df = (N−1)(k−1) = 16 for Residuals. After applying GG or HF corrections, these are multiplied by ε — reducing them and making the test more conservative. The <em>F</em>-value itself does not change; only the df (and therefore the <em>p</em>-value) changes. Always report the corrected df alongside the F value: e.g., <em>F</em>(1.35, 10.79) = …</p>
+  </div>
+
+  <!-- 11.8 -->
+  <h2 id="posthoc"><span class="sn">11.8</span>Post-Hoc Tests</h2>
+
+  <p>Just as with between-subjects ANOVA, a significant omnibus <em>F</em>-test tells you only that <em>some</em> difference exists across time points — not which specific pairs differ. Post-hoc pairwise comparisons are needed to identify where the differences lie.</p>
+
+  <p>In JASP, open the <strong>Post Hoc Tests</strong> menu and move your within-subjects IV to the right panel. JASP will compare all pairs of levels. Key options to select:</p>
+
+  <div class="tw">
+    <table>
+      <thead><tr><th>Option</th><th>What It Does</th><th>Recommendation</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Effect size</strong></td><td>Adds Cohen's <em>d</em>ₛ (standardized mean difference between each pair)</td><td>Always check this</td></tr>
+        <tr><td><strong>Confidence intervals</strong></td><td>95% CI for the mean difference and for the effect size</td><td>Always check this</td></tr>
+        <tr><td><strong>Correction</strong> (e.g., Bonferroni)</td><td>Adjusts <em>p</em>-values for multiple comparisons</td><td>Use Bonferroni if using <em>p</em>-values; CI approach does not require correction</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p>For the Kim (2013) data, we would compare all three pairs: Pretest–Posttest, Pretest–Delayed, and Posttest–Delayed. We already know from the paired <em>t</em>-test analyses (Ch. 9) that both the Pretest–Posttest and Posttest–Delayed comparisons were significant. The RM-ANOVA post-hoc tests will confirm these findings while controlling the error rate.</p>
+
+  <!-- 11.9 -->
+  <h2 id="effectsize"><span class="sn">11.9</span>Effect Sizes</h2>
+
+  <div class="tw">
+    <table>
+      <thead><tr><th>Effect Size</th><th>Used For</th><th>Interpretation</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>Partial η² (ηp²)</strong></td>
+          <td>Omnibus within-subjects effect</td>
+          <td>Proportion of variance explained by the IV, after removing variance due to individual differences. Reported directly in JASP output. Small ≈ .01, Medium ≈ .06, Large ≈ .14 (Cohen's guidelines).</td>
+        </tr>
+        <tr>
+          <td><strong>Cohen's <em>d</em>ₛ</strong></td>
+          <td>Each pairwise post-hoc comparison</td>
+          <td>Standardized mean difference between two specific conditions. Calculated the same way as for between-subjects <em>t</em>-tests using the pooled SD. By Plonsky &amp; Oswald: 0.60 = small, 1.00 = medium, 1.50 = large.</td>
+        </tr>
+        <tr>
+          <td><strong>Cohen's <em>d</em>ᵣₘ</strong></td>
+          <td>Within-group pairwise comparisons</td>
+          <td>Accounts for the correlation between repeated measures. Appropriate when reporting individual paired comparisons from a repeated-measures design. Available via JASP paired-samples t-test output.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 11.10 -->
+  <h2 id="reporting"><span class="sn">11.10</span>Writing Up Results</h2>
+
+  <p>A complete write-up should include: data format, assumption check results (normality, sphericity and ε), the corrected omnibus <em>F</em>-test, post-hoc pairwise comparisons with CIs and effect sizes, and a plain-language interpretation.</p>
+
+  <div class="report">
+    <span class="rl">Model Reporting Paragraph — One-Way RM-ANOVA</span>
+    <p>To examine whether sarcasm comprehension improved across three testing times, a one-way repeated-measures ANOVA was conducted with Time (Pretest, Posttest, Delayed Posttest) as the within-subjects independent variable and sarcasm test score as the dependent variable. Descriptive statistics were: Pretest, <em>M</em> = 7.44, <em>SD</em> = 5.20; Posttest, <em>M</em> = 16.56, <em>SD</em> = 2.96; Delayed Posttest, <em>M</em> = 19.67, <em>SD</em> = 2.96; all <em>N</em> = 9. Data distributions showed some departure from normality (positively skewed at Pretest and Delayed Posttest). Mauchly's test of sphericity [reported from output], and the Greenhouse–Geisser correction was applied (ε = [reported from output]).</p>
+    <p>The omnibus within-subjects effect of Time was statistically significant, <em>F</em>([corrected df]) = [<em>F</em>-value], <em>p</em> [<em>p</em>-value], ηp² = [value], indicating that scores changed significantly across the three testing times. Post-hoc pairwise comparisons with Bonferroni correction revealed that scores improved significantly from Pretest to Posttest (mean difference = −9.11, 95% CI [−14.37, −3.85], Cohen's <em>d</em>ᵣₘ = 2.18), and from Posttest to Delayed Posttest (mean difference = −3.11, 95% CI [−5.20, −1.03], Cohen's <em>d</em>ᵣₘ = 1.04). Both comparisons showed large and medium effect sizes respectively. These results indicate that concept-based instruction was effective in improving sarcasm comprehension, and that gains were maintained and even extended five weeks after instruction ended.</p>
+  </div>
+
+  <div class="box box-info">
+    <span class="blabel">📌 Note on Bracketed Values</span>
+    <p>Values shown in square brackets [ ] should be filled in from your JASP output after running the analysis. The write-up template above shows the structure and language to use — refer to the <a href="11_rm-anova_jasp.html">JASP Walkthrough page</a> for guidance on where to find each value in the output.</p>
+  </div>
+
+  <!-- 11.11 -->
+  <h2 id="summary"><span class="sn">11.11</span>Summary</h2>
+
+  <div class="tw">
+    <table>
+      <thead><tr><th>Concept</th><th>Key Points</th></tr></thead>
+      <tbody>
+        <tr><td><strong>When to use</strong></td><td>Same participants at 3+ time points or conditions; 1 within-subjects IV; 1 continuous DV</td></tr>
+        <tr><td><strong>Advantage</strong></td><td>Factors out individual differences → smaller error term → greater statistical power</td></tr>
+        <tr><td><strong>Data format</strong></td><td>Wide format: one row per participant, one column per condition</td></tr>
+        <tr><td><strong>Key new assumption</strong></td><td>Sphericity — equal variances of all pairwise difference scores; test with Mauchly's</td></tr>
+        <tr><td><strong>When sphericity violated</strong></td><td>Apply Greenhouse–Geisser (ε &lt; .75) or Huynh–Feldt (ε &gt; .75) correction to df</td></tr>
+        <tr><td><strong>Main result</strong></td><td>Within Subjects Effects table: read corrected F, corrected df, p, and ηp²</td></tr>
+        <tr><td><strong>Follow-up</strong></td><td>Post-hoc pairwise comparisons with effect sizes (dₛ or dᵣₘ) and 95% CIs</td></tr>
+        <tr><td><strong>Example</strong></td><td>Kim (2013): sarcasm scores improved significantly across Pretest → Posttest → Delayed Posttest</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="chnav">
+    <a href="10_one-way-anova.html" style="flex-direction:row;">
+      <span class="arrow">←</span>
+      <span><span class="nl2">Previous</span><span>Ch. 10 · One-Way ANOVA (Between-Subjects)</span></span>
+    </a>
+    <a href="11_rm-anova_jasp.html" style="flex-direction:row-reverse;">
+      <span><span class="nl2">Next</span><span>Ch. 11 · Running in JASP →</span></span>
+      <span class="arrow">→</span>
+    </a>
+  </div>
+
+</div>
+</main>
+
+<script>
+  const heads = document.querySelectorAll('h2[id]');
+  const subs = document.querySelectorAll('.ns');
+  const io = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        subs.forEach(a => { if (a.getAttribute('href') && a.getAttribute('href').startsWith('#')) a.classList.remove('active'); });
+        const m = document.querySelector(`.ns[href="#${e.target.id}"]`);
+        if (m) m.classList.add('active');
+      }
+    });
+  }, { rootMargin: '-15% 0px -70% 0px' });
+  heads.forEach(h => io.observe(h));
+</script>
+</body>
+</html>
