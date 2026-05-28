@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The New Statistics: CIs & Effect Sizes | Statistics with JASP</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;0,700;1,400&family=Source+Sans+3:wght@300;400;500;600&family=Source+Code+Pro:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:#faf8f5;--surface:#fff;--sidebar-bg:#1c2a38;
+    --sidebar-hover:#2d3f52;--sidebar-active:#3b8ea5;
+    --ink:#1a1f2e;--muted:#6b7280;
+    --accent:#2a7f9e;--accent2:#c0622a;
+    --border:#e2ddd6;--highlight:#eef7fa;
+    --tip-bg:#f0f9eb;--tip-border:#5a9e4a;
+    --warn-bg:#fdf6ec;--warn-border:#d97c2a;
+    --sidebar-w:280px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Source Sans 3',sans-serif;background:var(--bg);color:var(--ink);font-size:17px;line-height:1.75;display:flex;min-height:100vh;}
+
+  #sidebar{width:var(--sidebar-w);background:var(--sidebar-bg);color:#c8d4e0;position:fixed;top:0;left:0;bottom:0;overflow-y:auto;z-index:100;font-size:14px;}
+  #sh{padding:24px 20px 16px;border-bottom:1px solid rgba(255,255,255,.08);}
+  #sh .bt{font-family:'Lora',serif;font-size:15px;font-weight:700;color:#fff;line-height:1.3;margin-bottom:4px;}
+  #sh .bs{font-size:12px;color:rgba(200,212,224,.55);letter-spacing:.05em;text-transform:uppercase;}
+  #sidebar nav{padding:12px 0;}
+  .nl{padding:12px 20px 4px;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:rgba(200,212,224,.4);font-weight:600;}
+  .nc{display:block;padding:7px 20px;color:#c8d4e0;text-decoration:none;transition:background .15s,color .15s;line-height:1.4;}
+  .nc:hover{background:var(--sidebar-hover);color:#fff;}
+  .nc.active{background:rgba(59,142,165,.25);color:var(--sidebar-active);border-left:3px solid var(--sidebar-active);padding-left:17px;font-weight:600;}
+  .ns{display:block;padding:5px 20px 5px 36px;color:rgba(200,212,224,.65);text-decoration:none;font-size:13px;transition:color .15s;}
+  .ns:hover{color:#fff;}
+  .ns.active{color:var(--sidebar-active);}
+
+  #main{margin-left:var(--sidebar-w);flex:1;min-width:0;}
+  #content{max-width:820px;margin:0 auto;padding:56px 48px 80px;}
+
+  .eyebrow{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);font-weight:600;margin-bottom:10px;}
+  h1.cht{font-family:'Lora',serif;font-size:2.4rem;font-weight:700;line-height:1.15;color:var(--ink);margin-bottom:10px;}
+  h1.cht em{font-style:italic;color:var(--accent2);}
+  .chsub{font-family:'Lora',serif;font-size:1rem;font-style:italic;color:var(--muted);margin-bottom:12px;}
+  .pls{display:flex;gap:10px;margin-bottom:32px;flex-wrap:wrap;}
+  .pl{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:5px;font-size:13px;font-weight:600;text-decoration:none;transition:all .15s;}
+  .plc{background:var(--highlight);color:var(--accent);border:1.5px solid var(--accent);}
+  .plc:hover{background:var(--accent);color:#fff;}
+  .plj{background:var(--accent);color:#fff;border:1.5px solid var(--accent);cursor:default;opacity:.85;}
+  hr.dv{border:none;border-top:2px solid var(--border);margin-bottom:40px;}
+
+  h2{font-family:'Lora',serif;font-size:1.6rem;font-weight:700;color:var(--ink);margin:52px 0 16px;padding-bottom:8px;border-bottom:2px solid var(--border);scroll-margin-top:24px;}
+  h2 .sn{color:var(--accent);margin-right:8px;font-weight:400;font-size:1.1rem;}
+  h3{font-family:'Lora',serif;font-size:1.18rem;font-weight:600;color:var(--ink);margin:36px 0 12px;}
+  p{margin-bottom:16px;}
+  strong{font-weight:600;}
+  em{font-style:italic;}
+  a{color:var(--accent);text-decoration:none;}
+  a:hover{text-decoration:underline;}
+
+  blockquote.pq{border-left:4px solid var(--accent);background:var(--highlight);padding:20px 28px;margin:32px 0;border-radius:0 6px 6px 0;}
+  blockquote.pq p{font-family:'Lora',serif;font-style:italic;font-size:1.05rem;color:#2a3a4a;margin-bottom:6px;line-height:1.6;}
+  blockquote.pq cite{font-size:.85rem;color:var(--muted);font-style:normal;}
+
+  .box{border-radius:6px;padding:18px 24px;margin:24px 0;}
+  .box p:last-child,.box ul:last-child{margin:0;}
+  .box-tip{background:var(--tip-bg);border-left:4px solid var(--tip-border);}
+  .box-warn{background:var(--warn-bg);border-left:4px solid var(--warn-border);}
+  .box-info{background:var(--highlight);border-left:4px solid var(--accent);}
+  .box-ex{background:#fffbf5;border-left:4px solid var(--accent2);}
+  .blabel{font-size:11px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;margin-bottom:8px;display:block;}
+  .box-tip .blabel{color:var(--tip-border);}
+  .box-warn .blabel{color:var(--warn-border);}
+  .box-info .blabel{color:var(--accent);}
+  .box-ex .blabel{color:var(--accent2);}
+
+  .tw{overflow-x:auto;margin:24px 0;border:1px solid var(--border);border-radius:6px;}
+  table{width:100%;border-collapse:collapse;font-size:15px;}
+  thead tr{background:var(--ink);color:#fff;}
+  thead th{padding:11px 16px;text-align:left;font-weight:600;font-size:13px;letter-spacing:.04em;}
+  tbody tr:nth-child(even){background:var(--highlight);}
+  tbody td{padding:10px 16px;border-bottom:1px solid var(--border);vertical-align:top;}
+  tbody tr:last-child td{border-bottom:none;}
+  .tc{text-align:center;}
+
+  /* CI DANCE DIAGRAM */
+  .ci-dance{background:#1c2a38;border-radius:10px;padding:28px 32px;margin:28px 0;color:#e2f0f7;}
+  .ci-title{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:#7dd3fc;font-weight:600;margin-bottom:20px;text-align:center;}
+  .ci-track{position:relative;margin:12px 0 28px;}
+  .ci-axis{height:2px;background:rgba(255,255,255,.2);border-radius:1px;position:relative;margin:0 20px;}
+  .ci-zero{position:absolute;top:-10px;left:50%;transform:translateX(-50%);width:2px;height:24px;background:#7dd3fc;border-radius:1px;}
+  .ci-zero-label{position:absolute;top:16px;left:50%;transform:translateX(-50%);font-size:11px;color:#7dd3fc;white-space:nowrap;}
+  .ci-bars{display:flex;flex-direction:column;gap:10px;margin-top:16px;}
+  .ci-bar-row{display:flex;align-items:center;gap:12px;font-size:13px;}
+  .ci-bar-label{width:100px;text-align:right;color:rgba(200,212,224,.8);font-size:12px;flex-shrink:0;}
+  .ci-bar-track{flex:1;height:8px;background:rgba(255,255,255,.08);border-radius:4px;position:relative;}
+  .ci-bar-fill{height:100%;border-radius:4px;position:absolute;}
+  .ci-bar-dot{width:10px;height:10px;border-radius:50%;position:absolute;top:-1px;}
+  .ci-sig{background:#3b82f6;opacity:.7;}
+  .ci-ns{background:#f97316;opacity:.7;}
+  .ci-dot-sig{background:#7dd3fc;border:2px solid #fff;}
+  .ci-dot-ns{background:#fbbf24;border:2px solid #fff;}
+  .ci-note{font-size:12px;color:rgba(200,212,224,.65);margin-top:16px;font-style:italic;}
+
+  /* COMPARISON TABLE */
+  .compare-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:24px 0;}
+  .cg-card{border-radius:8px;padding:20px;}
+  .cg-old{background:#fdf6ec;border:2px solid var(--warn-border);}
+  .cg-new{background:var(--tip-bg);border:2px solid var(--tip-border);}
+  .cg-label{font-size:11px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;margin-bottom:12px;}
+  .cg-old .cg-label{color:var(--warn-border);}
+  .cg-new .cg-label{color:var(--tip-border);}
+  .cg-card ul{list-style:none;padding:0;margin:0;}
+  .cg-card li{font-size:14px;padding:5px 0;border-bottom:1px solid rgba(0,0,0,.06);}
+  .cg-card li:last-child{border-bottom:none;}
+  .cg-card li::before{margin-right:8px;}
+  .cg-old li::before{content:"—";color:var(--warn-border);}
+  .cg-new li::before{content:"✓";color:var(--tip-border);font-weight:700;}
+
+  /* EFFECT SIZE FAMILIES */
+  .es-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin:24px 0;}
+  .es-card{border:1.5px solid var(--border);border-radius:8px;padding:16px;}
+  .es-card .es-tag{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);font-weight:700;margin-bottom:8px;}
+  .es-card .es-name{font-family:'Lora',serif;font-size:1rem;font-weight:700;color:var(--ink);margin-bottom:8px;}
+  .es-card p{font-size:13px;color:var(--muted);margin:0;}
+
+  /* BENCHMARK TABLE */
+  .bench{background:#1c2a38;color:#e2f0f7;border-radius:8px;padding:22px 26px;margin:24px 0;font-size:14px;}
+  .bench .bh{color:#7dd3fc;font-weight:600;border-bottom:1px solid rgba(255,255,255,.12);padding-bottom:8px;margin-bottom:12px;font-family:'Source Sans 3',sans-serif;font-size:12px;letter-spacing:.08em;text-transform:uppercase;}
+  .bench .br{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.05);font-size:13px;}
+  .bench .br.hdr{color:#94a3b8;font-size:11.5px;}
+  .hi{color:#fbbf24;font-weight:600;}
+
+  /* RESEARCH QUESTIONS */
+  .rq-compare{display:grid;grid-template-columns:1fr 1fr;gap:0;margin:24px 0;border:1px solid var(--border);border-radius:8px;overflow:hidden;}
+  .rq-col{padding:20px;}
+  .rq-col.old{background:#fdf6ec;border-right:1px solid var(--border);}
+  .rq-col.new{background:var(--tip-bg);}
+  .rq-col-label{font-size:11px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;margin-bottom:12px;}
+  .rq-col.old .rq-col-label{color:var(--warn-border);}
+  .rq-col.new .rq-col-label{color:var(--tip-border);}
+  .rq-q{font-family:'Lora',serif;font-style:italic;font-size:15px;padding:8px 0;border-bottom:1px solid rgba(0,0,0,.07);}
+  .rq-q:last-child{border-bottom:none;}
+
+  .chnav{display:flex;justify-content:space-between;align-items:center;margin-top:64px;padding-top:24px;border-top:2px solid var(--border);gap:16px;}
+  .chnav a{display:flex;align-items:center;gap:8px;padding:12px 20px;border:1.5px solid var(--border);border-radius:6px;color:var(--ink);font-weight:500;font-size:15px;text-decoration:none;transition:border-color .2s,background .2s;}
+  .chnav a:hover{border-color:var(--accent);background:var(--highlight);text-decoration:none;}
+  .nl2{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);display:block;}
+  .arrow{color:var(--accent);font-size:1.2rem;}
+
+  @media(max-width:900px){
+    #sidebar{transform:translateX(-100%);}
+    #main{margin-left:0;}
+    #content{padding:32px 20px 60px;}
+    .compare-grid,.es-grid,.rq-compare{grid-template-columns:1fr;}
+  }
+</style>
+</head>
+<body>
+
+<aside id="sidebar">
+  <div id="sh"><div class="bt">Statistics with JASP</div><div class="bs">Applied Linguistics &amp; Language Research</div></div>
+  <nav>
+    <div class="nl">Foundations</div>
+    <a class="nc" href="A_old-statistics.html">A · The "Old" Statistics: NHST</a>
+    <a class="nc active" href="#">B · The "New" Statistics: CIs &amp; Effect Sizes ← you are here</a>
+    <a class="ns" href="#why">B.1 Why a New Approach?</a>
+    <a class="ns" href="#questions">B.2 The Right Questions</a>
+    <a class="ns" href="#ci">B.3 Confidence Intervals</a>
+    <a class="ns" href="#precision">B.4 Precision &amp; MOE</a>
+    <a class="ns" href="#pvariability">B.5 The Variability of p-Values</a>
+    <a class="ns" href="#effectsizes">B.6 Effect Sizes</a>
+    <a class="ns" href="#dfamily">B.7 d-Family Effect Sizes</a>
+    <a class="ns" href="#rfamily">B.8 r-Family Effect Sizes</a>
+    <a class="ns" href="#benchmarks">B.9 Benchmarks</a>
+    <a class="ns" href="#reporting">B.10 Reporting in Practice</a>
+    <a class="ns" href="#summary">B.11 Summary</a>
+    <div class="nl">Chapters</div>
+    <a class="nc" href="06_correlation.html">6 · Correlation</a>
+    <a class="nc" href="09_t-tests.html">9 · T-Tests</a>
+    <a class="nc" href="10_one-way-anova.html">10 · One-Way ANOVA</a>
+    <a class="nc" href="11_rm-anova.html">11 · One-Way RM-ANOVA</a>
+    <a class="nc" href="12_two-way-anova.html">12 · Two-Way ANOVA</a>
+  </nav>
+</aside>
+
+<main id="main">
+<div id="content">
+
+  <div class="eyebrow">Foundations · Part B</div>
+  <h1 class="cht">The <em>"New"</em> Statistics</h1>
+  <p class="chsub">Confidence Intervals, Effect Sizes &amp; Estimation</p>
+  <div class="pls">
+    <a class="pl plc" href="A_old-statistics.html">← The Old Statistics</a>
+    <a class="pl plj" href="#">The New Statistics (this page)</a>
+  </div>
+  <hr class="dv">
+
+  <blockquote class="pq">
+    <p>The main difference in the "new" statistics is an emphasis on the <em>size</em> of effects, measured through confidence intervals and effect sizes, over dichotomous "significant vs. non-significant" <em>p</em>-value decisions associated with NHST.</p>
+  </blockquote>
+
+  <p>The "new" statistics — a term used with the authors' tongues firmly in their cheeks, since these ideas have been around for 60 years or more — represent a fundamental shift in how researchers think about and report results. Rather than asking "is this statistically significant?", the new approach asks: <strong>How large is the effect, and how precisely have we estimated it?</strong></p>
+
+  <p>This chapter introduces the two core tools of the new statistics: <strong>confidence intervals</strong> (CIs) and <strong>effect sizes</strong>.</p>
+
+  <!-- B.1 -->
+  <h2 id="why"><span class="sn">B.1</span>Why a New Approach?</h2>
+
+  <p>The continued practice of NHST has been labelled as crude, uninformative, arbitrary, and unreliable because of its reliance on sample size. It has been called "inefficient at best, misleading at worst." Every major methodological society that has issued statistical reporting guidelines has insisted that the emphasis should shift away from dichotomous <em>p</em>-value decisions and toward effect sizes and confidence intervals.</p>
+
+  <p>Major SLA journals now require effect size reporting as standard practice, including <em>Language Learning</em>, <em>Studies in Second Language Acquisition</em>, <em>The Modern Language Journal</em>, <em>TESOL Quarterly</em>, <em>Foreign Language Annals</em>, <em>Language Testing</em>, <em>Second Language Research</em>, and <em>Language Learning &amp; Technology</em>. The APA Publication Manual states that complete reporting of effect sizes is a minimum expectation for all APA journals.</p>
+
+  <!-- B.2 -->
+  <h2 id="questions"><span class="sn">B.2</span>The Right Questions</h2>
+
+  <p>Faulkner et al. (2008) asked the authors of 193 published studies what they actually wanted to know when reading about a study's results. The answers were consistent: Was there an effect? How large was it? How practically important is it? A dichotomous NHST decision addresses only the first question, and imperfectly at that. The new statistics addresses all three.</p>
+
+  <div class="rq-compare">
+    <div class="rq-col old">
+      <div class="rq-col-label">Old Statistics Asks</div>
+      <div class="rq-q">"Is the <em>p</em>-value below .05?"</div>
+      <div class="rq-q">"Can we reject H₀?"</div>
+      <div class="rq-q">"Is the result statistically significant?"</div>
+    </div>
+    <div class="rq-col new">
+      <div class="rq-col-label">New Statistics Asks</div>
+      <div class="rq-q">"Was there an effect, and how large was it?"</div>
+      <div class="rq-q">"How precisely have we estimated this effect?"</div>
+      <div class="rq-q">"How practically important is this for learners?"</div>
+    </div>
+  </div>
+
+  <!-- B.3 -->
+  <h2 id="ci"><span class="sn">B.3</span>Confidence Intervals</h2>
+
+  <p>A <strong>confidence interval</strong> (CI) sets plausible limits for the value of a parameter — such as a mean score, a mean difference, or a correlation coefficient. Rather than a single-point estimate, a CI gives a <em>range</em> of values within which the true population parameter is likely to fall.</p>
+
+  <p>The agreed interpretation of a 95% CI is that it is "one from the notionally infinite number of intervals we would obtain if the experiment were repeated indefinitely." If we have a 95% CI, we can say that we are 95% confident that our interval includes the true population value (µ).</p>
+
+  <h3>Reading a Confidence Interval</h3>
+
+  <p>CIs do the same work as <em>p</em>-values — and more. If a 95% CI for a mean difference <strong>does not contain zero</strong>, the result is statistically significant at α = .05. But the CI also tells you how large the effect might be, and how uncertain your estimate is.</p>
+
+  <div class="ci-dance">
+    <div class="ci-title">Interpreting CIs for a Mean Difference — Does the Interval Cross Zero?</div>
+    <div class="ci-bars">
+      <div class="ci-bar-row">
+        <div class="ci-bar-label">CI entirely negative</div>
+        <div class="ci-bar-track">
+          <div class="ci-bar-fill ci-sig" style="left:5%;width:30%;"></div>
+          <div class="ci-bar-dot ci-dot-sig" style="left:19%;"></div>
+          <!-- zero line at 50% -->
+          <div style="position:absolute;top:-4px;left:50%;width:2px;height:16px;background:#7dd3fc;border-radius:1px;"></div>
+        </div>
+        <span style="font-size:12px;color:#60a5fa;">✓ Significant: Group 2 scored higher</span>
+      </div>
+      <div class="ci-bar-row">
+        <div class="ci-bar-label">CI crosses zero</div>
+        <div class="ci-bar-track">
+          <div class="ci-bar-fill ci-ns" style="left:40%;width:28%;"></div>
+          <div class="ci-bar-dot ci-dot-ns" style="left:52%;"></div>
+          <div style="position:absolute;top:-4px;left:50%;width:2px;height:16px;background:#7dd3fc;border-radius:1px;"></div>
+        </div>
+        <span style="font-size:12px;color:#fb923c;">✗ Not significant: Zero is plausible</span>
+      </div>
+      <div class="ci-bar-row">
+        <div class="ci-bar-label">CI entirely positive</div>
+        <div class="ci-bar-track">
+          <div class="ci-bar-fill ci-sig" style="left:60%;width:30%;"></div>
+          <div class="ci-bar-dot ci-dot-sig" style="left:73%;"></div>
+          <div style="position:absolute;top:-4px;left:50%;width:2px;height:16px;background:#7dd3fc;border-radius:1px;"></div>
+        </div>
+        <span style="font-size:12px;color:#60a5fa;">✓ Significant: Group 1 scored higher</span>
+      </div>
+    </div>
+    <div class="ci-note">The CI also shows the width of uncertainty. A narrow CI = precise estimate. A wide CI = uncertain estimate — the true effect could be anywhere in a wide range.</div>
+  </div>
+
+  <h3>What CIs Tell You That p-Values Cannot</h3>
+
+  <div class="compare-grid">
+    <div class="cg-card cg-old">
+      <div class="cg-label">❌ A p-value alone tells you:</div>
+      <ul>
+        <li>Whether a threshold was crossed (p &lt; .05 or not)</li>
+        <li>Nothing about effect size</li>
+        <li>Nothing about the precision of the estimate</li>
+        <li>Nothing about practical importance</li>
+      </ul>
+    </div>
+    <div class="cg-card cg-new">
+      <div class="cg-label">✓ A CI tells you:</div>
+      <ul>
+        <li>Whether there was a significant effect (does zero fall inside?)</li>
+        <li>The size of the effect in the original measurement scale</li>
+        <li>The precision of the estimate (width of the interval)</li>
+        <li>A range of plausible effect magnitudes</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- B.4 -->
+  <h2 id="precision"><span class="sn">B.4</span>Precision and the Margin of Error</h2>
+
+  <p>The <strong>precision</strong> of a CI is defined as half the width of the CI — also called the <strong>margin of error</strong> (MOE). A narrow CI is more precise: it pinpoints the true parameter more closely. A wide CI is less precise: the true effect could be anywhere in a large range, and the estimate is therefore less useful.</p>
+
+  <div class="box box-info">
+    <span class="blabel">📌 The Political Poll Analogy</span>
+    <p>When a political poll reports that "Candidate A leads by 7 points, with a margin of error of ±3 points," the margin of error is exactly the MOE in statistics. The lead could be as small as 4 or as large as 10 points — there is wiggle room. If the margin of error were ±0.1 points, the estimate would be much more precise and you could be more confident that the lead is real.</p>
+  </div>
+
+  <h3>How to Increase Precision</h3>
+  <ul style="margin:12px 0 20px 24px;">
+    <li style="margin-bottom:8px;"><strong>Increase sample size</strong> — the most direct lever. Larger <em>N</em> produces narrower CIs.</li>
+    <li style="margin-bottom:8px;"><strong>Include repeated measures</strong> — testing the same participants more than once or averaging across multiple tests reduces noise.</li>
+    <li style="margin-bottom:8px;"><strong>Use measures with better reliability and validity</strong> — unreliable measurement adds noise that widens the CI.</li>
+  </ul>
+
+  <!-- B.5 -->
+  <h2 id="pvariability"><span class="sn">B.5</span>The Hidden Variability of p-Values</h2>
+
+  <p>One of the most surprising findings from modern statistics is that <em>p</em>-values are themselves highly variable across samples. If you repeated the same experiment many times — drawing different samples from the same population — you would get very different <em>p</em>-values each time, even if the true effect remained constant.</p>
+
+  <p>Cumming (2012) calculated <em>p</em>-intervals, the prediction intervals for what <em>p</em>-value you would get in a replication. If your original experiment gave <em>p</em> = .05 in a two-tailed test, an 80% prediction interval for the replication <em>p</em>-value would range from .00 to .38 — meaning there is a 20% chance the replication <em>p</em>-value would exceed .38. A 95% <em>p</em>-interval would range from .00 to .82. In other words, a "significant" result could just as easily have been "non-significant" with a different sample from the same population.</p>
+
+  <div class="box box-warn">
+    <span class="blabel">⚠ The Illusion of Precision</span>
+    <p>Reporting a precise-looking <em>p</em>-value like <em>p</em> = .034 creates an illusion of precision. The true sampling variability of that value is enormous. In contrast, a CI — though it looks less precise because it gives a range rather than a single number — actually reflects the true uncertainty in the estimate more honestly. Reporting CIs is not trading precision for imprecision: it is revealing the variability that was always there but hidden behind a single misleading number.</p>
+  </div>
+
+  <!-- B.6 -->
+  <h2 id="effectsizes"><span class="sn">B.6</span>Effect Sizes</h2>
+
+  <p>An <strong>effect size</strong> is a measure of how large or important a result is. Unlike <em>p</em>-values, which change with sample size, effect sizes do not change no matter how many participants there are. This makes them the most informative answer to what researchers actually want to know.</p>
+
+  <p>Effect sizes are commonly divided into three families:</p>
+
+  <div class="es-grid">
+    <div class="es-card">
+      <div class="es-tag">d-Family</div>
+      <div class="es-name">Group Difference Indexes</div>
+      <p>Measure the difference between two group means in standard deviation units. Cohen's <em>d</em>, Hedges' <em>g</em>. Used with <em>t</em>-tests and ANOVA post-hocs.</p>
+    </div>
+    <div class="es-card">
+      <div class="es-tag">r-Family</div>
+      <div class="es-name">Relationship Indexes</div>
+      <p>Measure how strongly two variables co-vary. Includes <em>r</em>, <em>r</em>², η², ω², partial η², partial ω². Used with correlations and ANOVA omnibus tests.</p>
+    </div>
+    <div class="es-card">
+      <div class="es-tag">Risk Estimates</div>
+      <div class="es-name">Unstandardized Indexes</div>
+      <p>Include odds ratios (OR) and hazard ratios (HR). Common in medical research and logistic regression. Considered unstandardized effect sizes.</p>
+    </div>
+  </div>
+
+  <!-- B.7 -->
+  <h2 id="dfamily"><span class="sn">B.7</span>The <em>d</em>-Family: Group Difference Effect Sizes</h2>
+
+  <p>The prototypical <em>d</em>-family measure is <strong>Cohen's <em>d</em></strong>. It expresses how large the difference between two group means is in standard deviation units. If Cohen's <em>d</em> = 1.00, the two means differ by exactly one standard deviation. Values above 1.00 are possible.</p>
+
+  <p>The basic formula divides the mean difference by a standardizer (a form of SD):</p>
+
+  <div class="box box-info">
+    <span class="blabel">📌 The Standardizer Choice Matters</span>
+    <p>There are several options for the standardizer (denominator) in Cohen's <em>d</em>:<br>
+    <strong>A.</strong> The SD of one specific group (often the control group)<br>
+    <strong>B.</strong> The pooled SD of the two groups being compared (most common; recommended when variances are equal)<br>
+    <strong>C.</strong> The pooled SD of all groups in the study<br><br>
+    Because the standardizer choice affects the resulting <em>d</em> value, <strong>you must always state which standardizer you used</strong> when reporting a <em>d</em>-family effect size. Cohen's <em>d</em>ₛ (pooled SD) and Glass' Δ (SD of the control/reference group) are the most common choices in SLA.</p>
+  </div>
+
+  <h3>Key d-Family Measures</h3>
+
+  <div class="tw">
+    <table>
+      <thead><tr><th>Statistic</th><th>When to Use</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Cohen's <em>d</em>ₛ</strong></td><td>Independent groups; equal variances</td><td>Uses pooled SD. Most common. Report which standardizer you used.</td></tr>
+        <tr><td><strong>Hedges' <em>g</em>ₛ</strong></td><td>Independent groups; small samples</td><td>Corrects for positive bias in Cohen's <em>d</em> with small N. Preferred when bootstrapping CIs.</td></tr>
+        <tr><td><strong>Glass' Δ</strong></td><td>Independent groups; unequal variances</td><td>Uses SD of the control/reference group only. Appropriate when variances differ substantially.</td></tr>
+        <tr><td><strong>Cohen's <em>d</em>ᵣₘ</strong></td><td>Within-group (repeated measures)</td><td>Accounts for the correlation between repeated measurements. Does not overestimate effects like other within-group <em>d</em> variants.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="box box-tip">
+    <span class="blabel">💡 Calculating Effect Sizes</span>
+    <p>JASP reports effect sizes in the output for most analyses when you check the relevant box. An online calculator at <strong>www.psychometrica.de/effect_size</strong> allows you to calculate Cohen's <em>d</em>ₛ, Hedges' <em>g</em>ₛ, and their 95% CIs from means, SDs, and group sizes — and is especially useful for post-hoc comparisons from ANOVA output.</p>
+  </div>
+
+  <!-- B.8 -->
+  <h2 id="rfamily"><span class="sn">B.8</span>The <em>r</em>-Family: Relationship Effect Sizes</h2>
+
+  <p>The <em>r</em>-family measures how much two variables co-vary, or how much variance in one variable is explained by another. Unlike <em>d</em>-family measures, <em>r</em>-family measures are constrained between .00 and 1.00 (for squared versions), which many find easier to interpret.</p>
+
+  <div class="tw">
+    <table>
+      <thead><tr><th>Statistic</th><th>Used With</th><th>Interpretation</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Pearson's <em>r</em></strong></td><td>Correlation</td><td>Direction and strength of linear relationship (−1 to +1). <em>r</em>² = proportion of variance explained.</td></tr>
+        <tr><td><strong>η² (eta-squared)</strong></td><td>ANOVA omnibus test</td><td>Proportion of total variance explained by the IV. Slightly positively biased.</td></tr>
+        <tr><td><strong>ω² (omega-squared)</strong></td><td>ANOVA omnibus test</td><td>Like η² but corrected for positive bias. Preferred, especially with small N.</td></tr>
+        <tr><td><strong>Partial η² (η²p)</strong></td><td>Factorial ANOVA</td><td>Variance explained by one effect, controlling for others. Reported by JASP automatically.</td></tr>
+        <tr><td><strong>Partial ω² (ω²p)</strong></td><td>Factorial ANOVA</td><td>Like partial η² but less biased. Preferred over partial η² with small samples.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="box box-warn">
+    <span class="blabel">⚠ Effect Sizes Have CIs Too</span>
+    <p>Effect sizes are point estimates, just like mean scores — they come from a sample and are subject to sampling variability. Always report a <strong>95% CI alongside every effect size</strong>. A wide CI for an effect size (e.g., <em>d</em> = 1.48 [0.61, 2.24]) tells you that the true effect could be anywhere in that range, and you should treat the point estimate with caution. This is especially important in SLA research, where small samples are common.</p>
+  </div>
+
+  <!-- B.9 -->
+  <h2 id="benchmarks"><span class="sn">B.9</span>Benchmarks for Interpreting Effect Sizes</h2>
+
+  <p>Effect size benchmarks provide rough guidelines for judging whether an effect is small, medium, or large. Critically, <strong>SLA research has its own benchmarks</strong> developed by Plonsky and Oswald (2014), based on thousands of real SLA studies. These differ from Cohen's general benchmarks because SLA effects tend to be larger than those in experimental psychology.</p>
+
+  <div class="bench">
+    <div class="bh">Effect Size Benchmarks — d-Family</div>
+    <div class="br hdr"><span>Effect Size</span><span>Cohen (1988) General</span><span>Plonsky &amp; Oswald (2014) — SLA</span><span>Notes</span></div>
+    <div class="br"><span><strong>Small</strong></span><span><em>d</em> ≥ 0.20</span><span class="hi"><em>d</em> ≥ 0.60</span><span>Use P&amp;O for SLA research</span></div>
+    <div class="br"><span><strong>Medium</strong></span><span><em>d</em> ≥ 0.50</span><span class="hi"><em>d</em> ≥ 1.00</span><span></span></div>
+    <div class="br"><span><strong>Large</strong></span><span><em>d</em> ≥ 0.80</span><span class="hi"><em>d</em> ≥ 1.50</span><span></span></div>
+  </div>
+
+  <div class="bench" style="margin-top:16px;">
+    <div class="bh">Effect Size Benchmarks — r-Family</div>
+    <div class="br hdr"><span>Effect Size</span><span>Cohen (1988) General</span><span>Plonsky &amp; Oswald (2014) — SLA</span><span>Notes</span></div>
+    <div class="br"><span><strong>Small</strong></span><span><em>r</em> ≥ .10</span><span class="hi"><em>r</em> ≥ .25</span><span>Use P&amp;O for SLA research</span></div>
+    <div class="br"><span><strong>Medium</strong></span><span><em>r</em> ≥ .30</span><span class="hi"><em>r</em> ≥ .40</span><span></span></div>
+    <div class="br"><span><strong>Large</strong></span><span><em>r</em> ≥ .50</span><span class="hi"><em>r</em> ≥ .60</span><span></span></div>
+  </div>
+
+  <div class="box box-info">
+    <span class="blabel">📌 Benchmarks Are Not Laws</span>
+    <p>Effect size benchmarks are useful reference points, but context matters. Rosenthal (1990) noted that the correlation between taking aspirin and reduced heart attack risk was <em>r</em> = .03 — a tiny effect by any benchmark, yet medically important enough to recommend aspirin to millions of people. Always interpret effect sizes in light of the specific research question, the cost of interventions, and the field's standards.</p>
+  </div>
+
+  <!-- B.10 -->
+  <h2 id="reporting"><span class="sn">B.10</span>Reporting in Practice</h2>
+
+  <p>The new statistics does not require abandoning <em>p</em>-values entirely — they are still useful in some contexts (e.g., omnibus ANOVA tests, which do not produce CIs). The practical recommendation is to report CIs and effect sizes <em>alongside</em> or <em>instead of</em> <em>p</em>-values wherever possible.</p>
+
+  <div class="tw">
+    <table>
+      <thead><tr><th>Context</th><th>Recommended Reporting</th></tr></thead>
+      <tbody>
+        <tr><td>Mean scores (descriptives)</td><td>Report <em>M</em>, <em>SD</em>, and 95% CI for the mean</td></tr>
+        <tr><td>Correlation</td><td><em>r</em>, 95% CI [lower, upper], <em>N</em>, <em>r</em>² — no <em>p</em>-value needed</td></tr>
+        <tr><td>Paired <em>t</em>-test</td><td>Mean difference, 95% CI, Cohen's <em>d</em>ᵣₘ with 95% CI</td></tr>
+        <tr><td>Independent <em>t</em>-test</td><td>Mean difference, 95% CI, Hedges' <em>g</em>ₛ with 95% CI</td></tr>
+        <tr><td>One-way ANOVA (omnibus)</td><td><em>F</em>, <em>df</em>, <em>p</em>, ω² with 95% CI (no CI for the omnibus)</td></tr>
+        <tr><td>Post-hoc comparisons</td><td>Mean difference, 95% BCa CI, Hedges' <em>g</em>ₛ with 95% CI</td></tr>
+        <tr><td>Factorial ANOVA</td><td><em>F</em>, <em>df</em>, <em>p</em>, partial ω² for each effect; post-hoc comparisons with CIs</td></tr>
+        <tr><td>Effect sizes generally</td><td>Always include the 95% CI for the effect size itself</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="box box-ex">
+    <span class="blabel">📖 The Difference That p Cannot Show</span>
+    <p>Consider two fictional studies comparing teaching methods on a grammar cloze test. Study A has 10 participants and finds a mean difference of 15 points, <em>p</em> = .08. Study B has 1,000 participants and finds a mean difference of 0.5 points, <em>p</em> = .003.</p>
+    <p>Under NHST, Study B is "significant" and Study A is not. But Study A found a 15-point difference — three times the maximum score in some cloze tests — and was simply underpowered. Study B found a 0.5-point difference that is statistically significant but educationally meaningless. Effect sizes and CIs reveal this; a bare <em>p</em>-value hides it.</p>
+  </div>
+
+  <!-- B.11 -->
+  <h2 id="summary"><span class="sn">B.11</span>Summary</h2>
+
+  <div class="tw">
+    <table>
+      <thead><tr><th>Concept</th><th>Key Points</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Core goal</strong></td><td>Shift from "Is there an effect?" to "How large is it, and how precisely do we know?"</td></tr>
+        <tr><td><strong>Confidence interval (CI)</strong></td><td>A range of plausible values for a true parameter; 95% CI is standard. If CI excludes zero → significant.</td></tr>
+        <tr><td><strong>Precision / MOE</strong></td><td>Half the CI width; smaller = more precise. Increased by larger N, repeated measures, reliable instruments.</td></tr>
+        <tr><td><strong>p-value variability</strong></td><td>p-values are far more variable across replications than most researchers realize; CIs are more stable.</td></tr>
+        <tr><td><strong>Effect size</strong></td><td>Measures the magnitude of a result independent of N. Three families: d (group differences), r (relationships), risk estimates.</td></tr>
+        <tr><td><strong>d-family</strong></td><td>Cohen's <em>d</em>ₛ, Hedges' <em>g</em>ₛ, Glass' Δ, Cohen's <em>d</em>ᵣₘ. Always state which standardizer was used.</td></tr>
+        <tr><td><strong>r-family</strong></td><td>r, r², η², ω², partial η², partial ω². Used with correlations and ANOVA omnibus tests.</td></tr>
+        <tr><td><strong>Benchmarks (SLA)</strong></td><td>Use Plonsky &amp; Oswald (2014): d small = .60, medium = 1.00, large = 1.50; r small = .25, medium = .40, large = .60</td></tr>
+        <tr><td><strong>Practical rule</strong></td><td>Report CIs and effect sizes (with their CIs) for all results. p-values can be included but should not stand alone.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="chnav">
+    <a href="A_old-statistics.html" style="flex-direction:row;">
+      <span class="arrow">←</span>
+      <span><span class="nl2">Previous</span><span>A · The "Old" Statistics: NHST</span></span>
+    </a>
+    <a href="06_correlation.html" style="flex-direction:row-reverse;">
+      <span><span class="nl2">First Chapter</span><span>Ch. 6 · Correlation →</span></span>
+      <span class="arrow">→</span>
+    </a>
+  </div>
+
+</div>
+</main>
+
+<script>
+  const heads = document.querySelectorAll('h2[id]');
+  const subs = document.querySelectorAll('.ns');
+  const io = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        subs.forEach(a => { if (a.getAttribute('href')?.startsWith('#')) a.classList.remove('active'); });
+        const m = document.querySelector(`.ns[href="#${e.target.id}"]`);
+        if (m) m.classList.add('active');
+      }
+    });
+  }, { rootMargin: '-15% 0px -70% 0px' });
+  heads.forEach(h => io.observe(h));
+</script>
+</body>
+</html>

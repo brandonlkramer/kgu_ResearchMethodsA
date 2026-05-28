@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chapter 6: Correlation | Statistics with JASP</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;0,700;1,400&family=Source+Sans+3:wght@300;400;500;600&family=Source+Code+Pro:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:#faf8f5;--surface:#fff;--sidebar-bg:#1c2a38;
+    --sidebar-hover:#2d3f52;--sidebar-active:#3b8ea5;
+    --ink:#1a1f2e;--muted:#6b7280;
+    --accent:#2a7f9e;--accent2:#c0622a;
+    --border:#e2ddd6;--highlight:#eef7fa;
+    --tip-bg:#f0f9eb;--tip-border:#5a9e4a;
+    --warn-bg:#fdf6ec;--warn-border:#d97c2a;
+    --sidebar-w:280px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Source Sans 3',sans-serif;background:var(--bg);color:var(--ink);font-size:17px;line-height:1.75;display:flex;min-height:100vh;}
+
+  /* SIDEBAR */
+  #sidebar{width:var(--sidebar-w);background:var(--sidebar-bg);color:#c8d4e0;position:fixed;top:0;left:0;bottom:0;overflow-y:auto;z-index:100;font-size:14px;}
+  #sh{padding:24px 20px 16px;border-bottom:1px solid rgba(255,255,255,.08);}
+  #sh .bt{font-family:'Lora',serif;font-size:15px;font-weight:700;color:#fff;line-height:1.3;margin-bottom:4px;}
+  #sh .bs{font-size:12px;color:rgba(200,212,224,.55);letter-spacing:.05em;text-transform:uppercase;}
+  #sidebar nav{padding:12px 0;}
+  .nl{padding:12px 20px 4px;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:rgba(200,212,224,.4);font-weight:600;}
+  .nc{display:block;padding:7px 20px;color:#c8d4e0;text-decoration:none;transition:background .15s,color .15s;line-height:1.4;}
+  .nc:hover{background:var(--sidebar-hover);color:#fff;}
+  .nc.active{background:rgba(59,142,165,.25);color:var(--sidebar-active);border-left:3px solid var(--sidebar-active);padding-left:17px;font-weight:600;}
+  .ns{display:block;padding:5px 20px 5px 36px;color:rgba(200,212,224,.65);text-decoration:none;font-size:13px;transition:color .15s;}
+  .ns:hover{color:#fff;}
+  .ns.active{color:var(--sidebar-active);}
+
+  /* MAIN */
+  #main{margin-left:var(--sidebar-w);flex:1;min-width:0;}
+  #content{max-width:820px;margin:0 auto;padding:56px 48px 80px;}
+
+  .eyebrow{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);font-weight:600;margin-bottom:10px;}
+  h1.cht{font-family:'Lora',serif;font-size:2.4rem;font-weight:700;line-height:1.15;color:var(--ink);margin-bottom:10px;}
+  h1.cht em{font-style:italic;color:var(--accent2);}
+  .chsub{font-family:'Lora',serif;font-size:1rem;font-style:italic;color:var(--muted);margin-bottom:12px;}
+  .pls{display:flex;gap:10px;margin-bottom:32px;flex-wrap:wrap;}
+  .pl{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:5px;font-size:13px;font-weight:600;text-decoration:none;transition:all .15s;}
+  .plc{background:var(--accent);color:#fff;border:1.5px solid var(--accent);cursor:default;opacity:.85;}
+  .plj{background:var(--highlight);color:var(--accent);border:1.5px solid var(--accent);}
+  .plj:hover{background:var(--accent);color:#fff;}
+  hr.dv{border:none;border-top:2px solid var(--border);margin-bottom:40px;}
+
+  h2{font-family:'Lora',serif;font-size:1.6rem;font-weight:700;color:var(--ink);margin:52px 0 16px;padding-bottom:8px;border-bottom:2px solid var(--border);scroll-margin-top:24px;}
+  h2 .sn{color:var(--accent);margin-right:8px;font-weight:400;font-size:1.1rem;}
+  h3{font-family:'Lora',serif;font-size:1.18rem;font-weight:600;color:var(--ink);margin:36px 0 12px;scroll-margin-top:24px;}
+  h3 .sn{color:var(--accent2);margin-right:6px;font-weight:400;}
+  p{margin-bottom:16px;}
+  strong{font-weight:600;}
+  em{font-style:italic;}
+  a{color:var(--accent);text-decoration:none;}
+  a:hover{text-decoration:underline;}
+  kbd{background:#f0ede8;border:1px solid #ccc;border-radius:3px;padding:1px 7px;font-family:'Source Code Pro',monospace;font-size:13px;color:#333;}
+
+  /* PULL QUOTE */
+  blockquote.pq{border-left:4px solid var(--accent);background:var(--highlight);padding:20px 28px;margin:32px 0;border-radius:0 6px 6px 0;}
+  blockquote.pq p{font-family:'Lora',serif;font-style:italic;font-size:1.05rem;color:#2a3a4a;margin-bottom:6px;line-height:1.6;}
+  blockquote.pq cite{font-size:.85rem;color:var(--muted);font-style:normal;}
+
+  /* BOXES */
+  .box{border-radius:6px;padding:18px 24px;margin:24px 0;}
+  .box p:last-child{margin:0;}
+  .box-tip{background:var(--tip-bg);border-left:4px solid var(--tip-border);}
+  .box-warn{background:var(--warn-bg);border-left:4px solid var(--warn-border);}
+  .box-info{background:var(--highlight);border-left:4px solid var(--accent);}
+  .box-ex{background:#fffbf5;border-left:4px solid var(--accent2);}
+  .blabel{font-size:11px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;margin-bottom:8px;display:block;}
+  .box-tip .blabel{color:var(--tip-border);}
+  .box-warn .blabel{color:var(--warn-border);}
+  .box-info .blabel{color:var(--accent);}
+  .box-ex .blabel{color:var(--accent2);}
+
+  /* TABLES */
+  .tw{overflow-x:auto;margin:24px 0;border:1px solid var(--border);border-radius:6px;}
+  table{width:100%;border-collapse:collapse;font-size:15px;}
+  thead tr{background:var(--ink);color:#fff;}
+  thead th{padding:11px 16px;text-align:left;font-weight:600;font-size:13px;letter-spacing:.04em;}
+  tbody tr:nth-child(even){background:var(--highlight);}
+  tbody td{padding:10px 16px;border-bottom:1px solid var(--border);vertical-align:top;}
+  tbody tr:last-child td{border-bottom:none;}
+  .tc{text-align:center;}
+
+  /* SCATTERPLOT SVG GALLERY */
+  .scatter-gallery{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin:24px 0;}
+  .scatter-card{border:1.5px solid var(--border);border-radius:8px;overflow:hidden;background:var(--surface);}
+  .scatter-card svg{display:block;width:100%;}
+  .scatter-caption{padding:10px 12px;font-size:13px;text-align:center;color:var(--muted);border-top:1px solid var(--border);}
+  .scatter-caption strong{color:var(--ink);display:block;margin-bottom:2px;}
+
+  /* r SCALE */
+  .r-scale{background:#1c2a38;border-radius:10px;padding:24px 28px;margin:28px 0;color:#e2f0f7;}
+  .r-scale-title{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:#7dd3fc;font-weight:600;margin-bottom:16px;}
+  .r-track{position:relative;height:28px;border-radius:14px;background:linear-gradient(to right,#1d4ed8,#60a5fa,#e2e8f0,#fb923c,#dc2626);margin:8px 0 20px;}
+  .r-labels{display:flex;justify-content:space-between;font-size:12px;color:rgba(200,212,224,.8);font-family:'Source Code Pro',monospace;}
+  .r-markers{display:flex;justify-content:space-between;margin-bottom:4px;}
+  .r-mark{font-size:11px;color:#7dd3fc;font-weight:600;}
+  .r-benchmarks{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px;}
+  .r-bench{background:rgba(255,255,255,.06);border-radius:6px;padding:10px 14px;font-size:13px;}
+  .r-bench strong{color:#7dd3fc;display:block;margin-bottom:4px;font-size:11px;letter-spacing:.06em;text-transform:uppercase;}
+
+  /* ASSUMPTION LIST */
+  .al{list-style:none;padding:0;margin:16px 0;}
+  .al li{display:flex;gap:14px;align-items:flex-start;padding:12px 0;border-bottom:1px solid var(--border);}
+  .al li:last-child{border-bottom:none;}
+  .aicon{width:26px;height:26px;flex-shrink:0;border-radius:50%;background:var(--highlight);border:2px solid var(--accent);color:var(--accent);font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;margin-top:2px;}
+  .al strong{display:block;font-size:15px;margin-bottom:2px;}
+  .al span{font-size:15px;color:var(--muted);}
+
+  /* STAT OUTPUT */
+  .so{background:#1c2a38;color:#e2f0f7;border-radius:8px;padding:22px 26px;margin:24px 0;font-family:'Source Code Pro',monospace;font-size:13px;line-height:1.9;overflow-x:auto;}
+  .so .sh{color:#7dd3fc;font-weight:600;border-bottom:1px solid rgba(255,255,255,.12);padding-bottom:8px;margin-bottom:12px;font-family:'Source Sans 3',sans-serif;font-size:12px;letter-spacing:.08em;text-transform:uppercase;}
+  .so .sr{display:grid;gap:4px 16px;padding:4px 0;border-bottom:1px solid rgba(255,255,255,.05);font-size:12.5px;}
+  .sr5{grid-template-columns:2fr 1fr 1fr 1fr 1fr;}
+  .hdr{color:#94a3b8;font-size:11.5px;}
+  .hi{color:#fbbf24;font-weight:600;}
+  .dim{color:rgba(200,212,224,.45);}
+
+  /* REPORT */
+  .report{background:#fffbf5;border:1px solid #e8d5b7;border-radius:6px;padding:22px 28px 20px;margin:24px 0;font-family:'Lora',serif;font-size:.95rem;line-height:1.85;color:#2a2a2a;position:relative;}
+  .report::before{content:'"';position:absolute;top:-6px;left:18px;font-size:4rem;color:#e8d5b7;line-height:1;}
+  .rl{font-family:'Source Sans 3',sans-serif;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--accent2);font-weight:700;margin-bottom:14px;display:block;font-style:normal;}
+  .report p{margin-bottom:10px;}
+  .report p:last-child{margin:0;}
+
+  /* CHAPTER NAV */
+  .chnav{display:flex;justify-content:space-between;align-items:center;margin-top:64px;padding-top:24px;border-top:2px solid var(--border);gap:16px;}
+  .chnav a{display:flex;align-items:center;gap:8px;padding:12px 20px;border:1.5px solid var(--border);border-radius:6px;color:var(--ink);font-weight:500;font-size:15px;text-decoration:none;transition:border-color .2s,background .2s;}
+  .chnav a:hover{border-color:var(--accent);background:var(--highlight);text-decoration:none;}
+  .nl2{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);display:block;}
+  .arrow{color:var(--accent);font-size:1.2rem;}
+
+  @media(max-width:900px){
+    #sidebar{transform:translateX(-100%);}
+    #main{margin-left:0;}
+    #content{padding:32px 20px 60px;}
+    .scatter-gallery{grid-template-columns:1fr;}
+    .r-benchmarks{grid-template-columns:1fr;}
+  }
+</style>
+</head>
+<body>
+
+<aside id="sidebar">
+  <div id="sh"><div class="bt">Statistics with JASP</div><div class="bs">Applied Linguistics &amp; Language Research</div></div>
+  <nav>
+    <div class="nl">Chapters</div>
+    <a class="nc" href="#">1 · What is JASP?</a>
+    <a class="nc" href="#">2 · Generating Data for JASP</a>
+    <a class="nc" href="#">3 · Variables &amp; Value Labels</a>
+    <a class="nc" href="#">4 · Chi-Square (2×2)</a>
+    <a class="nc" href="#">5 · Chi-Square (i×j)</a>
+    <a class="nc active" href="#">6 · Correlation</a>
+    <a class="ns active" href="#">→ Concept &amp; Theory ← you are here</a>
+    <a class="ns" href="06_correlation_jasp.html">→ Running in JASP</a>
+    <a class="ns" href="#what">6.1 What Is Correlation?</a>
+    <a class="ns" href="#scatterplots">6.2 Scatterplots First</a>
+    <a class="ns" href="#r">6.3 The Correlation Coefficient</a>
+    <a class="ns" href="#r2">6.4 r² — Variance Explained</a>
+    <a class="ns" href="#causation">6.5 Correlation ≠ Causation</a>
+    <a class="ns" href="#assumptions">6.6 Assumptions</a>
+    <a class="ns" href="#types">6.7 Types of Correlation</a>
+    <a class="ns" href="#effect">6.8 Effect Size &amp; Benchmarks</a>
+    <a class="ns" href="#ci">6.9 Confidence Intervals</a>
+    <a class="ns" href="#multi">6.10 Correlation Matrices</a>
+    <a class="ns" href="#reporting">6.11 Writing Up Results</a>
+    <a class="ns" href="#summary">6.12 Summary</a>
+    <a class="nc" href="#">7 · Non-Parametric Statistics</a>
+    <a class="nc" href="#">8 · Multiple Regression</a>
+    <a class="nc" href="09_t-tests.html">9 · T-Tests</a>
+    <a class="nc" href="10_one-way-anova.html">10 · One-Way ANOVA (Between)</a>
+    <a class="nc" href="11_rm-anova.html">11 · One-Way ANOVA (Within)</a>
+    <a class="nc" href="12_two-way-anova.html">12 · Two-Way Factorial ANOVA</a>
+  </nav>
+</aside>
+
+<main id="main">
+<div id="content">
+
+  <div class="eyebrow">Chapter 6</div>
+  <h1 class="cht">Correlation</h1>
+  <p class="chsub">Age of Arrival, Accent, &amp; the Shape of a Relationship</p>
+  <div class="pls">
+    <a class="pl plc" href="#">Concept &amp; Theory (this page)</a>
+    <a class="pl plj" href="06_correlation_jasp.html">JASP Walkthrough →</a>
+  </div>
+  <hr class="dv">
+
+  <blockquote class="pq">
+    <p>Readers should get used to understanding the importance of the size of the <em>r</em> value, and understand the size of a correlation without worrying about whether the <em>p</em>-value is lower than .05 or not.</p>
+  </blockquote>
+
+  <p>A <strong>correlation</strong> measures the degree to which two continuous variables vary together. When one variable increases, does the other tend to increase too? Or decrease? Or neither? Correlation is one of the most fundamental tools in applied linguistics research — and one of the most frequently misused.</p>
+
+  <p>Unlike the ANOVA and <em>t</em>-test chapters, which focus on comparing <em>groups</em>, correlation is used when both variables are <strong>continuous</strong> (interval or ratio level). There are no groups, no DVs or IVs in the traditional sense — just two measurements per participant.</p>
+
+  <!-- 6.1 -->
+  <h2 id="what"><span class="sn">6.1</span>What Is Correlation?</h2>
+
+  <p>A correlation coefficient expresses two things simultaneously: the <strong>direction</strong> of a relationship (positive or negative) and its <strong>strength</strong> (from 0 = no relationship to ±1 = perfect relationship).</p>
+
+  <div class="scatter-gallery">
+    <div class="scatter-card">
+      <svg viewBox="0 0 200 160" xmlns="http://www.w3.org/2000/svg">
+        <rect width="200" height="160" fill="#f9f8f6"/>
+        <line x1="30" y1="130" x2="185" y2="130" stroke="#ddd" stroke-width="1"/>
+        <line x1="30" y1="20" x2="30" y2="130" stroke="#ddd" stroke-width="1"/>
+        <!-- dots trending up-right -->
+        <circle cx="40" cy="115" r="4" fill="#2a7f9e" opacity=".7"/>
+        <circle cx="55" cy="105" r="4" fill="#2a7f9e" opacity=".7"/>
+        <circle cx="68" cy="98" r="4" fill="#2a7f9e" opacity=".7"/>
+        <circle cx="80" cy="88" r="4" fill="#2a7f9e" opacity=".7"/>
+        <circle cx="95" cy="80" r="4" fill="#2a7f9e" opacity=".7"/>
+        <circle cx="108" cy="70" r="4" fill="#2a7f9e" opacity=".7"/>
+        <circle cx="122" cy="60" r="4" fill="#2a7f9e" opacity=".7"/>
+        <circle cx="135" cy="52" r="4" fill="#2a7f9e" opacity=".7"/>
+        <circle cx="148" cy="44" r="4" fill="#2a7f9e" opacity=".7"/>
+        <circle cx="163" cy="35" r="4" fill="#2a7f9e" opacity=".7"/>
+        <line x1="35" y1="120" x2="170" y2="28" stroke="#2a7f9e" stroke-width="2"/>
+        <text x="100" y="148" text-anchor="middle" font-size="11" fill="#6b7280" font-family="sans-serif">X</text>
+        <text x="12" y="80" text-anchor="middle" font-size="11" fill="#6b7280" font-family="sans-serif" transform="rotate(-90,12,80)">Y</text>
+      </svg>
+      <div class="scatter-caption"><strong>Positive Correlation</strong>r ≈ +0.95 — as X rises, Y rises</div>
+    </div>
+    <div class="scatter-card">
+      <svg viewBox="0 0 200 160" xmlns="http://www.w3.org/2000/svg">
+        <rect width="200" height="160" fill="#f9f8f6"/>
+        <line x1="30" y1="130" x2="185" y2="130" stroke="#ddd" stroke-width="1"/>
+        <line x1="30" y1="20" x2="30" y2="130" stroke="#ddd" stroke-width="1"/>
+        <!-- dots trending down-right -->
+        <circle cx="40" cy="32" r="4" fill="#c0622a" opacity=".7"/>
+        <circle cx="55" cy="42" r="4" fill="#c0622a" opacity=".7"/>
+        <circle cx="68" cy="52" r="4" fill="#c0622a" opacity=".7"/>
+        <circle cx="82" cy="60" r="4" fill="#c0622a" opacity=".7"/>
+        <circle cx="95" cy="72" r="4" fill="#c0622a" opacity=".7"/>
+        <circle cx="108" cy="80" r="4" fill="#c0622a" opacity=".7"/>
+        <circle cx="122" cy="90" r="4" fill="#c0622a" opacity=".7"/>
+        <circle cx="136" cy="100" r="4" fill="#c0622a" opacity=".7"/>
+        <circle cx="150" cy="108" r="4" fill="#c0622a" opacity=".7"/>
+        <circle cx="163" cy="118" r="4" fill="#c0622a" opacity=".7"/>
+        <line x1="35" y1="26" x2="170" y2="122" stroke="#c0622a" stroke-width="2"/>
+        <text x="100" y="148" text-anchor="middle" font-size="11" fill="#6b7280" font-family="sans-serif">X</text>
+        <text x="12" y="80" text-anchor="middle" font-size="11" fill="#6b7280" font-family="sans-serif" transform="rotate(-90,12,80)">Y</text>
+      </svg>
+      <div class="scatter-caption"><strong>Negative Correlation</strong>r ≈ −0.95 — as X rises, Y falls</div>
+    </div>
+    <div class="scatter-card">
+      <svg viewBox="0 0 200 160" xmlns="http://www.w3.org/2000/svg">
+        <rect width="200" height="160" fill="#f9f8f6"/>
+        <line x1="30" y1="130" x2="185" y2="130" stroke="#ddd" stroke-width="1"/>
+        <line x1="30" y1="20" x2="30" y2="130" stroke="#ddd" stroke-width="1"/>
+        <!-- scattered dots -->
+        <circle cx="42" cy="88" r="4" fill="#6b7280" opacity=".6"/>
+        <circle cx="58" cy="45" r="4" fill="#6b7280" opacity=".6"/>
+        <circle cx="70" cy="110" r="4" fill="#6b7280" opacity=".6"/>
+        <circle cx="85" cy="62" r="4" fill="#6b7280" opacity=".6"/>
+        <circle cx="98" cy="95" r="4" fill="#6b7280" opacity=".6"/>
+        <circle cx="112" cy="38" r="4" fill="#6b7280" opacity=".6"/>
+        <circle cx="126" cy="78" r="4" fill="#6b7280" opacity=".6"/>
+        <circle cx="140" cy="55" r="4" fill="#6b7280" opacity=".6"/>
+        <circle cx="154" cy="102" r="4" fill="#6b7280" opacity=".6"/>
+        <circle cx="168" cy="70" r="4" fill="#6b7280" opacity=".6"/>
+        <line x1="35" y1="74" x2="173" y2="76" stroke="#6b7280" stroke-width="1.5" stroke-dasharray="4,3"/>
+        <text x="100" y="148" text-anchor="middle" font-size="11" fill="#6b7280" font-family="sans-serif">X</text>
+        <text x="12" y="80" text-anchor="middle" font-size="11" fill="#6b7280" font-family="sans-serif" transform="rotate(-90,12,80)">Y</text>
+      </svg>
+      <div class="scatter-caption"><strong>No Correlation</strong>r ≈ 0.00 — X and Y are unrelated</div>
+    </div>
+  </div>
+
+  <!-- 6.2 -->
+  <h2 id="scatterplots"><span class="sn">6.2</span>Scatterplots First — Always</h2>
+
+  <p>Before computing any correlation coefficient, examine a <strong>scatterplot</strong>. This is not optional. A scatterplot tells you:</p>
+
+  <ul style="margin:12px 0 20px 24px;">
+    <li style="margin-bottom:8px;">Whether the relationship is <strong>linear</strong> — if it isn't, Pearson's <em>r</em> will mislead you</li>
+    <li style="margin-bottom:8px;">Whether there are <strong>outliers</strong> that are disproportionately pulling the line</li>
+    <li style="margin-bottom:8px;">Whether there are meaningful <strong>subgroups</strong> driving an apparent correlation</li>
+    <li style="margin-bottom:8px;">The approximate <strong>direction and strength</strong> of the relationship</li>
+  </ul>
+
+  <p>A good scatterplot includes both a <strong>regression line</strong> (a straight best-fit line) and a <strong>Loess line</strong> (a flexible smooth curve). When the two lines are close, the linearity assumption is supported. When they diverge, the relationship may be non-linear and a simple Pearson correlation may not be the best summary.</p>
+
+  <div class="box box-ex">
+    <span class="blabel">📖 Example: Flege et al. (1999) — Age of Arrival &amp; Pronunciation</span>
+    <p>Flege, Yeni-Komshian, and Liu (1999) examined 240 Korean immigrants to the USA. Their age of arrival (AOA) in years was correlated with their accent rating — a score from 1 (very foreign-accented) to 9 (native-like) given by native English speaker judges. The prediction: learners who arrived younger would sound more native-like.</p>
+    <p>A scatterplot of this data shows a clear <strong>negative linear trend</strong>: the older the learner's arrival age, the lower the pronunciation rating. The regression and Loess lines track closely, supporting a roughly linear relationship — though Flege et al. themselves fit a cubic curve to capture the slight non-linearity at younger ages.</p>
+  </div>
+
+  <div class="box box-ex">
+    <span class="blabel">📖 Example: DeKeyser (2000) — Age of Arrival &amp; Grammar</span>
+    <p>DeKeyser (2000) gave 57 Hungarian immigrants to the USA a 200-point grammaticality judgment test (GJT) of English. Again, age of arrival was negatively correlated with test performance — older arrivals scored lower on the grammar test. This is a smaller, complementary dataset that demonstrates the same underlying pattern.</p>
+  </div>
+
+  <!-- 6.3 -->
+  <h2 id="r"><span class="sn">6.3</span>The Correlation Coefficient <em>r</em></h2>
+
+  <p>The most commonly used correlation statistic is <strong>Pearson's <em>r</em></strong> (also written as the product-moment correlation). It ranges from <strong>−1.00</strong> (perfect negative relationship) to <strong>+1.00</strong> (perfect positive relationship), with 0 indicating no linear relationship.</p>
+
+  <div class="r-scale">
+    <div class="r-scale-title">The Pearson <em>r</em> Scale</div>
+    <div class="r-markers">
+      <span class="r-mark">−1.00</span>
+      <span class="r-mark">−0.60</span>
+      <span class="r-mark">−0.25</span>
+      <span class="r-mark">0.00</span>
+      <span class="r-mark">+0.25</span>
+      <span class="r-mark">+0.60</span>
+      <span class="r-mark">+1.00</span>
+    </div>
+    <div class="r-track"></div>
+    <div class="r-labels">
+      <span>Perfect negative</span>
+      <span style="text-align:center;">← Large · Medium · Small →</span>
+      <span>Perfect positive</span>
+    </div>
+    <div class="r-benchmarks">
+      <div class="r-bench">
+        <strong>Cohen's (1988) — General</strong>
+        Small: <em>r</em> = .10 · Medium: <em>r</em> = .30 · Large: <em>r</em> = .50
+      </div>
+      <div class="r-bench">
+        <strong>Plonsky &amp; Oswald (2014) — SLA</strong>
+        Small: <em>r</em> = .25 · Medium: <em>r</em> = .40 · Large: <em>r</em> = .60
+      </div>
+    </div>
+  </div>
+
+  <p>For the Flege et al. (1999) data, the Pearson correlation between AOA and pronunciation rating is <strong><em>r</em> = −.86</strong>. By any benchmark, this is a very large effect — a strong, negative relationship. The negative sign tells us that higher AOA goes together with lower pronunciation scores.</p>
+
+  <!-- 6.4 -->
+  <h2 id="r2"><span class="sn">6.4</span><em>r</em>² — The Variance Explained</h2>
+
+  <p>Squaring the correlation coefficient gives <strong><em>r</em>²</strong>, which tells you the <em>proportion of variance</em> in one variable that is explained by its linear relationship with the other. This is directly interpretable as a percentage.</p>
+
+  <div class="tw">
+    <table>
+      <thead><tr><th><em>r</em></th><th><em>r</em>²</th><th>Interpretation</th><th>Example</th></tr></thead>
+      <tbody>
+        <tr><td>−.86</td><td>.74</td><td>74% of variance in pronunciation explained by AOA</td><td>Flege et al. (1999)</td></tr>
+        <tr><td>.18</td><td>.03</td><td>3% of variance in GJT scores explained by hours of study</td><td>Larson-Hall (2008)</td></tr>
+        <tr><td>.08</td><td>.006</td><td>&lt;1% of variance explained — essentially no relationship</td><td>GJT × Aptitude</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="box box-info">
+    <span class="blabel">📌 r² and the "New Statistics"</span>
+    <p>Because <em>r</em> is already an effect size, and <em>r</em>² is directly interpretable as a proportion, many researchers report <em>r</em> and <em>r</em>² without a <em>p</em>-value. A <em>p</em>-value tells you almost nothing useful about a correlation: with a large enough sample, any <em>r</em> will be "significant"; with a small sample, even a large <em>r</em> will not reach significance. Focus on <em>r</em>, <em>r</em>², and their 95% CIs instead.</p>
+  </div>
+
+  <!-- 6.5 -->
+  <h2 id="causation"><span class="sn">6.5</span>Correlation Does Not Equal Causation</h2>
+
+  <p>This is the most important caution in all of statistics. A correlation tells you that two variables co-vary — not that one <em>causes</em> the other. If AOA and pronunciation are negatively correlated, there are (at least) three possible explanations:</p>
+
+  <div class="tw">
+    <table>
+      <thead><tr><th>Scenario</th><th>Explanation</th></tr></thead>
+      <tbody>
+        <tr><td><strong>A causes B</strong></td><td>Arriving later causes lower pronunciation (younger brains are more plastic)</td></tr>
+        <tr><td><strong>B causes A</strong></td><td>Unlikely here, but must always be considered</td></tr>
+        <tr><td><strong>C causes both A and B</strong></td><td>A third variable (e.g., amount of L1 use, social networks) causes both older arrival and lower pronunciation</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p>Only a true experiment — where the researcher manipulates the independent variable — can establish causality. Correlational studies can suggest causality through theory and logic, but cannot prove it statistically.</p>
+
+  <!-- 6.6 -->
+  <h2 id="assumptions"><span class="sn">6.6</span>Assumptions of Pearson's <em>r</em></h2>
+
+  <ul class="al">
+    <li><div class="aicon">1</div><div><strong>Linearity</strong><span>The relationship between the two variables should follow a straight line. Check with a scatterplot showing both a regression line and a Loess smoother. If the Loess line curves substantially, consider a non-linear approach.</span></div></li>
+    <li><div class="aicon">2</div><div><strong>Independence of observations</strong><span>Each participant contributes one pair of scores, and scores are not influenced by other participants' scores. Ensured by good research design.</span></div></li>
+    <li><div class="aicon">3</div><div><strong>Normal distribution</strong><span>Both variables should be approximately normally distributed. Check with histograms or Q-Q plots. Moderate violations are tolerable with larger samples.</span></div></li>
+    <li><div class="aicon">4</div><div><strong>Homoscedasticity</strong><span>The variance of one variable should be roughly equal across all values of the other. On a scatterplot, this means the spread of points around the regression line should be similar throughout the range of X.</span></div></li>
+  </ul>
+
+  <div class="box box-warn">
+    <span class="blabel">⚠ When Assumptions Are Violated</span>
+    <p>If normality or homoscedasticity are violated, consider:<br>
+    • <strong>Bootstrapped Pearson's <em>r</em></strong> — randomly resamples the data to produce robust CIs without assuming normality<br>
+    • <strong>Spearman's <em>ρ</em></strong> — a rank-based non-parametric alternative (less preferred in modern practice)<br>
+    • <strong>Percentage bend correlation</strong> or <strong>Winsorized correlation</strong> — robust alternatives available in R</p>
+  </div>
+
+  <!-- 6.7 -->
+  <h2 id="types"><span class="sn">6.7</span>Types of Correlation</h2>
+
+  <div class="tw">
+    <table>
+      <thead><tr><th>Test</th><th>When to Use</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>Pearson's <em>r</em></strong></td>
+          <td>Both variables are continuous and the relationship is linear; assumptions met</td>
+          <td>The standard parametric choice. Also used to report bootstrapped correlation results.</td>
+        </tr>
+        <tr>
+          <td><strong>Spearman's <em>ρ</em></strong></td>
+          <td>Ordinal data, or serious normality violations</td>
+          <td>Converts scores to ranks before correlating. Traditional but less powerful than modern robust alternatives.</td>
+        </tr>
+        <tr>
+          <td><strong>Kendall's <em>τ</em>-b</strong></td>
+          <td>Small samples with many tied ranks</td>
+          <td>Another rank-based option; rarely used in SLA research.</td>
+        </tr>
+        <tr>
+          <td><strong>Point-biserial</strong></td>
+          <td>One continuous variable, one dichotomous variable (e.g., correct/incorrect on a test item)</td>
+          <td>Used in test item analysis (item discrimination). Mathematically equivalent to Pearson's <em>r</em> with a 0/1 variable.</td>
+        </tr>
+        <tr>
+          <td><strong>Bootstrapped Pearson's <em>r</em></strong></td>
+          <td>When parametric assumptions are violated</td>
+          <td>Preferred over Spearman's <em>ρ</em> in modern practice. Available in SPSS; not yet available in JASP (as of writing).</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 6.8 -->
+  <h2 id="effect"><span class="sn">6.8</span>Effect Size &amp; Benchmarks</h2>
+
+  <p>The correlation coefficient <em>r</em> is itself an effect size — unlike ANOVA where you need a separate calculation. For applied linguistics and SLA research, use <strong>Plonsky and Oswald's (2014)</strong> benchmarks rather than Cohen's more general guidelines, as real SLA effects tend to be larger than those in experimental psychology.</p>
+
+  <div class="tw">
+    <table>
+      <thead><tr><th>Magnitude</th><th>Plonsky &amp; Oswald (2014) — SLA</th><th>Cohen (1988) — General</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Small</strong></td><td><em>r</em> ≥ .25</td><td><em>r</em> ≥ .10</td></tr>
+        <tr><td><strong>Medium</strong></td><td><em>r</em> ≥ .40</td><td><em>r</em> ≥ .30</td></tr>
+        <tr><td><strong>Large</strong></td><td><em>r</em> ≥ .60</td><td><em>r</em> ≥ .50</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 6.9 -->
+  <h2 id="ci"><span class="sn">6.9</span>Confidence Intervals for <em>r</em></h2>
+
+  <p>Just as with mean differences, a 95% CI for <em>r</em> tells you the range of values within which the true population correlation is likely to fall. JASP calculates these automatically using Fisher's <em>z</em>-transformation, which converts the asymmetric distribution of <em>r</em> into a symmetric normal distribution before computing the CI, then transforms back.</p>
+
+  <div class="so">
+    <div class="sh">Pearson Correlation — Flege et al. (1999): AOA × Pronunciation (JASP Output)</div>
+    <div class="sr sr5 hdr"><span>Variables</span><span><em>r</em></span><span>95% CI Lower</span><span>95% CI Upper</span><span><em>N</em></span></div>
+    <div class="sr sr5"><span>AOA – PronEng</span><span class="hi">−.86</span><span class="hi">−.89</span><span class="hi">−.82</span><span>240</span></div>
+  </div>
+
+  <p>The CI of [−.89, −.82] is narrow because the sample is large (<em>N</em> = 240). It tells us that the true correlation is almost certainly between −.82 and −.89 — a large negative effect by any standard, explaining between 67% and 79% of the variance in pronunciation ratings.</p>
+
+  <div class="box box-tip">
+    <span class="blabel">💡 Wide CIs Signal Uncertainty</span>
+    <p>Small samples produce wide CIs. A correlation of <em>r</em> = .50 with a CI of [−.10, .85] tells you almost nothing — zero is within the plausible range. Always report the CI alongside <em>r</em>; without it, the reader cannot judge how precisely the true effect has been estimated.</p>
+  </div>
+
+  <!-- 6.10 -->
+  <h2 id="multi"><span class="sn">6.10</span>Correlation Matrices</h2>
+
+  <p>When you have more than two variables and want to see all pairwise correlations simultaneously, a <strong>correlation matrix</strong> (also called a correlation table) is the most efficient format. Each cell shows the <em>r</em> between the row variable and the column variable.</p>
+
+  <div class="tw">
+    <table>
+      <thead>
+        <tr><th></th><th class="tc">GJT Score</th><th class="tc">Hours of Study</th><th class="tc">Aptitude</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>GJT Score</strong></td><td class="tc">—</td><td class="tc">.18 [.05, .32]</td><td class="tc">.08 [−.06, .22]</td></tr>
+        <tr><td><strong>Hours of Study</strong></td><td class="tc">.18 [.05, .32]</td><td class="tc">—</td><td class="tc">—</td></tr>
+        <tr><td><strong>Aptitude</strong></td><td class="tc">.08 [−.06, .22]</td><td class="tc">—</td><td class="tc">—</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p>A <strong>scatterplot matrix</strong> extends this to show all pairwise scatterplots simultaneously — a very efficient way to visually check for linearity and outliers across many variables at once. JASP's Correlation module produces these automatically.</p>
+
+  <div class="box box-info">
+    <span class="blabel">📌 JASP Note</span>
+    <p>Correlation in JASP is found under the <strong>Regression</strong> module (not a standalone Correlation module). Select <kbd>Regression → Correlation</kbd> and move any number of variables into the Variables box. JASP will compute all pairwise correlations simultaneously and display them in a table with optional CIs.</p>
+  </div>
+
+  <!-- 6.11 -->
+  <h2 id="reporting"><span class="sn">6.11</span>Writing Up Results</h2>
+
+  <p>A complete report of a correlation should include: the name of the test, the <em>r</em> value, the 95% CI, the sample size, and <em>r</em>². No <em>p</em>-value is required if the CI is present.</p>
+
+  <div class="report">
+    <span class="rl">Model Reporting Paragraph — Single Correlation</span>
+    <p>A Pearson correlation was conducted to examine the relationship between age of arrival (AOA) in the USA and pronunciation ratings in English among 240 Korean immigrants (Flege et al., 1999). There was a large, negative relationship between the two variables: <em>r</em> = −.86, 95% CI [−.89, −.82], <em>N</em> = 240, <em>r</em>² = .74. This indicates that AOA accounts for approximately 74% of the variance in English pronunciation ratings — learners who arrived younger tended to receive substantially higher (more native-like) ratings than those who arrived later. Because the sample size is large and the CI is narrow, this is a precise estimate of the true population relationship.</p>
+  </div>
+
+  <div class="report">
+    <span class="rl">Model Reporting Paragraph — Multiple Correlations (Prose)</span>
+    <p>Pearson correlations were examined between scores on the grammaticality judgment test (GJT) and two potential predictors: hours of English study and language aptitude scores (Larson-Hall, 2008; <em>N</em> = 200). Hours of study showed a small positive relationship with GJT scores, <em>r</em> = .18, 95% CI [.05, .32], <em>r</em>² = .03 — English study time accounts for only about 3% of the variance in grammar scores. No meaningful relationship was found between aptitude and GJT scores, <em>r</em> = .08, 95% CI [−.06, .22], <em>r</em>² &lt; .01. Both CIs indicate considerable uncertainty, and the aptitude CI spans zero, meaning the true relationship could be negligible.</p>
+  </div>
+
+  <!-- 6.12 -->
+  <h2 id="summary"><span class="sn">6.12</span>Summary</h2>
+
+  <div class="tw">
+    <table>
+      <thead><tr><th>Concept</th><th>Key Points</th></tr></thead>
+      <tbody>
+        <tr><td><strong>What it measures</strong></td><td>Degree and direction of linear co-variation between two continuous variables</td></tr>
+        <tr><td><strong>First step</strong></td><td>Always examine a scatterplot with regression + Loess lines before computing <em>r</em></td></tr>
+        <tr><td><strong>The statistic</strong></td><td>Pearson's <em>r</em>: ranges from −1.00 to +1.00; negative = inverse relationship</td></tr>
+        <tr><td><strong>Effect size</strong></td><td><em>r</em> is itself an effect size; <em>r</em>² = proportion of variance explained</td></tr>
+        <tr><td><strong>p-value</strong></td><td>Not required; focus on <em>r</em>, <em>r</em>², and the 95% CI instead</td></tr>
+        <tr><td><strong>Benchmarks (SLA)</strong></td><td>Small ≥ .25 · Medium ≥ .40 · Large ≥ .60 (Plonsky &amp; Oswald, 2014)</td></tr>
+        <tr><td><strong>Key warning</strong></td><td>Correlation ≠ causation; three possible explanations always exist</td></tr>
+        <tr><td><strong>Assumptions</strong></td><td>Linearity (check visually!), independence, normality, homoscedasticity</td></tr>
+        <tr><td><strong>In JASP</strong></td><td>Regression module → Correlation; select Confidence intervals + Sample size</td></tr>
+        <tr><td><strong>Example</strong></td><td>Flege et al. (1999): AOA × Pronunciation, <em>r</em> = −.86 [−.89, −.82], <em>r</em>² = .74</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="chnav">
+    <a href="#" style="flex-direction:row;">
+      <span class="arrow">←</span>
+      <span><span class="nl2">Previous</span><span>Ch. 5 · Chi-Square (i×j)</span></span>
+    </a>
+    <a href="06_correlation_jasp.html" style="flex-direction:row-reverse;">
+      <span><span class="nl2">Next</span><span>Ch. 6 · Running in JASP →</span></span>
+      <span class="arrow">→</span>
+    </a>
+  </div>
+
+</div>
+</main>
+
+<script>
+  const heads = document.querySelectorAll('h2[id]');
+  const subs = document.querySelectorAll('.ns');
+  const io = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        subs.forEach(a => { if (a.getAttribute('href')?.startsWith('#')) a.classList.remove('active'); });
+        const m = document.querySelector(`.ns[href="#${e.target.id}"]`);
+        if (m) m.classList.add('active');
+      }
+    });
+  }, { rootMargin: '-15% 0px -70% 0px' });
+  heads.forEach(h => io.observe(h));
+</script>
+</body>
+</html>
